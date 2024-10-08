@@ -15,11 +15,11 @@ This plugin adds a wishlist feature to Sylius. It comes with these features:
 
 [ico-version]: https://poser.pugx.org/setono/sylius-wishlist-plugin/v/stable
 [ico-license]: https://poser.pugx.org/setono/sylius-wishlist-plugin/license
-[ico-github-actions]: https://github.com/Setono/SyliusWishlistPlugin/workflows/build/badge.svg
-[ico-code-coverage]: https://codecov.io/gh/Setono/SyliusWishlistPlugin/branch/master/graph/badge.svg
+[ico-github-actions]: https://github.com/Setono/sylius-wishlist-plugin/workflows/build/badge.svg
+[ico-code-coverage]: https://codecov.io/gh/Setono/sylius-wishlist-plugin/branch/master/graph/badge.svg
 [ico-infection]: https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2FSetono%2FSyliusPluginSkeleton%2Fmaster
 
 [link-packagist]: https://packagist.org/packages/setono/sylius-wishlist-plugin
-[link-github-actions]: https://github.com/Setono/SyliusWishlistPlugin/actions
-[link-code-coverage]: https://codecov.io/gh/Setono/SyliusWishlistPlugin
-[link-infection]: https://dashboard.stryker-mutator.io/reports/github.com/Setono/SyliusWishlistPlugin/master
+[link-github-actions]: https://github.com/Setono/sylius-wishlist-plugin/actions
+[link-code-coverage]: https://codecov.io/gh/Setono/sylius-wishlist-plugin
+[link-infection]: https://dashboard.stryker-mutator.io/reports/github.com/Setono/sylius-wishlist-plugin/master
