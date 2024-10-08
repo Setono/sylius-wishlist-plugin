@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Sylius\Resource\Model\TimestampableTrait;
 
-class Wishlist implements WishlistInterface
+abstract class Wishlist implements WishlistInterface
 {
     use TimestampableTrait;
 

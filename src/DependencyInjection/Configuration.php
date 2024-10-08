@@ -8,6 +8,8 @@ use Setono\SyliusWishlistPlugin\Model\GuestWishlist;
 use Setono\SyliusWishlistPlugin\Model\UserWishlist;
 use Setono\SyliusWishlistPlugin\Model\Wishlist;
 use Setono\SyliusWishlistPlugin\Model\WishlistItem;
+use Setono\SyliusWishlistPlugin\Repository\GuestWishlistRepository;
+use Setono\SyliusWishlistPlugin\Repository\UserWishlistRepository;
 use Sylius\Component\Resource\Factory\Factory;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -59,7 +61,7 @@ final class Configuration implements ConfigurationInterface
                                     ->addDefaultsIfNotSet()
                                     ->children()
                                         ->scalarNode('model')->defaultValue(GuestWishlist::class)->cannotBeEmpty()->end()
-                                        ->scalarNode('repository')->cannotBeEmpty()->end()
+                                        ->scalarNode('repository')->defaultValue(GuestWishlistRepository::class)->cannotBeEmpty()->end()
                                         ->scalarNode('factory')->defaultValue(Factory::class)->end()
                                     ->end()
                                 ->end()
@@ -73,7 +75,7 @@ final class Configuration implements ConfigurationInterface
                                     ->addDefaultsIfNotSet()
                                     ->children()
                                         ->scalarNode('model')->defaultValue(UserWishlist::class)->cannotBeEmpty()->end()
-                                        ->scalarNode('repository')->cannotBeEmpty()->end()
+                                        ->scalarNode('repository')->defaultValue(UserWishlistRepository::class)->cannotBeEmpty()->end()
                                         ->scalarNode('factory')->defaultValue(Factory::class)->end()
                                     ->end()
                                 ->end()

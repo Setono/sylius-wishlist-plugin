@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://symfony.com/schema/dic/services"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"
+                 alias="Setono\SyliusWishlistPlugin\Provider\CompositeWishlistProvider"/>
+
+        <service id="Setono\SyliusWishlistPlugin\Provider\CompositeWishlistProvider"/>
+
+        <service id="Setono\SyliusWishlistPlugin\Provider\UserWishlistProvider">
+            <argument type="service" id="security.helper"/>
+            <argument type="service" id="setono_sylius_wishlist.repository.user_wishlist"/>
+
+            <tag name="setono_sylius_wishlist.wishlist_provider" priority="-40"/>
+        </service>
+
+        <service id="Setono\SyliusWishlistPlugin\Provider\GuestWishlistProvider">
+            <argument type="service" id="setono_client.client_context.default"/>
+            <argument type="service" id="setono_sylius_wishlist.repository.guest_wishlist"/>
+
+            <tag name="setono_sylius_wishlist.wishlist_provider" priority="-50"/>
+        </service>
+
+        <service id="Setono\SyliusWishlistPlugin\Provider\NewWishlistProvider">
+            <argument type="service" id="setono_sylius_wishlist.factory.wishlist"/>
+            <argument type="service" id="security.helper"/>
+            <argument type="service" id="setono_client.client_context.default"/>
+
+            <tag name="setono_sylius_wishlist.wishlist_provider" priority="-60"/>
+        </service>
+    </services>
+</container>

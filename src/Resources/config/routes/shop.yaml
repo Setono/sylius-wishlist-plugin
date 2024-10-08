@@ -1,1 +1,5 @@
-# TODO Add your shop routes here
+setono_sylius_wishlist_plugin_shop_wishlist_add:
+    path: /wishlist/add/{productVariant}
+    methods: [POST]
+    _defaults:
+        controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::add
