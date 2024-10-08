@@ -1,0 +1,2 @@
+setono_sylius_wishlist:
+    resource: "@SetonoSyliusWishlistPlugin/Resources/config/routes.yaml"

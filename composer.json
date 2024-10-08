@@ -1,6 +1,6 @@
 {
-    "name": "setono/sylius-plugin-skeleton",
-    "description": "Acme example plugin for Sylius.",
+    "name": "setono/sylius-wishlist-plugin",
+    "description": "Setono example plugin for Sylius.",
     "license": "MIT",
     "type": "sylius-plugin",
     "keywords": [
@@ -41,12 +41,12 @@
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
-            "Acme\\SyliusExamplePlugin\\": "src/"
+            "Setono\\SyliusWishlistPlugin\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Acme\\SyliusExamplePlugin\\Tests\\": "tests/"
+            "Setono\\SyliusWishlistPlugin\\Tests\\": "tests/"
         },
         "classmap": [
             "tests/Application/Kernel.php"
