@@ -12,6 +12,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Webmozart\Assert\Assert;
 
 final class SelectableWishlistType extends AbstractType
 {
@@ -31,6 +32,9 @@ final class SelectableWishlistType extends AbstractType
                 if (null === $data) {
                     return;
                 }
+
+                Assert::keyExists($options, 'selected');
+                Assert::isArray($options['selected']);
 
                 $event->setData([
                     'selected' => in_array($data, $options['selected'], true), // todo test that this works when objects are being fetched from two different places
