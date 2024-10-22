@@ -24,7 +24,7 @@ final class CompositeWishlistProvider extends CompositeService implements Wishli
         throw new \RuntimeException('No wishlists found');
     }
 
-    public function getPreviouslyAddedToWishlists(): array
+    public function getPreSelectedWishlists(): array
     {
         // todo implement
         return $this->getWishlists();

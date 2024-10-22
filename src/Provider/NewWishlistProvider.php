@@ -28,7 +28,7 @@ final class NewWishlistProvider implements WishlistProviderInterface
         return [$this->wishlistFactory->createForGuest($this->clientContext->getClient()->id)];
     }
 
-    public function getPreviouslyAddedToWishlists(): array
+    public function getPreSelectedWishlists(): array
     {
         // todo implement
         return $this->getWishlists();

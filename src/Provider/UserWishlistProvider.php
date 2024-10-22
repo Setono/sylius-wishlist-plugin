@@ -32,7 +32,7 @@ final class UserWishlistProvider implements WishlistProviderInterface
         return $wishlists;
     }
 
-    public function getPreviouslyAddedToWishlists(): array
+    public function getPreSelectedWishlists(): array
     {
         // todo implement
         return $this->getWishlists();

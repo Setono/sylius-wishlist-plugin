@@ -26,7 +26,7 @@ final class GuestWishlistProvider implements WishlistProviderInterface
         return [$wishlist];
     }
 
-    public function getPreviouslyAddedToWishlists(): array
+    public function getPreSelectedWishlists(): array
     {
         // todo implement
         return $this->getWishlists();

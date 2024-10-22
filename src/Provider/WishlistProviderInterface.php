@@ -20,5 +20,5 @@ interface WishlistProviderInterface
      *
      * @throws \RuntimeException if no wishlists are found
      */
-    public function getPreviouslyAddedToWishlists(): array;
+    public function getPreSelectedWishlists(): array;
 }

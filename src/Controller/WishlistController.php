@@ -43,8 +43,8 @@ final class WishlistController
 
         $wishlistItem = $this->wishlistItemFactory->createWithProduct($productEntity);
 
-        $wishlists = $this->wishlistProvider->getPreviouslyAddedToWishlists();
-        foreach ($wishlists as $wishlist) {
+        $preSelectedWishlists = $this->wishlistProvider->getPreSelectedWishlists();
+        foreach ($preSelectedWishlists as $wishlist) {
             $manager = $this->getManager($wishlist);
             $manager->persist($wishlist);
 
@@ -54,7 +54,7 @@ final class WishlistController
         $manager->flush();
 
         $form = $this->formFactory->create(SelectWishlistsType::class, new SelectWishlistsCommand($this->wishlistProvider->getWishlists()), [
-            'selected' => $wishlists,
+            'selected' => $preSelectedWishlists,
         ]);
 
         return new Response($this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/select_wishlists.html.twig', [
