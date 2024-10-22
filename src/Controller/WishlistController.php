@@ -9,7 +9,6 @@ use Setono\Doctrine\ORMTrait;
 use Setono\SyliusWishlistPlugin\Controller\Command\SelectWishlistsCommand;
 use Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface;
 use Setono\SyliusWishlistPlugin\Form\Type\SelectWishlistsType;
-use Setono\SyliusWishlistPlugin\Form\Type\WishlistChoiceType;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Sylius\Component\Core\Model\ProductInterface;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -54,7 +53,9 @@ final class WishlistController
 
         $manager->flush();
 
-        $form = $this->formFactory->create(SelectWishlistsType::class, new SelectWishlistsCommand($wishlists));
+        $form = $this->formFactory->create(SelectWishlistsType::class, new SelectWishlistsCommand($this->wishlistProvider->getWishlists()), [
+            'selected' => $wishlists,
+        ]);
 
         return new Response($this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/select_wishlists.html.twig', [
             'product' => $productEntity,
@@ -64,6 +65,5 @@ final class WishlistController
 
     public function updateProductWishlists(Request $request, int $product): Response
     {
-
     }
 }

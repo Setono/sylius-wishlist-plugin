@@ -19,6 +19,7 @@ final class SelectWishlistsType extends AbstractType
                 'entry_type' => SelectableWishlistType::class,
                 'entry_options' => [
                     'label' => false,
+                    'selected' => $options['selected'],
                 ],
                 'allow_add' => true,
             ])
@@ -29,6 +30,7 @@ final class SelectWishlistsType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => SelectWishlistsCommand::class,
+            'selected' => [],
         ]);
     }
 }

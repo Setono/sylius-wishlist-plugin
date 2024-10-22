@@ -2,7 +2,7 @@
     <ul data-index="{{ form.wishlists|length > 0 ? ((form.wishlists|last).vars.name + 1) : 0 }}"
         data-prototype="{{ form_widget(form.wishlists.vars.prototype)|e('html_attr') }}">
         {% for wishlist in form.wishlists %}
-            <li>{{ form_widget(wishlist.added) }} {{ field_value(wishlist.name) }}</li>
+            <li>{{ form_widget(wishlist.selected) }} {{ field_value(wishlist.name) }}</li>
         {% endfor %}
     </ul>
 {{ form_end(form, {render_rest: false}) }}
