@@ -63,7 +63,7 @@ final class WishlistController
         ]));
     }
 
-    public function updateProductWishlists(Request $request, int $product): Response
+    public function selectWishlists(Request $request, int $product): Response
     {
     }
 }

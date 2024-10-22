@@ -5,9 +5,9 @@ setono_sylius_wishlist_shop_wishlist_add:
     requirements:
         product: '\d+'
         
-setono_sylius_wishlist_shop_wishlist_update_product_wishlists:
+setono_sylius_wishlist_shop_wishlist_select_wishlists:
     methods: [POST]
-    path: /wishlist/product-wishlists/{product}
-    controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::updateProductWishlists
+    path: /wishlist/select-wishlists/{product}
+    controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::selectWishlists
     requirements:
         product: '\d+'
