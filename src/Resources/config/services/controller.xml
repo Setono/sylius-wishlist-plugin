@@ -6,6 +6,9 @@
             <argument type="service" id="doctrine"/>
             <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"/>
             <argument type="service" id="setono_sylius_wishlist.factory.wishlist_item"/>
+            <argument type="service" id="twig"/>
+            <argument type="service" id="form.factory"/>
+            <argument>%sylius.model.product.class%</argument>
 
             <tag name="controller.service_arguments"/>
         </service>

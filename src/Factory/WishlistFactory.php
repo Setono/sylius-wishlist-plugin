@@ -36,6 +36,7 @@ final class WishlistFactory implements WishlistFactoryInterface
         Assert::isInstanceOf($obj, GuestWishlistInterface::class);
 
         $obj->setClientId($clientId);
+        $obj->setName('Wishlist'); // todo should be configurable
 
         return $obj;
     }
@@ -46,6 +47,7 @@ final class WishlistFactory implements WishlistFactoryInterface
         Assert::isInstanceOf($obj, UserWishlistInterface::class);
 
         $obj->setUser($user);
+        $obj->setName('Wishlist'); // todo should be configurable
 
         return $obj;
     }

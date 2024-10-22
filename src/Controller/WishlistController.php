@@ -6,10 +6,17 @@ namespace Setono\SyliusWishlistPlugin\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Setono\Doctrine\ORMTrait;
+use Setono\SyliusWishlistPlugin\Controller\Command\ProductWishlistsCommand;
 use Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface;
+use Setono\SyliusWishlistPlugin\Form\Type\SelectWishlistsType;
+use Setono\SyliusWishlistPlugin\Form\Type\WishlistChoiceType;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Sylius\Component\Core\Model\ProductInterface;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Twig\Environment;
 
 final class WishlistController
 {
@@ -19,25 +26,44 @@ final class WishlistController
         ManagerRegistry $managerRegistry,
         private readonly WishlistProviderInterface $wishlistProvider,
         private readonly WishlistItemFactoryInterface $wishlistItemFactory,
+        private readonly Environment $twig,
+        private readonly FormFactoryInterface $formFactory,
+        /** @var class-string<ProductInterface> $productClass */
+        private readonly string $productClass,
     ) {
         $this->managerRegistry = $managerRegistry;
     }
 
-    public function add(int $productVariant): JsonResponse
+    public function add(int $product): Response
     {
-        try {
-            $wishlistItem = $this->wishlistItemFactory->createWithVariant($productVariant);
-        } catch (\InvalidArgumentException) {
-            throw new NotFoundHttpException(sprintf('Product variant with id %s not found', $productVariant));
+        $productEntity = $this->getManager($this->productClass)->find($this->productClass, $product);
+
+        if (null === $productEntity) {
+            throw new NotFoundHttpException(sprintf('Product with id %s not found', $product));
         }
 
-        $wishlists = $this->wishlistProvider->getWishlists();
-        $wishlists[0]->addItem($wishlistItem);
+        $wishlistItem = $this->wishlistItemFactory->createWithProduct($productEntity);
 
-        $manager = $this->getManager($wishlists[0]);
-        $manager->persist($wishlists[0]);
+        $wishlists = $this->wishlistProvider->getPreviouslyAddedToWishlists();
+        foreach ($wishlists as $wishlist) {
+            $manager = $this->getManager($wishlist);
+            $manager->persist($wishlist);
+
+            $wishlist->addItem($wishlistItem);
+        }
+
         $manager->flush();
 
-        return new JsonResponse();
+        $form = $this->formFactory->create(SelectWishlistsType::class, new ProductWishlistsCommand($wishlists));
+
+        return new Response($this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/add.html.twig', [
+            'product' => $productEntity,
+            'form' => $form->createView(),
+        ]));
+    }
+
+    public function updateProductWishlists(Request $request, int $product): Response
+    {
+
     }
 }

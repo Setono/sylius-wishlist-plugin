@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Setono\SyliusWishlistPlugin\Model;
 
 use Sylius\Component\Core\Model\ProductInterface;
-use Sylius\Component\Core\Model\ProductVariantInterface;
 
 class WishlistItem implements WishlistItemInterface
 {
@@ -13,7 +12,7 @@ class WishlistItem implements WishlistItemInterface
 
     protected ?WishlistInterface $wishlist = null;
 
-    protected ?ProductVariantInterface $productVariant = null;
+    protected ?ProductInterface $product = null;
 
     protected int $quantity = 1;
 
@@ -32,25 +31,14 @@ class WishlistItem implements WishlistItemInterface
         $this->wishlist = $wishlist;
     }
 
-    public function getProductVariant(): ?ProductVariantInterface
-    {
-        return $this->productVariant;
-    }
-
-    public function setProductVariant(?ProductVariantInterface $productVariant): void
-    {
-        $this->productVariant = $productVariant;
-    }
-
     public function getProduct(): ?ProductInterface
     {
-        $product = $this->productVariant?->getProduct();
+        return $this->product;
+    }
 
-        if ($product instanceof ProductInterface) {
-            return $product;
-        }
-
-        return null;
+    public function setProduct(?ProductInterface $product): void
+    {
+        $this->product = $product;
     }
 
     public function getQuantity(): int

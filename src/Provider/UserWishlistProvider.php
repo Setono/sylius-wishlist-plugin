@@ -31,4 +31,10 @@ final class UserWishlistProvider implements WishlistProviderInterface
 
         return $wishlists;
     }
+
+    public function getPreviouslyAddedToWishlists(): array
+    {
+        // todo implement
+        return $this->getWishlists();
+    }
 }

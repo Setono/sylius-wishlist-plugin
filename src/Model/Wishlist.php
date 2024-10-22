@@ -43,6 +43,7 @@ abstract class Wishlist implements WishlistInterface
     {
         if (!$this->hasItem($item)) {
             $this->items->add($item);
+            $item->setWishlist($this);
         }
     }
 
@@ -50,6 +51,7 @@ abstract class Wishlist implements WishlistInterface
     {
         if ($this->hasItem($item)) {
             $this->items->removeElement($item);
+            $item->setWishlist(null);
         }
     }
 

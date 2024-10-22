@@ -25,4 +25,10 @@ final class GuestWishlistProvider implements WishlistProviderInterface
 
         return [$wishlist];
     }
+
+    public function getPreviouslyAddedToWishlists(): array
+    {
+        // todo implement
+        return $this->getWishlists();
+    }
 }

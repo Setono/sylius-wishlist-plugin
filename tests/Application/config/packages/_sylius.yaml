@@ -13,3 +13,10 @@ sylius_shop:
 
 sylius_api:
     enabled: true
+
+sylius_ui:
+    events:
+        sylius.shop.layout.stylesheets:
+            blocks:
+                app_styles:
+                    template: "shop/_styles.html.twig"

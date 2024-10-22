@@ -14,4 +14,11 @@ interface WishlistProviderInterface
      * @throws \RuntimeException if no wishlists are found
      */
     public function getWishlists(): array;
+
+    /**
+     * @return non-empty-list<WishlistInterface>
+     *
+     * @throws \RuntimeException if no wishlists are found
+     */
+    public function getPreviouslyAddedToWishlists(): array;
 }

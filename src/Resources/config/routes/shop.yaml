@@ -1,5 +1,13 @@
 setono_sylius_wishlist_shop_wishlist_add:
-    path: /wishlist/add/{productVariant}
+    methods: [POST,GET]
+    path: /wishlist/add/{product}
+    controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::add
+    requirements:
+        product: '\d+'
+        
+setono_sylius_wishlist_shop_wishlist_update_product_wishlists:
     methods: [POST]
-    defaults:
-        controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::add
+    path: /wishlist/product-wishlists/{product}
+    controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::updateProductWishlists
+    requirements:
+        product: '\d+'
