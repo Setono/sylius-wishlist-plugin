@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Setono\SyliusWishlistPlugin\Form\Type;
 
-use Setono\SyliusWishlistPlugin\Controller\Command\ProductWishlistsCommand;
+use Setono\SyliusWishlistPlugin\Controller\Command\SelectWishlistsCommand;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -14,9 +15,12 @@ final class SelectWishlistsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('wishlists', WishlistChoiceType::class, [
-                'multiple' => true,
-                'expanded' => true,
+            ->add('wishlists', CollectionType::class, [
+                'entry_type' => SelectableWishlistType::class,
+                'entry_options' => [
+                    'label' => false,
+                ],
+                'allow_add' => true,
             ])
         ;
     }
@@ -24,7 +28,7 @@ final class SelectWishlistsType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => ProductWishlistsCommand::class,
+            'data_class' => SelectWishlistsCommand::class,
         ]);
     }
 }

@@ -6,7 +6,7 @@ namespace Setono\SyliusWishlistPlugin\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Setono\Doctrine\ORMTrait;
-use Setono\SyliusWishlistPlugin\Controller\Command\ProductWishlistsCommand;
+use Setono\SyliusWishlistPlugin\Controller\Command\SelectWishlistsCommand;
 use Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface;
 use Setono\SyliusWishlistPlugin\Form\Type\SelectWishlistsType;
 use Setono\SyliusWishlistPlugin\Form\Type\WishlistChoiceType;
@@ -54,9 +54,9 @@ final class WishlistController
 
         $manager->flush();
 
-        $form = $this->formFactory->create(SelectWishlistsType::class, new ProductWishlistsCommand($wishlists));
+        $form = $this->formFactory->create(SelectWishlistsType::class, new SelectWishlistsCommand($wishlists));
 
-        return new Response($this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/add.html.twig', [
+        return new Response($this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/select_wishlists.html.twig', [
             'product' => $productEntity,
             'form' => $form->createView(),
         ]));

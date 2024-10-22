@@ -6,7 +6,7 @@ namespace Setono\SyliusWishlistPlugin\Controller\Command;
 
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 
-final class ProductWishlistsCommand
+final class SelectWishlistsCommand
 {
     public function __construct(
         /** @var list<WishlistInterface> $wishlists */
