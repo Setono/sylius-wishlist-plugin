@@ -17,7 +17,7 @@
         "sylius/core": "^1.0",
         "sylius/core-bundle": "^1.0",
         "sylius/product-bundle": "^1.0",
-        "sylius/resource-bundle": "^1.8",
+        "sylius/resource-bundle": "^1.11",
         "sylius/user": "^1.0",
         "symfony/config": "^6.4 || ^7.0",
         "symfony/dependency-injection": "^6.4 || ^7.0",
