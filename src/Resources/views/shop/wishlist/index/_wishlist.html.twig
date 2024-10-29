@@ -1,0 +1,19 @@
+<div class="ui card">
+    <div class="image">
+        {% set item = wishlist.items.first %}
+        {% if item %}
+            {% if item.variant and item.variant.hasImages %}
+                {% include '@SyliusShop/Product/_mainImage.html.twig' with {'product': item.variant, 'filter': 'sylius_shop_product_thumbnail'} %}
+            {% else %}
+                {% include '@SyliusShop/Product/_mainImage.html.twig' with {'product': item.product, 'filter': 'sylius_shop_product_thumbnail'} %}
+            {% endif %}
+        {% endif %}
+    </div>
+    <div class="content">
+        <a class="header" href="{{ path('setono_sylius_wishlist_shop_wishlist_show', { 'uuid': wishlist.uuid }) }}">{{ wishlist.name }}</a>
+    </div>
+    <div class="extra content">
+        <i class="gift icon"></i>
+        {{ wishlist.items.count }} {{ 'sylius.ui.items'|trans }}
+    </div>
+</div>
