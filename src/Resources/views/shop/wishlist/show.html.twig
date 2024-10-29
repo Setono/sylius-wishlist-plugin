@@ -12,6 +12,7 @@
         <table class="ui table">
             <thead>
                 <tr>
+                    <th>&nbsp;</th>
                     <th>{{ 'sylius.ui.quantity'|trans }}</th>
                     <th>{{ 'sylius.ui.product'|trans }}</th>
                     <th>{{ 'sylius.ui.variant'|trans }}</th>
@@ -22,6 +23,13 @@
             <tbody>
                 {% for key, item in wishlist.items %}
                     <tr>
+                        <td>
+                            {% if item.variant.hasImages %}
+                                {% include '@SyliusShop/Product/_mainImage.html.twig' with {'product': item.variant, 'filter': 'sylius_shop_product_tiny_thumbnail'} %}
+                            {% else %}
+                                {% include '@SyliusShop/Product/_mainImage.html.twig' with {'product': item.product, 'filter': 'sylius_shop_product_tiny_thumbnail'} %}
+                            {% endif %}
+                        </td>
                         <td>
                             <div class="ui form">
                                 {{ form_widget(form.items[key].quantity) }}
