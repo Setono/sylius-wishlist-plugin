@@ -9,6 +9,7 @@ use Setono\Doctrine\ORMTrait;
 use Setono\SyliusWishlistPlugin\Controller\Command\SelectWishlistsCommand;
 use Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface;
 use Setono\SyliusWishlistPlugin\Form\Type\SelectWishlistsType;
+use Setono\SyliusWishlistPlugin\Form\Type\WishlistType;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
@@ -43,16 +44,27 @@ final class WishlistController
         ]));
     }
 
-    public function show(WishlistRepositoryInterface $wishlistRepository, string $uuid): Response
-    {
+    public function show(
+        Request $request,
+        WishlistRepositoryInterface $wishlistRepository,
+        FormFactoryInterface $formFactory,
+        string $uuid,
+    ): Response {
         $wishlist = $wishlistRepository->findOneByUuid($uuid);
 
         if (null === $wishlist) {
             throw new NotFoundHttpException(sprintf('Wishlist with id %s not found', $uuid));
         }
 
+        $form = $formFactory->create(WishlistType::class, $wishlist);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $wishlistRepository->add($wishlist);
+        }
+
         return new Response($this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/show.html.twig', [
             'wishlist' => $wishlist,
+            'form' => $form->createView(),
         ]));
     }
 

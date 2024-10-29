@@ -2,57 +2,57 @@
 {% extends '@SyliusShop/layout.html.twig' %}
 
 {% block content %}
-    <h1 class="ui monster section dividing header">
-        {{ 'setono_sylius_wishlist.ui.wishlist_header'|trans({'%name%' : wishlist.name }) }}
-    </h1>
+    {{ form_start(form, {'method': 'PATCH', 'attr': {'class': 'ui form', 'novalidate': 'novalidate'}}) }}
+        {{ form_errors(form) }}
 
-    <table class="ui table">
-        <thead>
-            <tr>
-                <th>{{ 'sylius.ui.quantity'|trans }}</th>
-                <th>{{ 'sylius.ui.product'|trans }}</th>
-                <th>{{ 'sylius.ui.variant'|trans }}</th>
-                <th>{{ 'sylius.ui.price'|trans }}</th>
-                <th>&nbsp;</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in wishlist.items %}
+        <h1 class="ui monster section dividing header">
+            {{ 'setono_sylius_wishlist.ui.wishlist_header'|trans({'%name%' : wishlist.name }) }}
+        </h1>
+
+        <table class="ui table">
+            <thead>
                 <tr>
-                    <td>{{ item.quantity }}</td>
-                    <td>
-                        <a href="{{ path('sylius_shop_product_show', {'slug': item.product.slug}) }}">
-                            {{ item.product.name }}
-                        </a>
-                    </td>
-                    <td>
-                        <select class="ui dropdown" name="variant-selector">
-                            <option>{{ 'sylius.ui.select'|trans }}</option>
-                            {% for key, variant in item.product.enabledVariants %}
-                                <option value="{{ variant.id }}">
-                                    {% if item.product.hasOptions() %}
-                                        {% for optionValue in variant.optionValues %}
-                                            {{ optionValue.option.name }}: {{ optionValue.value }}{{ loop.last ? '' : ' |' }}
-                                        {% endfor %}
-                                    {% endif %}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td>
-                        {{ include('@SetonoSyliusWishlistPlugin/shop/wishlist/show/_price.html.twig') }}
-                    </td>
-                    <td style="text-align: right">
-                        {# todo only show this if wishlist is owned by the current user #}
-                        <a href="{{ path('setono_sylius_wishlist_shop_wishlist_remove', { 'product': item.product.id, 'wishlist': wishlist.id }) }}" class="ui basic red button">
-                            <i class="icon remove"></i>
-                            {{ 'setono_sylius_wishlist.ui.remove_from_wishlist'|trans }}
-                        </a>
-                    </td>
+                    <th>{{ 'sylius.ui.quantity'|trans }}</th>
+                    <th>{{ 'sylius.ui.product'|trans }}</th>
+                    <th>{{ 'sylius.ui.variant'|trans }}</th>
+                    <th>{{ 'sylius.ui.price'|trans }}</th>
+                    <th>&nbsp;</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for key, item in wishlist.items %}
+                    <tr>
+                        <td>
+                            <div class="ui form">
+                                {{ form_widget(form.items[key].quantity) }}
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{{ path('sylius_shop_product_show', {'slug': item.product.slug}) }}">
+                                {{ item.product.name }}
+                            </a>
+                        </td>
+                        <td>
+                            <div class="ui form">
+                                {{ form_widget(form.items[key].variant) }}
+                            </div>
+                        </td>
+                        <td>
+                            {{ include('@SetonoSyliusWishlistPlugin/shop/wishlist/show/_price.html.twig') }}
+                        </td>
+                        <td style="text-align: right">
+                            {# todo only show this if wishlist is owned by the current user #}
+                            <a href="{{ path('setono_sylius_wishlist_shop_wishlist_remove', { 'product': item.product.id, 'wishlist': wishlist.id }) }}" class="ui basic red button">
+                                <i class="icon remove"></i>
+                                {{ 'setono_sylius_wishlist.ui.remove_from_wishlist'|trans }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit">Submit</button>
+    {{ form_end(form) }}
 {% endblock %}
 
 {% block stylesheets %}

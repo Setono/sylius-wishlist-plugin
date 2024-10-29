@@ -4,7 +4,7 @@ setono_sylius_wishlist_shop_wishlist_index:
     controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::index
     
 setono_sylius_wishlist_shop_wishlist_show:
-    methods: [GET]
+    methods: [GET,PATCH]
     path: /wishlists/{uuid}
     controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::show
 
