@@ -1,6 +1,9 @@
 setono_sylius_wishlist:
     ui:
         wishlist_header: "Wishlist: %name%"
+        wishlist_subheader: Here you can edit the quantity of the products in your wishlist. You can also select the variants you want and remove products from your wishlist. Finally you can share your wishlist with others by copying the URL directly.
+        wishlists: Wishlists
         wishlists_header: Wishlists
         wishlists_subheader: Here you can manage your wishlists. As a logged in user you can create, edit and delete wishlists. You can also add and remove products from your wishlists. If you're not logged in, you can only add and remove products from your single wishlist.
         remove_from_wishlist: Remove from wishlist
+        inventory_insufficient: The inventory is insufficient for the quantity you want to add to the wishlist

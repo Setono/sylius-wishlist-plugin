@@ -31,3 +31,8 @@ setono_sylius_wishlist_shop_wishlist_select_wishlists:
     controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::selectWishlists
     requirements:
         product: '\d+'
+        
+setono_sylius_wishlist_shop_wishlist_add_to_cart:
+    methods: [GET]
+    path: /wishlists/{uuid}/add-to-cart
+    controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::addToCart

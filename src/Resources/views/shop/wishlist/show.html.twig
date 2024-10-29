@@ -7,7 +7,12 @@
 
         <h1 class="ui monster section dividing header">
             {{ 'setono_sylius_wishlist.ui.wishlist_header'|trans({'%name%' : wishlist.name }) }}
+            <div class="sub header">{{ 'setono_sylius_wishlist.ui.wishlist_subheader'|trans }}</div>
         </h1>
+
+        <div>
+            <a href="{{ path('setono_sylius_wishlist_shop_wishlist_add_to_cart', { 'uuid' : wishlist.uuid }) }}">Add all to cart</a>
+        </div>
 
         <table class="ui table">
             <thead>
@@ -33,6 +38,11 @@
                         <td>
                             <div class="ui form">
                                 {{ form_widget(form.items[key].quantity) }}
+                                {% if item.variant and not sylius_inventory_is_sufficient(item.variant, item.quantity) %}
+                                    <div class="ui pointing red basic label">
+                                        {{ 'setono_sylius_wishlist.ui.inventory_insufficient'|trans }}
+                                    </div>
+                                {% endif %}
                             </div>
                         </td>
                         <td>

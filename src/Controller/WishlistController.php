@@ -13,7 +13,12 @@ use Setono\SyliusWishlistPlugin\Form\Type\WishlistType;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
+use Sylius\Component\Core\Factory\CartItemFactoryInterface;
+use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Order\Context\CartContextInterface;
+use Sylius\Component\Order\Modifier\OrderItemQuantityModifierInterface;
+use Sylius\Component\Order\Modifier\OrderModifierInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -21,6 +26,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Twig\Environment;
+use Webmozart\Assert\Assert;
 
 final class WishlistController
 {
@@ -29,6 +35,7 @@ final class WishlistController
     public function __construct(
         ManagerRegistry $managerRegistry,
         private readonly Environment $twig,
+        private readonly CartItemFactoryInterface $cartItemFactory,
         /** @var class-string<ProductInterface> $productClass */
         private readonly string $productClass,
         /** @var class-string<WishlistInterface> $wishlistClass */
@@ -88,18 +95,28 @@ final class WishlistController
 
         $manager->flush();
 
-        $form = $formFactory->create(SelectWishlistsType::class, new SelectWishlistsCommand($wishlistProvider->getWishlists()), [
-            'selected' => $preSelectedWishlists,
-        ]);
+        $form = $formFactory->create(
+            SelectWishlistsType::class,
+            new SelectWishlistsCommand($wishlistProvider->getWishlists()),
+            [
+                'selected' => $preSelectedWishlists,
+            ],
+        );
 
         return new JsonResponse([
-            'toggleButton' => $this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/_toggle_button.html.twig', [
-                'product' => $productEntity,
-            ]),
-            'selectWishlistsForm' => $this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/_select_wishlists.html.twig', [
-                'product' => $productEntity,
-                'form' => $form->createView(),
-            ]),
+            'toggleButton' => $this->twig->render(
+                '@SetonoSyliusWishlistPlugin/shop/wishlist/_toggle_button.html.twig',
+                [
+                    'product' => $productEntity,
+                ],
+            ),
+            'selectWishlistsForm' => $this->twig->render(
+                '@SetonoSyliusWishlistPlugin/shop/wishlist/_select_wishlists.html.twig',
+                [
+                    'product' => $productEntity,
+                    'form' => $form->createView(),
+                ],
+            ),
         ]);
     }
 
@@ -119,13 +136,16 @@ final class WishlistController
             $wishlistEntity->removeProduct($productEntity);
         }
 
-        $this->getManager($wishlistEntity)->flush();
+        $this->getManager($productEntity)->flush();
 
         if ($request->isXmlHttpRequest()) {
             return new JsonResponse([
-                'toggleButton' => $this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/_toggle_button.html.twig', [
-                    'product' => $productEntity,
-                ]),
+                'toggleButton' => $this->twig->render(
+                    '@SetonoSyliusWishlistPlugin/shop/wishlist/_toggle_button.html.twig',
+                    [
+                        'product' => $productEntity,
+                    ],
+                ),
             ]);
         }
 
@@ -135,6 +155,36 @@ final class WishlistController
     public function selectWishlists(Request $request, int $product): Response
     {
         return new Response('Not implemented', Response::HTTP_NOT_IMPLEMENTED);
+    }
+
+    public function addToCart(
+        Request $request,
+        WishlistRepositoryInterface $wishlistRepository,
+        OrderItemQuantityModifierInterface $orderItemQuantityModifier,
+        OrderModifierInterface $orderModifier,
+        CartContextInterface $cartContext,
+        string $uuid,
+    ): Response {
+        $wishlist = $wishlistRepository->findOneByUuid($uuid);
+        if (null === $wishlist) {
+            throw new NotFoundHttpException(sprintf('Wishlist with id %s not found', $uuid));
+        }
+
+        $cart = $cartContext->getCart();
+        Assert::isInstanceOf($cart, OrderInterface::class);
+
+        foreach ($wishlist->getItems() as $item) {
+            $cartItem = $this->cartItemFactory->createForCart($cart);
+            $cartItem->setVariant($item->getVariant());
+
+            $orderItemQuantityModifier->modify($cartItem, $item->getQuantity());
+
+            $orderModifier->addToOrder($cart, $cartItem);
+        }
+
+        $this->getManager($cart)->flush();
+
+        return new RedirectResponse($request->headers->get('referer'));
     }
 
     private function getProduct(int $id): ProductInterface
