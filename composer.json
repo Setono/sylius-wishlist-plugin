@@ -16,7 +16,8 @@
         "symfony/config": "^5.4 || ^6.4 || ^7.0",
         "symfony/dependency-injection": "^5.4 || ^6.4 || ^7.0",
         "symfony/http-kernel": "^5.4 || ^6.4 || ^7.0",
-        "symfony/serializer": "^5.4 || ^6.4 || ^7.0"
+        "symfony/serializer": "^5.4 || ^6.4 || ^7.0",
+        "symfony/uid": "^5.4 || ^6.4 || ^7.0"
     },
     "require-dev": {
         "api-platform/core": "^2.7.16",

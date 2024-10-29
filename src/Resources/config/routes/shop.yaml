@@ -1,9 +1,29 @@
+setono_sylius_wishlist_shop_wishlist_index:
+    methods: [GET]
+    path: /wishlists
+    controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::index
+    
+setono_sylius_wishlist_shop_wishlist_show:
+    methods: [GET]
+    path: /wishlists/{uuid}
+    controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::show
+
 setono_sylius_wishlist_shop_wishlist_add:
-    methods: [POST,GET]
+    methods: [GET]
     path: /wishlist/add/{product}
     controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::add
     requirements:
         product: '\d+'
+        
+setono_sylius_wishlist_shop_wishlist_remove:
+    methods: [GET]
+    path: /wishlist/remove/{product}/{wishlist}
+    controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::remove
+    defaults:
+        wishlist: null
+    requirements:
+        product: '\d+'
+        wishlist: '\d+'
         
 setono_sylius_wishlist_shop_wishlist_select_wishlists:
     methods: [POST]

@@ -16,6 +16,7 @@
             <discriminator-mapping value="user" class="Setono\SyliusWishlistPlugin\Model\UserWishlistInterface"/>
         </discriminator-map>
 
+        <field name="uuid" type="string"/>
         <field name="name" type="string"/>
 
         <one-to-many field="items" target-entity="Setono\SyliusWishlistPlugin\Model\WishlistItemInterface" mapped-by="wishlist" orphan-removal="true">

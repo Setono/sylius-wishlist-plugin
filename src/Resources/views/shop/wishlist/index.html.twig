@@ -1,0 +1,42 @@
+{# @var wishlists \Setono\SyliusWishlistPlugin\Model\WishlistInterface[] #}
+{% extends '@SyliusShop/layout.html.twig' %}
+
+{% block content %}
+    <h1 class="ui monster section dividing header">
+        {{ 'setono_sylius_wishlist.ui.wishlists_header'|trans }}
+        <div class="sub header">{{ 'setono_sylius_wishlist.ui.wishlists_subheader'|trans }}</div>
+    </h1>
+    {% for wishlist in wishlists %}
+        <div class="wishlist">
+            <h2>{{ wishlist.name }}</h2>
+            <div><a href="{{ path('setono_sylius_wishlist_shop_wishlist_show', { 'uuid': wishlist.uuid }) }}">{{ 'sylius.ui.show'|trans }}</a></div>
+            <ul>
+                {% for item in wishlist.items %}
+                    <li>
+                        <a href="{{ path('sylius_shop_product_show', {'slug': item.product.slug}) }}">
+                            {{ item.product.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <style>
+        h1 {
+            max-width: 800px !important;
+            margin: 50px auto 120px auto !important;
+            text-align: center !important;
+            border: 0 !important;
+        }
+
+        h1 .sub.header {
+            margin-top: 20px !important;
+            line-height: 1.7 !important;
+        }
+    </style>
+{% endblock %}

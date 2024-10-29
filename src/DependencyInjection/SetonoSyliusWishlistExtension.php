@@ -8,9 +8,10 @@ use Sylius\Bundle\ResourceBundle\DependencyInjection\Extension\AbstractResourceE
 use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
-final class SetonoSyliusWishlistExtension extends AbstractResourceExtension
+final class SetonoSyliusWishlistExtension extends AbstractResourceExtension implements PrependExtensionInterface
 {
     public function load(array $configs, ContainerBuilder $container): void
     {
@@ -30,5 +31,27 @@ final class SetonoSyliusWishlistExtension extends AbstractResourceExtension
         );
 
         $loader->load('services.xml');
+    }
+
+    public function prepend(ContainerBuilder $container): void
+    {
+        $container->prependExtensionConfig('sylius_ui', [
+            'events' => [
+                'sylius.shop.layout.stylesheets' => [
+                    'blocks' => [
+                        'setono_sylius_wishlist__styles' => [
+                            'template' => '@SetonoSyliusWishlistPlugin/shop/_styles.html.twig',
+                        ],
+                    ],
+                ],
+                'sylius.shop.layout.javascripts' => [
+                    'blocks' => [
+                        'setono_sylius_wishlist__javascripts' => [
+                            'template' => '@SetonoSyliusWishlistPlugin/shop/_javascripts.html.twig',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
     }
 }

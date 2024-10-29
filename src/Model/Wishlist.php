@@ -6,13 +6,17 @@ namespace Setono\SyliusWishlistPlugin\Model;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Resource\Model\TimestampableTrait;
+use Symfony\Component\Uid\Uuid;
 
 abstract class Wishlist implements WishlistInterface
 {
     use TimestampableTrait;
 
     protected ?int $id = null;
+
+    protected string $uuid;
 
     protected ?string $name = null;
 
@@ -21,12 +25,18 @@ abstract class Wishlist implements WishlistInterface
 
     public function __construct()
     {
+        $this->uuid = (string) Uuid::v7();
         $this->items = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getUuid(): string
+    {
+        return $this->uuid;
     }
 
     public function getName(): ?string
@@ -63,5 +73,25 @@ abstract class Wishlist implements WishlistInterface
     public function getItems(): Collection
     {
         return $this->items;
+    }
+
+    public function hasProduct(ProductInterface $product): bool
+    {
+        foreach ($this->items as $item) {
+            if ($item->getProduct()?->getId() === $product->getId()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function removeProduct(ProductInterface $product): void
+    {
+        foreach ($this->items as $item) {
+            if ($item->getProduct()?->getId() === $product->getId()) {
+                $this->removeItem($item);
+            }
+        }
     }
 }

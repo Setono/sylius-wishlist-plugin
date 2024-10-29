@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Setono\SyliusWishlistPlugin\Repository;
 
 use Setono\SyliusWishlistPlugin\Model\GuestWishlistInterface;
-use Sylius\Resource\Doctrine\Persistence\RepositoryInterface;
 
 /**
- * @extends RepositoryInterface<GuestWishlistInterface>
+ * @extends WishlistRepositoryInterface<GuestWishlistInterface>
  */
-interface GuestWishlistRepositoryInterface extends RepositoryInterface
+interface GuestWishlistRepositoryInterface extends WishlistRepositoryInterface
 {
     public function findOneByClientId(string $clientId): ?GuestWishlistInterface;
 }

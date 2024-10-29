@@ -6,12 +6,11 @@ namespace Setono\SyliusWishlistPlugin\Repository;
 
 use Setono\SyliusWishlistPlugin\Model\UserWishlistInterface;
 use Sylius\Component\User\Model\UserInterface;
-use Sylius\Resource\Doctrine\Persistence\RepositoryInterface;
 
 /**
- * @extends RepositoryInterface<UserWishlistInterface>
+ * @extends WishlistRepositoryInterface<UserWishlistInterface>
  */
-interface UserWishlistRepositoryInterface extends RepositoryInterface
+interface UserWishlistRepositoryInterface extends WishlistRepositoryInterface
 {
     /**
      * @return list<UserWishlistInterface>

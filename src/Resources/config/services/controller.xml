@@ -9,6 +9,7 @@
             <argument type="service" id="twig"/>
             <argument type="service" id="form.factory"/>
             <argument>%sylius.model.product.class%</argument>
+            <argument>%setono_sylius_wishlist.model.wishlist.class%</argument>
 
             <tag name="controller.service_arguments"/>
         </service>

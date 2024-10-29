@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace Setono\SyliusWishlistPlugin\Repository;
 
 use Setono\SyliusWishlistPlugin\Model\UserWishlistInterface;
-use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
 use Sylius\Component\User\Model\UserInterface;
 use Webmozart\Assert\Assert;
 
-class UserWishlistRepository extends EntityRepository implements UserWishlistRepositoryInterface
+class UserWishlistRepository extends WishlistRepository implements UserWishlistRepositoryInterface
 {
     public function findByUser(UserInterface $user): array
     {
