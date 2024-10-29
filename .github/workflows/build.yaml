@@ -76,13 +76,13 @@ jobs:
                 php-version:
                     - "8.1"
                     - "8.2"
+                    - "8.3"
 
                 dependencies:
                     - "lowest"
                     - "highest"
                 
                 symfony:
-                    - "~5.4.0"
                     - "~6.4.0"
 
         steps:
@@ -123,13 +123,13 @@ jobs:
                 php-version:
                     - "8.1"
                     - "8.2"
+                    - "8.3"
 
                 dependencies:
                     - "lowest"
                     - "highest"
 
                 symfony:
-                    - "~5.4.0"
                     - "~6.4.0"
 
         steps:
@@ -167,13 +167,13 @@ jobs:
                 php-version:
                     - "8.1"
                     - "8.2"
+                    - "8.3"
                 
                 dependencies:
                     - "lowest"
                     - "highest"
 
                 symfony:
-                    - "~5.4.0"
                     - "~6.4.0"
 
         steps:
@@ -208,13 +208,13 @@ jobs:
                 php-version:
                     - "8.1"
                     - "8.2"
+                    - "8.3"
 
                 dependencies:
                     - "lowest"
                     - "highest"
                 
                 symfony:
-                    - "~5.4.0"
                     - "~6.4.0"
 
         steps:
