@@ -14,17 +14,17 @@ class WishlistManager {
     constructor(options = {}) {
         this.#options = Object.assign({
                 selector: {
-                    toggle: 'a.wishlist-toggle',
+                    toggle: 'button.wishlist-toggle',
                 },
                 callback: {
                     /**
                      * @param {Event} event
-                     * @param {HTMLAnchorElement} element
+                     * @param {HTMLButtonElement} element
                      */
                     onToggle: async function (event, element) {
                         event.preventDefault();
 
-                        const response = await fetch(element.href, {
+                        const response = await fetch(element.dataset.url, {
                             headers: {
                                 'X-Requested-With': 'XMLHttpRequest'
                             }

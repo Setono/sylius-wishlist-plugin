@@ -1,10 +1,10 @@
 {# @var product \Sylius\Component\Core\Model\ProductInterface #}
 {% set onWishlist = setono_sylius_wishlist_on_wishlist(product) %}
-        {% set wishlistPath = onWishlist ? path('setono_sylius_wishlist_shop_wishlist_remove', { 'product': product.id }) : path('setono_sylius_wishlist_shop_wishlist_add', { 'product': product.id }) %}
-<a href="{{ wishlistPath }}" class="wishlist-toggle">
+{% set wishlistPath = onWishlist ? path('setono_sylius_wishlist_shop_wishlist_remove', { 'product': product.id }) : path('setono_sylius_wishlist_shop_wishlist_add', { 'product': product.id }) %}
+<button data-url="{{ wishlistPath }}" class="wishlist-toggle">
     {% if onWishlist %}
         <i class="heart icon"></i>
     {% else %}
         <i class="heart outline icon"></i>
     {% endif %}
-</a>
+</button>
