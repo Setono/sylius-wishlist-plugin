@@ -2,11 +2,17 @@
 <container xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://symfony.com/schema/dic/services"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
+        <service id="Setono\SyliusWishlistPlugin\Factory\WishlistFactoryInterface"
+                 alias="Setono\SyliusWishlistPlugin\Factory\WishlistFactory"/>
+
         <service id="Setono\SyliusWishlistPlugin\Factory\WishlistFactory"
                  decorates="setono_sylius_wishlist.factory.wishlist" decoration-priority="64">
             <argument>%setono_sylius_wishlist.model.guest_wishlist.class%</argument>
             <argument>%setono_sylius_wishlist.model.user_wishlist.class%</argument>
         </service>
+
+        <service id="Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface"
+                 alias="Setono\SyliusWishlistPlugin\Factory\WishlistItemFactory"/>
 
         <service id="Setono\SyliusWishlistPlugin\Factory\WishlistItemFactory"
                  decorates="setono_sylius_wishlist.factory.wishlist_item" decoration-priority="64">

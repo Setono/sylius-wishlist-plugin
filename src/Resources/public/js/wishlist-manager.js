@@ -24,7 +24,12 @@ class WishlistManager {
                     onToggle: async function (event, element) {
                         event.preventDefault();
 
-                        const response = await fetch(element.href);
+                        const response = await fetch(element.href, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+
                         // todo how to handle this?
                         if (!response.ok) {
                             throw new Error(`Response status: ${response.status}`);

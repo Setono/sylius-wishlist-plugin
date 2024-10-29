@@ -11,8 +11,9 @@
             <tr>
                 <th>{{ 'sylius.ui.quantity'|trans }}</th>
                 <th>{{ 'sylius.ui.product'|trans }}</th>
+                <th>{{ 'sylius.ui.variant'|trans }}</th>
                 <th>{{ 'sylius.ui.price'|trans }}</th>
-                <th>{{ 'sylius.ui.actions'|trans }}</th>
+                <th>&nbsp;</th>
             </tr>
         </thead>
         <tbody>
@@ -24,11 +25,28 @@
                             {{ item.product.name }}
                         </a>
                     </td>
-                    <td>Price</td>
                     <td>
+                        <select class="ui dropdown" name="variant-selector">
+                            <option>{{ 'sylius.ui.select'|trans }}</option>
+                            {% for key, variant in item.product.enabledVariants %}
+                                <option value="{{ variant.id }}">
+                                    {% if item.product.hasOptions() %}
+                                        {% for optionValue in variant.optionValues %}
+                                            {{ optionValue.option.name }}: {{ optionValue.value }}{{ loop.last ? '' : ' |' }}
+                                        {% endfor %}
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        {{ include('@SetonoSyliusWishlistPlugin/shop/wishlist/show/_price.html.twig') }}
+                    </td>
+                    <td style="text-align: right">
                         {# todo only show this if wishlist is owned by the current user #}
-                        <a href="{{ path('setono_sylius_wishlist_shop_wishlist_remove', { 'product': item.product.id, 'wishlist': wishlist.id }) }}" class="ui red button">
-                            {{ 'sylius.ui.delete'|trans }}
+                        <a href="{{ path('setono_sylius_wishlist_shop_wishlist_remove', { 'product': item.product.id, 'wishlist': wishlist.id }) }}" class="ui basic red button">
+                            <i class="icon remove"></i>
+                            {{ 'setono_sylius_wishlist.ui.remove_from_wishlist'|trans }}
                         </a>
                     </td>
                 </tr>

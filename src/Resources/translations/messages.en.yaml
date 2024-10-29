@@ -3,3 +3,4 @@ setono_sylius_wishlist:
         wishlist_header: "Wishlist: %name%"
         wishlists_header: Wishlists
         wishlists_subheader: Here you can manage your wishlists. As a logged in user you can create, edit and delete wishlists. You can also add and remove products from your wishlists. If you're not logged in, you can only add and remove products from your single wishlist.
+        remove_from_wishlist: Remove from wishlist
