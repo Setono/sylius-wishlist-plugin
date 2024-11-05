@@ -1,4 +1,7 @@
-class WishlistManager {
+/**
+ * Handles the add to wishlist and remove from wishlist actions (i.e. toggling)
+ */
+class WishlistActionHandler {
     /**
      * @type {Object}
      */
