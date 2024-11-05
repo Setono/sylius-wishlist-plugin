@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Twig\Environment;
 use Webmozart\Assert\Assert;
@@ -170,19 +171,31 @@ final class WishlistController
             throw new NotFoundHttpException(sprintf('Wishlist with id %s not found', $uuid));
         }
 
-        $cart = $cartContext->getCart();
-        Assert::isInstanceOf($cart, OrderInterface::class);
+        try {
+            $cart = $cartContext->getCart();
+            Assert::isInstanceOf($cart, OrderInterface::class);
 
-        foreach ($wishlist->getItems() as $item) {
-            $cartItem = $this->cartItemFactory->createForCart($cart);
-            $cartItem->setVariant($item->getVariant());
+            foreach ($wishlist->getItems() as $item) {
+                if ($item->getVariant() === null) {
+                    throw new \RuntimeException(sprintf('You have not selected a variant for the product "%s"', $item->getProduct()?->getName()));
+                }
 
-            $orderItemQuantityModifier->modify($cartItem, $item->getQuantity());
+                $cartItem = $this->cartItemFactory->createForCart($cart);
+                $cartItem->setVariant($item->getVariant());
 
-            $orderModifier->addToOrder($cart, $cartItem);
+                $orderItemQuantityModifier->modify($cartItem, $item->getQuantity());
+
+                $orderModifier->addToOrder($cart, $cartItem);
+            }
+
+            $this->getManager($cart)->persist($cart);
+            $this->getManager($cart)->flush();
+        } catch (\Throwable $e) {
+            $session = $request->getSession();
+            if ($session instanceof FlashBagAwareSessionInterface) {
+                $session->getFlashBag()->add('error', $e->getMessage());
+            }
         }
-
-        $this->getManager($cart)->flush();
 
         return new RedirectResponse($request->headers->get('referer'));
     }

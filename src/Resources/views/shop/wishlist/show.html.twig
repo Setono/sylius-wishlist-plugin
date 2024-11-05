@@ -10,8 +10,16 @@
             <div class="sub header">{{ 'setono_sylius_wishlist.ui.wishlist_subheader'|trans }}</div>
         </h1>
 
+        <div class="wishlist-url">
+            <input type="text" value="{{ url('setono_sylius_wishlist_shop_wishlist_show', { 'uuid' : wishlist.uuid }) }}">
+            <button class="ui icon labeled button" type="button">
+                <i class="copy icon"></i>
+                {{ 'setono_sylius_wishlist.ui.copy'|trans }}
+            </button>
+        </div>
+
         <div>
-            <a href="{{ path('setono_sylius_wishlist_shop_wishlist_add_to_cart', { 'uuid' : wishlist.uuid }) }}">Add all to cart</a>
+            <a href="{{ path('setono_sylius_wishlist_shop_wishlist_add_to_cart', { 'uuid' : wishlist.uuid }) }}">{{ 'setono_sylius_wishlist.ui.add_wishlist_to_cart'|trans }}</a>
         </div>
 
         <table class="ui table">
@@ -80,7 +88,7 @@
     <style>
         h1 {
             max-width: 800px !important;
-            margin: 50px auto 120px auto !important;
+            margin: 50px auto 50px auto !important;
             text-align: center !important;
             border: 0 !important;
         }
@@ -89,5 +97,35 @@
             margin-top: 20px !important;
             line-height: 1.7 !important;
         }
+
+        .wishlist-url {
+            margin: 0 auto 40px auto !important;
+            max-width: 800px !important;
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 20px;
+        }
     </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        document.querySelector('.wishlist-url button').addEventListener('click', function() {
+            const input = document.querySelector(".wishlist-url input");
+
+            input.select();
+            input.setSelectionRange(0, 99999); // For mobile devices
+
+            navigator.clipboard.writeText(input.value)
+                .then(() => {
+                    // Optional: Notify the user that the text has been copied
+                    alert("Copied to clipboard: " + input.value);
+                })
+                .catch((error) => {
+                    console.error("Could not copy text: ", error);
+                });
+        });
+    </script>
 {% endblock %}
