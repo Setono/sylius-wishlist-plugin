@@ -7,6 +7,7 @@
         <import resource="services/factory.xml"/>
         <import resource="services/form.xml"/>
         <import resource="services/provider.xml"/>
+        <import resource="services/security.xml"/>
         <import resource="services/twig.xml"/>
     </imports>
 </container>

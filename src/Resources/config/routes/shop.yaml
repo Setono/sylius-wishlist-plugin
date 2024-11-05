@@ -17,7 +17,7 @@ setono_sylius_wishlist_shop_wishlist_add_product:
         
 setono_sylius_wishlist_shop_wishlist_add_product_variant:
     methods: [GET]
-    path: /wishlist/add-product/{id}
+    path: /wishlist/add-product-variant/{id}
     controller: setono_sylius_wishlist.controller.add_product_variant_to_wishlist
     requirements:
         id: '\d+'

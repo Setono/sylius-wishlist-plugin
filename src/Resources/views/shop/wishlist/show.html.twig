@@ -1,12 +1,20 @@
 {# @var wishlist \Setono\SyliusWishlistPlugin\Model\WishlistInterface #}
 {% extends '@SyliusShop/layout.html.twig' %}
 
+{% set canEdit = is_granted('wishlist_edit', wishlist) %}
+
 {% block content %}
-    {{ form_start(form, {'method': 'PATCH', 'attr': {'class': 'ui form', 'novalidate': 'novalidate'}}) }}
+    {{ form_start(form, {'attr': {'class': 'ui form', 'novalidate': 'novalidate'}}) }}
+        {{ form_row(form._token) }}
+        <input type="hidden" name="_method" value="PATCH" />
         {{ form_errors(form) }}
 
         <h1 class="ui monster section dividing header">
-            <span data-editable="{{ form_widget(form.name)|e('html_attr') }}">{{ wishlist.name }}</span>
+            {% if canEdit %}
+                <span data-editable="{{ form_widget(form.name)|e('html_attr') }}">{{ wishlist.name }}</span>
+            {% else %}
+                {{ wishlist.name }}
+            {% endif %}
             <div class="sub header">{{ 'setono_sylius_wishlist.ui.wishlist_subheader'|trans }}</div>
         </h1>
 
@@ -67,19 +75,22 @@
                             {{ include('@SetonoSyliusWishlistPlugin/shop/wishlist/show/_price.html.twig') }}
                         </td>
                         <td style="text-align: right">
-                            {# todo only show this if wishlist is owned by the current user #}
-                            <a href="{{ path('setono_sylius_wishlist_shop_wishlist_remove_product', { 'id': item.product.id, 'wishlist': wishlist.id }) }}" class="ui basic red button">
-                                <i class="icon remove"></i>
-                                {{ 'setono_sylius_wishlist.ui.remove_from_wishlist'|trans }}
-                            </a>
+                            {% if canEdit %}
+                                {# todo only show this if wishlist is owned by the current user #}
+                                <a href="{{ path('setono_sylius_wishlist_shop_wishlist_remove_product', { 'id': item.product.id, 'wishlist': wishlist.id }) }}" class="ui basic red button">
+                                    <i class="icon remove"></i>
+                                    {{ 'setono_sylius_wishlist.ui.remove_from_wishlist'|trans }}
+                                </a>
+                            {% else %}
+                                &nbsp;
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
         <button type="submit" class="ui icon labeled large button"><i class="save icon"></i> {{ 'sylius.ui.update'|trans }}</button>
-
-    {{ form_end(form) }}
+    {{ form_end(form, {'render_rest': false}) }}
 {% endblock %}
 
 {% block stylesheets %}
@@ -127,11 +138,14 @@
                     console.error("Could not copy text: ", error);
                 });
         });
-
-        document.querySelectorAll('[data-editable]').forEach((element) => {
-            element.addEventListener('click', () => {
-                element.innerHTML = element.dataset.editable;
-            }, {once: true});
-        });
     </script>
+    {% if canEdit %}
+        <script>
+            document.querySelectorAll('[data-editable]').forEach((element) => {
+                element.addEventListener('click', () => {
+                    element.innerHTML = element.dataset.editable;
+                }, {once: true});
+            });
+        </script>
+    {% endif %}
 {% endblock %}
