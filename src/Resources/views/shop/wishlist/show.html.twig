@@ -6,7 +6,7 @@
         {{ form_errors(form) }}
 
         <h1 class="ui monster section dividing header">
-            {{ 'setono_sylius_wishlist.ui.wishlist_header'|trans({'%name%' : wishlist.name }) }}
+            <span data-editable="{{ form_widget(form.name)|e('html_attr') }}">{{ wishlist.name }}</span>
             <div class="sub header">{{ 'setono_sylius_wishlist.ui.wishlist_subheader'|trans }}</div>
         </h1>
 
@@ -111,6 +111,7 @@
 {% block javascripts %}
     {{ parent() }}
 
+    {# todo create a component for this #}
     <script>
         document.querySelector('.wishlist-url button').addEventListener('click', function() {
             const input = document.querySelector(".wishlist-url input");
@@ -120,12 +121,17 @@
 
             navigator.clipboard.writeText(input.value)
                 .then(() => {
-                    // Optional: Notify the user that the text has been copied
-                    alert("Copied to clipboard: " + input.value);
+                    console.log("Copied to clipboard: " + input.value);
                 })
                 .catch((error) => {
                     console.error("Could not copy text: ", error);
                 });
+        });
+
+        document.querySelectorAll('[data-editable]').forEach((element) => {
+            element.addEventListener('click', () => {
+                element.innerHTML = element.dataset.editable;
+            }, {once: true});
         });
     </script>
 {% endblock %}

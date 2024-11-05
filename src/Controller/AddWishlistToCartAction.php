@@ -9,6 +9,7 @@ use Setono\Doctrine\ORMTrait;
 use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
 use Sylius\Component\Core\Factory\CartItemFactoryInterface;
 use Sylius\Component\Core\Model\OrderInterface;
+use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Order\Context\CartContextInterface;
 use Sylius\Component\Order\Modifier\OrderItemQuantityModifierInterface;
 use Sylius\Component\Order\Modifier\OrderModifierInterface;
@@ -54,7 +55,8 @@ final class AddWishlistToCartAction
                     ));
                 }
 
-                $cartItem = $this->cartItemFactory->createForCart($cart);
+                /** @var OrderItemInterface $cartItem */
+                $cartItem = $this->cartItemFactory->createNew();
                 $cartItem->setVariant($item->getVariant());
 
                 $this->orderItemQuantityModifier->modify($cartItem, $item->getQuantity());

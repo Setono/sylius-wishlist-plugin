@@ -2,7 +2,6 @@ setono_sylius_wishlist:
     ui:
         add_wishlist_to_cart: Add wishlist to cart
         copy: Copy
-        wishlist_header: "Wishlist: %name%"
         wishlist_subheader: Here you can edit the quantity of the products in your wishlist. You can also select the variants you want and remove products from your wishlist. Finally you can share your wishlist with others by copying the URL below.
         wishlists: Wishlists
         wishlists_header: Wishlists
