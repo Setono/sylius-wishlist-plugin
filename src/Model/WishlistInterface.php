@@ -6,6 +6,7 @@ namespace Setono\SyliusWishlistPlugin\Model;
 
 use Doctrine\Common\Collections\Collection;
 use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Resource\Model\ResourceInterface;
 use Sylius\Resource\Model\TimestampableInterface;
 
@@ -33,4 +34,6 @@ interface WishlistInterface extends ResourceInterface, TimestampableInterface
     public function hasProduct(ProductInterface $product): bool;
 
     public function removeProduct(ProductInterface $product): void;
+
+    public function hasProductVariant(ProductVariantInterface $productVariant): bool;
 }

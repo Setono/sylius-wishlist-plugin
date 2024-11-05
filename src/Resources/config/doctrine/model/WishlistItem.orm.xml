@@ -24,5 +24,9 @@
         <many-to-one field="variant" target-entity="Sylius\Component\Product\Model\ProductVariantInterface">
             <join-column name="variant_id" referenced-column-name="id" nullable="true" on-delete="CASCADE"/>
         </many-to-one>
+
+        <unique-constraints>
+            <unique-constraint columns="wishlist_id, product_id, variant_id"/>
+        </unique-constraints>
     </entity>
 </doctrine-mapping>

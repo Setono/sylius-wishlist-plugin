@@ -1,4 +1,5 @@
-{# @var product \Sylius\Component\Core\Model\ProductInterface #}
+{# todo we need to handle the removal of variants also #}
+{# @var product \Sylius\Component\Core\Model\ProductInterface|\Sylius\Component\Core\Model\ProductVariantInterface #}
 {% set onWishlist = setono_sylius_wishlist_on_wishlist(product) %}
 {% set wishlistPath = onWishlist ? path('setono_sylius_wishlist_shop_wishlist_remove', { 'product': product.id }) : path('setono_sylius_wishlist_shop_wishlist_add', { 'product': product.id }) %}
 <button data-url="{{ wishlistPath }}" class="wishlist-toggle">

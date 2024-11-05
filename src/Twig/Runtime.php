@@ -6,6 +6,7 @@ namespace Setono\SyliusWishlistPlugin\Twig;
 
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Core\Model\ProductVariantInterface;
 use Twig\Extension\RuntimeExtensionInterface;
 
 final class Runtime implements RuntimeExtensionInterface
@@ -14,11 +15,12 @@ final class Runtime implements RuntimeExtensionInterface
     {
     }
 
-    public function onWishlist(ProductInterface $product): bool
+    public function onWishlist(ProductInterface|ProductVariantInterface $product): bool
     {
         // todo should be optimized
         foreach ($this->wishlistProvider->getWishlists() as $wishlist) {
-            if ($wishlist->hasProduct($product)) {
+            $hasProduct = $product instanceof ProductInterface ? $wishlist->hasProduct($product) : $wishlist->hasProductVariant($product);
+            if ($hasProduct) {
                 return true;
             }
         }
