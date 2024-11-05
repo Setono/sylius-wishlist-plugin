@@ -6,7 +6,7 @@ setono_sylius_wishlist_shop_wishlist_index:
 setono_sylius_wishlist_shop_wishlist_show:
     methods: [GET,PATCH]
     path: /wishlists/{uuid}
-    controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::show
+    controller: Setono\SyliusWishlistPlugin\Controller\ShowWishlistAction
 
 setono_sylius_wishlist_shop_wishlist_add_product:
     methods: [GET]

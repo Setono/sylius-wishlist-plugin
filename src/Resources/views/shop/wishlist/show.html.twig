@@ -68,7 +68,7 @@
                         </td>
                         <td style="text-align: right">
                             {# todo only show this if wishlist is owned by the current user #}
-                            <a href="{{ path('setono_sylius_wishlist_shop_wishlist_remove', { 'product': item.product.id, 'wishlist': wishlist.id }) }}" class="ui basic red button">
+                            <a href="{{ path('setono_sylius_wishlist_shop_wishlist_remove_product', { 'id': item.product.id, 'wishlist': wishlist.id }) }}" class="ui basic red button">
                                 <i class="icon remove"></i>
                                 {{ 'setono_sylius_wishlist.ui.remove_from_wishlist'|trans }}
                             </a>
