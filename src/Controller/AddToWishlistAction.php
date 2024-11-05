@@ -66,21 +66,15 @@ final class AddToWishlistAction
         );
 
         return new JsonResponse([
-            'toggleButton' => $this->twig->render(
-                '@SetonoSyliusWishlistPlugin/shop/wishlist/_toggle_button.html.twig',
-                [
-                    'product' => $entity instanceof ProductInterface ? $entity : $entity->getProduct(),
-                    'productVariant' => $entity instanceof ProductVariantInterface ? $entity : null,
-                ],
-            ),
-            'selectWishlistsForm' => $this->twig->render(
-                '@SetonoSyliusWishlistPlugin/shop/wishlist/_select_wishlists.html.twig',
-                [
-                    'product' => $entity instanceof ProductInterface ? $entity : $entity->getProduct(),
-                    'productVariant' => $entity instanceof ProductVariantInterface ? $entity : null,
-                    'form' => $form->createView(),
-                ],
-            ),
+            'toggleButton' => $this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/_toggle_button.html.twig', [
+                'product' => $entity instanceof ProductInterface ? $entity : $entity->getProduct(),
+                'productVariant' => $entity instanceof ProductVariantInterface ? $entity : null,
+            ]),
+            'selectWishlistsForm' => $this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/_select_wishlists.html.twig', [
+                'product' => $entity instanceof ProductInterface ? $entity : $entity->getProduct(),
+                'productVariant' => $entity instanceof ProductVariantInterface ? $entity : null,
+                'form' => $form->createView(),
+            ]),
         ]);
     }
 }
