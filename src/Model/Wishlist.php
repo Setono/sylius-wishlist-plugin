@@ -7,6 +7,7 @@ namespace Setono\SyliusWishlistPlugin\Model;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Resource\Model\TimestampableTrait;
 use Symfony\Component\Uid\Uuid;
 
@@ -90,6 +91,26 @@ abstract class Wishlist implements WishlistInterface
     {
         foreach ($this->items as $item) {
             if ($item->getProduct()?->getId() === $product->getId()) {
+                $this->removeItem($item);
+            }
+        }
+    }
+
+    public function hasProductVariant(ProductVariantInterface $productVariant): bool
+    {
+        foreach ($this->items as $item) {
+            if ($item->getVariant()?->getId() === $productVariant->getId()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function removeProductVariant(ProductVariantInterface $productVariant): void
+    {
+        foreach ($this->items as $item) {
+            if ($item->getVariant()?->getId() === $productVariant->getId()) {
                 $this->removeItem($item);
             }
         }

@@ -11,5 +11,54 @@
 
             <tag name="controller.service_arguments"/>
         </service>
+
+        <service id="Setono\SyliusWishlistPlugin\Controller\AddWishlistToCartAction" public="true">
+            <argument type="service" id="setono_sylius_wishlist.repository.wishlist"/>
+            <argument type="service" id="sylius.order_item_quantity_modifier"/>
+            <argument type="service" id="sylius.order_modifier"/>
+            <argument type="service" id="sylius.context.cart"/>
+            <argument type="service" id="router"/>
+            <argument type="service" id="sylius.factory.order_item"/>
+            <argument type="service" id="doctrine"/>
+        </service>
+
+        <!-- Add product/variant to wishlist -->
+        <service id="setono_sylius_wishlist.controller.add_to_wishlist"
+                 class="Setono\SyliusWishlistPlugin\Controller\AddToWishlistAction" public="true" abstract="true">
+            <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"/>
+            <argument type="service" id="Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface"/>
+            <argument type="service" id="form.factory"/>
+            <argument type="service" id="twig"/>
+            <argument type="service" id="doctrine"/>
+        </service>
+
+        <service id="setono_sylius_wishlist.controller.add_product_to_wishlist"
+                 parent="setono_sylius_wishlist.controller.add_to_wishlist">
+            <argument>%sylius.model.product.class%</argument>
+        </service>
+
+        <service id="setono_sylius_wishlist.controller.add_product_variant_to_wishlist"
+                 parent="setono_sylius_wishlist.controller.add_to_wishlist">
+            <argument>%sylius.model.product_variant.class%</argument>
+        </service>
+
+        <!-- Remove product/variant from wishlist -->
+        <service id="setono_sylius_wishlist.controller.remove_from_wishlist"
+                 class="Setono\SyliusWishlistPlugin\Controller\RemoveFromWishlistAction" public="true" abstract="true">
+            <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"/>
+            <argument type="service" id="twig"/>
+            <argument type="service" id="doctrine"/>
+            <argument type="service" id="router"/>
+        </service>
+
+        <service id="setono_sylius_wishlist.controller.remove_product_from_wishlist"
+                 parent="setono_sylius_wishlist.controller.remove_from_wishlist">
+            <argument>%sylius.model.product.class%</argument>
+        </service>
+
+        <service id="setono_sylius_wishlist.controller.remove_product_variant_from_wishlist"
+                 parent="setono_sylius_wishlist.controller.remove_from_wishlist">
+            <argument>%sylius.model.product_variant.class%</argument>
+        </service>
     </services>
 </container>

@@ -8,23 +8,37 @@ setono_sylius_wishlist_shop_wishlist_show:
     path: /wishlists/{uuid}
     controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::show
 
-setono_sylius_wishlist_shop_wishlist_add:
+setono_sylius_wishlist_shop_wishlist_add_product:
     methods: [GET]
-    path: /wishlist/add/{product}
-    controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::add
+    path: /wishlist/add-product/{id}
+    controller: setono_sylius_wishlist.controller.add_product_to_wishlist
     requirements:
-        product: '\d+'
+        id: '\d+'
         
-setono_sylius_wishlist_shop_wishlist_remove:
+setono_sylius_wishlist_shop_wishlist_add_product_variant:
     methods: [GET]
-    path: /wishlist/remove/{product}/{wishlist}
-    controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::remove
+    path: /wishlist/add-product/{id}
+    controller: setono_sylius_wishlist.controller.add_product_variant_to_wishlist
+    requirements:
+        id: '\d+'
+        
+setono_sylius_wishlist_shop_wishlist_remove_product:
+    methods: [GET]
+    path: /wishlist/remove-product/{id}/{wishlist}
+    controller: setono_sylius_wishlist.controller.remove_product_from_wishlist
     defaults:
         wishlist: null
     requirements:
-        product: '\d+'
+        id: '\d+'
         wishlist: '\d+'
         
+setono_sylius_wishlist_shop_wishlist_remove_product_variant:
+    methods: [GET]
+    path: /wishlist/remove-product-variant/{id}
+    controller: setono_sylius_wishlist.controller.remove_product_variant_from_wishlist
+    requirements:
+        id: '\d+'
+
 setono_sylius_wishlist_shop_wishlist_select_wishlists:
     methods: [POST]
     path: /wishlist/select-wishlists/{product}
@@ -35,4 +49,4 @@ setono_sylius_wishlist_shop_wishlist_select_wishlists:
 setono_sylius_wishlist_shop_wishlist_add_to_cart:
     methods: [GET]
     path: /wishlists/{uuid}/add-to-cart
-    controller: Setono\SyliusWishlistPlugin\Controller\WishlistController::addToCart
+    controller: Setono\SyliusWishlistPlugin\Controller\AddWishlistToCartAction

@@ -36,4 +36,6 @@ interface WishlistInterface extends ResourceInterface, TimestampableInterface
     public function removeProduct(ProductInterface $product): void;
 
     public function hasProductVariant(ProductVariantInterface $productVariant): bool;
+
+    public function removeProductVariant(ProductVariantInterface $productVariant): void;
 }

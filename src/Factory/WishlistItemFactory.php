@@ -6,6 +6,7 @@ namespace Setono\SyliusWishlistPlugin\Factory;
 
 use Setono\SyliusWishlistPlugin\Model\WishlistItemInterface;
 use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Resource\Factory\FactoryInterface;
 use Webmozart\Assert\Assert;
 
@@ -27,6 +28,15 @@ final class WishlistItemFactory implements WishlistItemFactoryInterface
     {
         $wishlistItem = $this->createNew();
         $wishlistItem->setProduct($product);
+        $wishlistItem->setQuantity($quantity);
+
+        return $wishlistItem;
+    }
+
+    public function createWithProductVariant(ProductVariantInterface $productVariant, int $quantity = 1): WishlistItemInterface
+    {
+        $wishlistItem = $this->createNew();
+        $wishlistItem->setVariant($productVariant);
         $wishlistItem->setQuantity($quantity);
 
         return $wishlistItem;

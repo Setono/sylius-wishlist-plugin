@@ -52,6 +52,13 @@ class WishlistItem implements WishlistItemInterface
     public function setVariant(?ProductVariantInterface $variant): void
     {
         $this->variant = $variant;
+
+        if (null !== $variant) {
+            $product = $variant->getProduct();
+            if ($product instanceof ProductInterface) {
+                $this->product = $product;
+            }
+        }
     }
 
     public function getQuantity(): int

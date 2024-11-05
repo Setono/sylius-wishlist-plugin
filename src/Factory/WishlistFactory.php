@@ -6,14 +6,9 @@ namespace Setono\SyliusWishlistPlugin\Factory;
 
 use Setono\SyliusWishlistPlugin\Model\GuestWishlistInterface;
 use Setono\SyliusWishlistPlugin\Model\UserWishlistInterface;
-use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Sylius\Component\User\Model\UserInterface;
-use Sylius\Resource\Factory\FactoryInterface;
 use Webmozart\Assert\Assert;
 
-/**
- * @extends FactoryInterface<WishlistInterface>
- */
 final class WishlistFactory implements WishlistFactoryInterface
 {
     public function __construct(
