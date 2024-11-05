@@ -20,6 +20,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Webmozart\Assert\Assert;
 
+// todo Right now we are not checking if the product is available.
+// todo We should probably copy the logic from the \Sylius\Bundle\OrderBundle\Controller\OrderItemController::addAction
 final class AddWishlistToCartAction
 {
     use ORMTrait;
