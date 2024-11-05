@@ -88,7 +88,9 @@
                 {% endfor %}
             </tbody>
         </table>
-        <button type="submit" class="ui icon labeled large button"><i class="save icon"></i> {{ 'sylius.ui.update'|trans }}</button>
+        {% if canEdit %}
+            <button type="submit" class="ui icon labeled large button"><i class="save icon"></i> {{ 'sylius.ui.update'|trans }}</button>
+        {% endif %}
     {{ form_end(form, {'render_rest': false}) }}
 {% endblock %}
 
