@@ -35,7 +35,7 @@ final class RemoveFromWishlistAction
         $this->managerRegistry = $managerRegistry;
     }
 
-    public function __invoke(Request $request, int $id, int $wishlist = null): Response
+    public function __invoke(Request $request, int $id): Response
     {
         $entity = $this->getManager($this->className)->find($this->className, $id);
 
@@ -44,10 +44,6 @@ final class RemoveFromWishlistAction
         }
 
         foreach ($this->wishlistProvider->getWishlists() as $wishlistEntity) {
-            if (null !== $wishlist && $wishlistEntity->getId() !== $wishlist) {
-                continue;
-            }
-
             $entity instanceof ProductInterface ? $wishlistEntity->removeProduct($entity) : $wishlistEntity->removeProductVariant($entity);
         }
 

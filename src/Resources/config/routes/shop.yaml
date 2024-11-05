@@ -7,6 +7,11 @@ setono_sylius_wishlist_shop_wishlist_show:
     methods: [GET,PATCH]
     path: /wishlists/{uuid}
     controller: Setono\SyliusWishlistPlugin\Controller\ShowWishlistAction
+    
+setono_sylius_wishlist_shop_wishlist_item_remove:
+    methods: [ GET ]
+    path: /wishlists/{uuid}/remove-item/{id}
+    controller: Setono\SyliusWishlistPlugin\Controller\RemoveWishlistItemAction
 
 setono_sylius_wishlist_shop_wishlist_add_product:
     methods: [GET]
@@ -24,13 +29,10 @@ setono_sylius_wishlist_shop_wishlist_add_product_variant:
         
 setono_sylius_wishlist_shop_wishlist_remove_product:
     methods: [GET]
-    path: /wishlist/remove-product/{id}/{wishlist}
+    path: /wishlist/remove-product/{id}
     controller: setono_sylius_wishlist.controller.remove_product_from_wishlist
-    defaults:
-        wishlist: null
     requirements:
         id: '\d+'
-        wishlist: '\d+'
         
 setono_sylius_wishlist_shop_wishlist_remove_product_variant:
     methods: [GET]
