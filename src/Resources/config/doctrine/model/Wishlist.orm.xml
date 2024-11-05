@@ -19,6 +19,10 @@
         <field name="uuid" type="string" unique="true"/>
         <field name="name" type="string"/>
 
+        <many-to-one field="user" target-entity="Sylius\Component\User\Model\UserInterface">
+            <join-column name="user_id" referenced-column-name="id" nullable="true" on-delete="CASCADE"/>
+        </many-to-one>
+
         <one-to-many field="items" target-entity="Setono\SyliusWishlistPlugin\Model\WishlistItemInterface"
                      mapped-by="wishlist" orphan-removal="true" fetch="EXTRA_LAZY">
             <cascade>

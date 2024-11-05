@@ -8,8 +8,6 @@ use Sylius\Component\User\Model\UserInterface;
 
 class UserWishlist extends Wishlist implements UserWishlistInterface
 {
-    protected ?UserInterface $user = null;
-
     public function getUser(): ?UserInterface
     {
         return $this->user;

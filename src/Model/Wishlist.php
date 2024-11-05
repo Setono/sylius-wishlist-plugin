@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
+use Sylius\Component\User\Model\UserInterface;
 use Sylius\Resource\Model\TimestampableTrait;
 use Symfony\Component\Uid\Uuid;
 
@@ -20,6 +21,8 @@ abstract class Wishlist implements WishlistInterface
     protected string $uuid;
 
     protected ?string $name = null;
+
+    protected ?UserInterface $user = null;
 
     /** @var Collection<array-key, WishlistItemInterface> */
     protected Collection $items;
@@ -48,6 +51,11 @@ abstract class Wishlist implements WishlistInterface
     public function setName(?string $name): void
     {
         $this->name = $name;
+    }
+
+    public function hasItems(): bool
+    {
+        return !$this->items->isEmpty();
     }
 
     public function addItem(WishlistItemInterface $item): void
