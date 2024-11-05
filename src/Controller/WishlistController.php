@@ -8,7 +8,6 @@ use Doctrine\Persistence\ManagerRegistry;
 use Setono\Doctrine\ORMTrait;
 use Setono\SyliusWishlistPlugin\Form\Type\WishlistType;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
-use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
 use Sylius\Component\Core\Factory\CartItemFactoryInterface;
 use Sylius\Component\Core\Model\ProductInterface;
@@ -32,13 +31,6 @@ final class WishlistController
         private readonly string $wishlistClass,
     ) {
         $this->managerRegistry = $managerRegistry;
-    }
-
-    public function index(WishlistProviderInterface $wishlistProvider): Response
-    {
-        return new Response($this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/index.html.twig', [
-            'wishlists' => $wishlistProvider->getWishlists(),
-        ]));
     }
 
     public function show(

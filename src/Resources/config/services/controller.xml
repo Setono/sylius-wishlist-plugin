@@ -12,6 +12,11 @@
             <tag name="controller.service_arguments"/>
         </service>
 
+        <service id="Setono\SyliusWishlistPlugin\Controller\WishlistIndexAction" public="true">
+            <argument type="service" id="twig"/>
+            <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"/>
+        </service>
+
         <service id="Setono\SyliusWishlistPlugin\Controller\AddWishlistToCartAction" public="true">
             <argument type="service" id="setono_sylius_wishlist.repository.wishlist"/>
             <argument type="service" id="sylius.order_item_quantity_modifier"/>

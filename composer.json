@@ -26,6 +26,7 @@
         "symfony/http-foundation": "^6.4 || ^7.0",
         "symfony/http-kernel": "^6.4 || ^7.0",
         "symfony/options-resolver": "^6.4 || ^7.0",
+        "symfony/routing": "^6.4 || ^7.0",
         "symfony/security-bundle": "^6.4 || ^7.0",
         "symfony/uid": "^6.4 || ^7.0",
         "twig/twig": "^2.15 || ^3.0",
