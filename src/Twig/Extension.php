@@ -16,6 +16,7 @@ final class Extension extends AbstractExtension
     {
         return [
             new TwigFunction('setono_sylius_wishlist_on_wishlist', [Runtime::class, 'onWishlist']),
+            new TwigFunction('setono_sylius_wishlist_has_wishlist', [Runtime::class, 'hasWishlist']),
         ];
     }
 }

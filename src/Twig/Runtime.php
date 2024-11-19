@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Setono\SyliusWishlistPlugin\Twig;
 
+use Doctrine\Persistence\ManagerRegistry;
+use Setono\Doctrine\ORMTrait;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
@@ -11,8 +13,13 @@ use Twig\Extension\RuntimeExtensionInterface;
 
 final class Runtime implements RuntimeExtensionInterface
 {
-    public function __construct(private readonly WishlistProviderInterface $wishlistProvider)
-    {
+    use ORMTrait;
+
+    public function __construct(
+        private readonly WishlistProviderInterface $wishlistProvider,
+        ManagerRegistry $managerRegistry,
+    ) {
+        $this->managerRegistry = $managerRegistry;
     }
 
     public function onWishlist(ProductInterface|ProductVariantInterface $product): bool
@@ -26,5 +33,12 @@ final class Runtime implements RuntimeExtensionInterface
         }
 
         return false;
+    }
+
+    public function hasWishlist(): bool
+    {
+        $wishlist = $this->wishlistProvider->getWishlists()[0];
+
+        return $this->getManager($wishlist)->contains($wishlist);
     }
 }

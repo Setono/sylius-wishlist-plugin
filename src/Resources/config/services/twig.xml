@@ -8,6 +8,7 @@
 
         <service id="Setono\SyliusWishlistPlugin\Twig\Runtime">
             <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"/>
+            <argument type="service" id="doctrine"/>
 
             <tag name="twig.runtime"/>
         </service>
