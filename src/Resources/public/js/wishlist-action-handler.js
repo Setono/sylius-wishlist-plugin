@@ -64,3 +64,5 @@ class WishlistActionHandler {
         });
     }
 }
+
+new WishlistActionHandler(window.ssWishlist || {});
