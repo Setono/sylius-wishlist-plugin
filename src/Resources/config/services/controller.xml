@@ -23,6 +23,13 @@
             <argument type="service" id="twig"/>
         </service>
 
+        <service id="Setono\SyliusWishlistPlugin\Controller\FirstWishlistRedirectAction" public="true">
+            <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"/>
+            <argument type="service" id="Setono\SyliusWishlistPlugin\Factory\WishlistFactoryInterface"/>
+            <argument type="service" id="doctrine"/>
+            <argument type="service" id="router"/>
+        </service>
+
         <service id="Setono\SyliusWishlistPlugin\Controller\RemoveWishlistItemAction" public="true">
             <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"/>
             <argument type="service" id="router"/>

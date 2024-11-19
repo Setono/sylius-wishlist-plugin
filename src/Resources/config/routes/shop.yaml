@@ -2,6 +2,11 @@ setono_sylius_wishlist_shop_wishlist_index:
     methods: [GET]
     path: /wishlists
     controller: Setono\SyliusWishlistPlugin\Controller\WishlistIndexAction
+
+setono_sylius_wishlist_shop_wishlist_first_redirect:
+    methods: [GET]
+    path: /wishlists/redirect-to-first
+    controller: Setono\SyliusWishlistPlugin\Controller\FirstWishlistRedirectAction
     
 setono_sylius_wishlist_shop_wishlist_show:
     methods: [GET,PATCH]
