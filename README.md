@@ -12,6 +12,54 @@ This plugin adds a wishlist feature to Sylius. It comes with these features:
 - Allow multiple wishlists per user (not implemented yet)
 - Share wishlists with others
 - Add products to cart from wishlist
+## Installation
+
+```bash
+composer require setono/sylius-wishlist-plugin
+```
+
+### Add plugin class to your `bundles.php`
+
+Make sure you add it before `SyliusGridBundle`, otherwise you'll get
+`You have requested a non-existent parameter "setono_sylius_wishlist.model.wishlist.class".` exception.
+
+```php
+<?php
+$bundles = [
+    // ...
+    Setono\SyliusWishlistPlugin\SetonoSyliusWishlistPlugin::class => ['all' => true],
+    Sylius\Bundle\GridBundle\SyliusGridBundle::class => ['all' => true],
+    // ...
+];
+```
+
+### Import routing
+
+```yaml
+# config/routes/setono_sylius_wishlist.yaml
+setono_sylius_wishlist:
+    resource: "@SetonoSyliusWishlistPlugin/Resources/config/routes.yaml"
+```
+
+or if your app doesn't use locales:
+
+```yaml
+# config/routes/setono_sylius_wishlist.yaml
+setono_sylius_wishlist:
+    resource: "@SetonoSyliusWishlistPlugin/Resources/config/routes_no_locale.yaml"
+```
+
+### Update your database
+
+```shell
+php bin/console doctrine:migrations:diff
+php bin/console doctrine:migrations:migrate
+```
+
+### Update your templates
+
+TODO
+
 
 [ico-version]: https://poser.pugx.org/setono/sylius-wishlist-plugin/v/stable
 [ico-license]: https://poser.pugx.org/setono/sylius-wishlist-plugin/license
