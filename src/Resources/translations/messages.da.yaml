@@ -8,3 +8,4 @@ setono_sylius_wishlist:
         wishlists_subheader: Her kan du administrere dine ønskelister. Som en logget ind bruger kan du oprette, redigere og slette ønskelister. Du kan også tilføje og fjerne produkter fra dine ønskelister. Hvis du ikke er logget ind, kan du kun tilføje og fjerne produkter fra din enkelt ønskeliste.
         remove_from_wishlist: Fjern
         inventory_insufficient: Lageret er utilstrækkeligt til den mængde, du ønsker at tilføje til ønskelisten
+        select_variant: Vælg variant...
