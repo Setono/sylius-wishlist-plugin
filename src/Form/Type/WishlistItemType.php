@@ -33,6 +33,8 @@ class WishlistItemType extends AbstractResourceType
                     return;
                 }
 
+                // todo handle simple products
+
                 $form = $event->getForm();
                 $form->add('variant', ProductVariantChoiceType::class, [
                     'choice_label' => fn (ProductVariantInterface $variant) => implode(', ', array_map(static fn ($optionValue) => sprintf('%s: %s', (string) $optionValue->getOption()?->getName(), (string) $optionValue->getValue()), $variant->getOptionValues()->toArray())),
