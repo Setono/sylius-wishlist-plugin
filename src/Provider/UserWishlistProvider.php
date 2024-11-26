@@ -20,16 +20,10 @@ final class UserWishlistProvider implements WishlistProviderInterface
     {
         $user = $this->security->getUser();
         if (!$user instanceof UserInterface) {
-            throw new \RuntimeException('No wishlists found');
+            return [];
         }
 
-        $wishlists = $this->userWishlistRepository->findByUser($user);
-
-        if ([] === $wishlists) {
-            throw new \RuntimeException('No wishlists found');
-        }
-
-        return $wishlists;
+        return $this->userWishlistRepository->findByUser($user);
     }
 
     public function getPreSelectedWishlists(): array

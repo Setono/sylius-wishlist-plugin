@@ -20,13 +20,5 @@
 
             <tag name="setono_sylius_wishlist.wishlist_provider" priority="-50"/>
         </service>
-
-        <service id="Setono\SyliusWishlistPlugin\Provider\NewWishlistProvider">
-            <argument type="service" id="setono_sylius_wishlist.factory.wishlist"/>
-            <argument type="service" id="security.helper"/>
-            <argument type="service" id="setono_client.client_context.default"/>
-
-            <tag name="setono_sylius_wishlist.wishlist_provider" priority="-60"/>
-        </service>
     </services>
 </container>

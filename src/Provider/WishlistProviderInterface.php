@@ -9,16 +9,12 @@ use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 interface WishlistProviderInterface
 {
     /**
-     * @return non-empty-list<WishlistInterface>
-     *
-     * @throws \RuntimeException if no wishlists are found
+     * @return list<WishlistInterface>
      */
     public function getWishlists(): array;
 
     /**
-     * @return non-empty-list<WishlistInterface>
-     *
-     * @throws \RuntimeException if no wishlists are found
+     * @return list<WishlistInterface>
      */
     public function getPreSelectedWishlists(): array;
 }

@@ -14,14 +14,13 @@ final class CompositeWishlistProvider extends CompositeService implements Wishli
     public function getWishlists(): array
     {
         foreach ($this->services as $service) {
-            try {
-                return $service->getWishlists();
-            } catch (\RuntimeException) {
-                continue;
+            $wishlists = $service->getWishlists();
+            if ([] !== $wishlists) {
+                return $wishlists;
             }
         }
 
-        throw new \RuntimeException('No wishlists found');
+        return [];
     }
 
     public function getPreSelectedWishlists(): array

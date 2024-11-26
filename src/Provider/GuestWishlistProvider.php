@@ -20,7 +20,7 @@ final class GuestWishlistProvider implements WishlistProviderInterface
         $wishlist = $this->guestWishlistRepository->findOneByClientId($this->clientContext->getClient()->id);
 
         if (null === $wishlist) {
-            throw new \RuntimeException('No wishlists found');
+            return [];
         }
 
         return [$wishlist];

@@ -53,6 +53,7 @@
             <argument type="service" id="Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface"/>
             <argument type="service" id="twig"/>
             <argument type="service" id="doctrine"/>
+            <argument type="service" id="Setono\SyliusWishlistPlugin\Factory\WishlistFactoryInterface"/>
         </service>
 
         <service id="setono_sylius_wishlist.controller.add_product_to_wishlist"

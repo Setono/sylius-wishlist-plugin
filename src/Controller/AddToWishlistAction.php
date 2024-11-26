@@ -6,12 +6,12 @@ namespace Setono\SyliusWishlistPlugin\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Setono\Doctrine\ORMTrait;
+use Setono\SyliusWishlistPlugin\Factory\WishlistFactoryInterface;
 use Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Twig\Environment;
 
@@ -27,13 +27,14 @@ final class AddToWishlistAction
         private readonly WishlistItemFactoryInterface $wishlistItemFactory,
         private readonly Environment $twig,
         ManagerRegistry $managerRegistry,
+        private readonly WishlistFactoryInterface $wishlistFactory,
         /** @var class-string<ProductInterface|ProductVariantInterface> $className */
         private readonly string $className,
     ) {
         $this->managerRegistry = $managerRegistry;
     }
 
-    public function __invoke(int $id): Response
+    public function __invoke(int $id): JsonResponse
     {
         $entity = $this->getManager($this->className)->find($this->className, $id);
 
@@ -44,6 +45,9 @@ final class AddToWishlistAction
         $wishlistItem = $entity instanceof ProductInterface ? $this->wishlistItemFactory->createWithProduct($entity) : $this->wishlistItemFactory->createWithProductVariant($entity);
 
         $preSelectedWishlists = $this->wishlistProvider->getPreSelectedWishlists();
+        if ([] === $preSelectedWishlists) {
+            $preSelectedWishlists = [$this->wishlistFactory->createNew()];
+        }
         foreach ($preSelectedWishlists as $wishlist) {
             $manager = $this->getManager($wishlist);
             $manager->persist($wishlist);
