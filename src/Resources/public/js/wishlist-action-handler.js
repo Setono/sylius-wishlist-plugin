@@ -48,6 +48,13 @@ class WishlistActionHandler {
 
                         element.dataset.url = json.toggleUrl;
                         element.classList.toggle('ssw-added', json.event === 'added');
+
+                        element.dispatchEvent(new CustomEvent(`ssw:product-${json.event}`, {
+                            bubbles: true,
+                            detail: {
+                                wishlistItemsCount: json.wishlistItemsCount,
+                            },
+                        }));
                     },
                 }
             },
@@ -64,4 +71,4 @@ class WishlistActionHandler {
     }
 }
 
-new WishlistActionHandler(window.ssWishlist || {});
+new WishlistActionHandler(window.sswWishlist || {});
