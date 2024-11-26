@@ -1,18 +1,20 @@
 /**
  * Handles the add to wishlist and remove from wishlist actions (i.e. toggling)
+ *
+ * @typedef {Object} WishlistActionHandlerOptions
+ * @property {Object} selector
+ * @property {string} selector.toggle - Selector for the toggle wishlist button
+ * @property {Object} callback
+ * @property {Function} callback.onToggle - Callback function to call when the toggle wishlist button is clicked. The first argument is the event object, the second argument is the button element, and 'this' is bound to the wishlist manager
  */
 class WishlistActionHandler {
     /**
-     * @type {Object}
+     * @type {WishlistActionHandlerOptions}
      */
     #options;
 
     /**
-     * @param {Object} options
-     * @param {Object} options.selector
-     * @param {string} options.selector.toggle - Selector for the toggle wishlist button
-     * @param {Object} options.callback
-     * @param {Function} options.callback.onToggle - Callback function to call when the toggle wishlist button is clicked. The first argument is the event object, the second argument is the button element, and 'this' is bound to the wishlist manager
+     * @param {WishlistActionHandlerOptions} options
      */
     constructor(options = {}) {
         this.#options = Object.assign({
