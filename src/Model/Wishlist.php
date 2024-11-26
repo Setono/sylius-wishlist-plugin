@@ -123,4 +123,14 @@ abstract class Wishlist implements WishlistInterface
             }
         }
     }
+
+    public function getQuantity(): int
+    {
+        $quantity = 0;
+        foreach ($this->items as $item) {
+            $quantity += $item->getQuantity();
+        }
+
+        return $quantity;
+    }
 }

@@ -9,10 +9,7 @@
     {%- set wishlistPath = onWishlist ? path('setono_sylius_wishlist_shop_wishlist_remove_product', { 'id': product.id }) : path('setono_sylius_wishlist_shop_wishlist_add_product', { 'id': product.id }) -%}
 {%- endif -%}
 
-<button data-url="{{ wishlistPath }}" class="wishlist-toggle">
-    {%- if onWishlist -%}
-        <i class="heart icon"></i>
-    {%- else -%}
-        <i class="heart outline icon"></i>
-    {%- endif -%}
+<button data-url="{{ wishlistPath }}" class="ssw-toggle{{ onWishlist ? ' ssw-added' : '' }}">
+    <i class="heart icon"></i>
+    <i class="heart outline icon"></i>
 </button>

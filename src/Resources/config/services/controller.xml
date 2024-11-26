@@ -51,9 +51,9 @@
                  class="Setono\SyliusWishlistPlugin\Controller\AddToWishlistAction" public="true" abstract="true">
             <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"/>
             <argument type="service" id="Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface"/>
-            <argument type="service" id="twig"/>
             <argument type="service" id="doctrine"/>
             <argument type="service" id="Setono\SyliusWishlistPlugin\Factory\WishlistFactoryInterface"/>
+            <argument type="service" id="router"/>
         </service>
 
         <service id="setono_sylius_wishlist.controller.add_product_to_wishlist"
@@ -70,8 +70,8 @@
         <service id="setono_sylius_wishlist.controller.remove_from_wishlist"
                  class="Setono\SyliusWishlistPlugin\Controller\RemoveFromWishlistAction" public="true" abstract="true">
             <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"/>
-            <argument type="service" id="twig"/>
             <argument type="service" id="doctrine"/>
+            <argument type="service" id="router"/>
         </service>
 
         <service id="setono_sylius_wishlist.controller.remove_product_from_wishlist"

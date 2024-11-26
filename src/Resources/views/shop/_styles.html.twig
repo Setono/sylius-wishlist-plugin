@@ -1,5 +1,5 @@
 <style>
-    button.wishlist-toggle {
+    .ssw-toggle {
         border: none;
         margin: 0;
         padding: 0;
@@ -13,5 +13,13 @@
         font-size: 30px;
         line-height: 30px;
         cursor: pointer;
+    }
+
+    .ssw-toggle:not(.ssw-added) i.heart:not(.outline) {
+        display: none;
+    }
+
+    .ssw-added i.heart.outline {
+        display: none;
     }
 </style>

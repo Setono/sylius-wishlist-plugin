@@ -17,7 +17,7 @@ class WishlistActionHandler {
     constructor(options = {}) {
         this.#options = Object.assign({
                 selector: {
-                    toggle: 'button.wishlist-toggle',
+                    toggle: 'button.ssw-toggle',
                 },
                 callback: {
                     /**
@@ -40,15 +40,14 @@ class WishlistActionHandler {
 
                         /**
                          * @type {Object}
-                         * @property {string} toggleButton - HTML string of the new toggle button
-                         * @property {string|undefined} selectWishlistsForm - HTML string of the select wishlists form
+                         * @property {string} event - Either 'added' or 'removed'
+                         * @property {string} toggleUrl - The new URL to toggle the wishlist
+                         * @property {string} wishlistItemsCount - The number of items in all wishlists
                          */
                         const json = await response.json();
 
-                        const tmp = document.createElement('div');
-                        tmp.innerHTML = json.toggleButton;
-
-                        element.replaceWith(...tmp.childNodes);
+                        element.dataset.url = json.toggleUrl;
+                        element.classList.toggle('ssw-added', json.event === 'added');
                     },
                 }
             },

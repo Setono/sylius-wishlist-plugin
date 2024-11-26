@@ -6,6 +6,7 @@ namespace Setono\SyliusWishlistPlugin\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Setono\Doctrine\ORMTrait;
+use Setono\SyliusWishlistPlugin\Controller\DTO\ToggleWishlistResponse;
 use Setono\SyliusWishlistPlugin\Factory\WishlistFactoryInterface;
 use Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
@@ -13,7 +14,7 @@ use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Twig\Environment;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * This controller action is responsible for adding a product or product variant to the wishlist
@@ -25,9 +26,9 @@ final class AddToWishlistAction
     public function __construct(
         private readonly WishlistProviderInterface $wishlistProvider,
         private readonly WishlistItemFactoryInterface $wishlistItemFactory,
-        private readonly Environment $twig,
         ManagerRegistry $managerRegistry,
         private readonly WishlistFactoryInterface $wishlistFactory,
+        private readonly UrlGeneratorInterface $urlGenerator,
         /** @var class-string<ProductInterface|ProductVariantInterface> $className */
         private readonly string $className,
     ) {
@@ -48,26 +49,23 @@ final class AddToWishlistAction
         if ([] === $preSelectedWishlists) {
             $preSelectedWishlists = [$this->wishlistFactory->createNew()];
         }
+
+        $wishlistItemsCount = 0;
         foreach ($preSelectedWishlists as $wishlist) {
             $manager = $this->getManager($wishlist);
             $manager->persist($wishlist);
 
             $wishlist->addItem($wishlistItem);
+
+            $wishlistItemsCount += $wishlist->getQuantity();
         }
 
         $manager->flush();
 
-        return new JsonResponse([
-            'toggleButton' => $this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/_toggle_button.html.twig', [
-                'product' => $entity instanceof ProductInterface ? $entity : $entity->getProduct(),
-                'productVariant' => $entity instanceof ProductVariantInterface ? $entity : null,
-            ]),
-// Will be added in a later version
-//             'selectWishlistsForm' => $this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/_select_wishlists.html.twig', [
-//                'product' => $entity instanceof ProductInterface ? $entity : $entity->getProduct(),
-//                'productVariant' => $entity instanceof ProductVariantInterface ? $entity : null,
-//                'form' => $form->createView(),
-//            ]),
-        ]);
+        return new JsonResponse(new ToggleWishlistResponse(
+            ToggleWishlistResponse::EVENT_ADDED,
+            $this->urlGenerator->generate($entity instanceof ProductInterface ? 'setono_sylius_wishlist_shop_wishlist_remove_product' : 'setono_sylius_wishlist_shop_wishlist_remove_product_variant', ['id' => $entity->getId()]),
+            $wishlistItemsCount,
+        ));
     }
 }
