@@ -59,16 +59,4 @@ final class RemoveWishlistItemAction
             'uuid' => $uuid,
         ]));
     }
-
-    private function getWishlist(string $uuid): WishlistInterface
-    {
-        // todo optimize this
-        foreach ($this->wishlistProvider->getWishlists() as $wishlist) {
-            if ($wishlist->getUuid() === $uuid) {
-                return $wishlist;
-            }
-        }
-
-        throw new NotFoundHttpException(sprintf('Wishlist with uuid %s not found', $uuid));
-    }
 }
