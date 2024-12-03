@@ -20,5 +20,10 @@
 
             <tag name="setono_sylius_wishlist.wishlist_provider" priority="-50"/>
         </service>
+
+        <service id="Setono\SyliusWishlistPlugin\Provider\CachedWishlistProvider"
+                 decorates="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface" decoration-priority="64">
+            <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\CachedWishlistProvider.inner"/>
+        </service>
     </services>
 </container>

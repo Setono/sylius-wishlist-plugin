@@ -16,7 +16,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  */
 final class FirstWishlistRedirectAction
 {
-
     public function __construct(
         private readonly WishlistProviderInterface $wishlistProvider,
         private readonly UrlGeneratorInterface $urlGenerator,

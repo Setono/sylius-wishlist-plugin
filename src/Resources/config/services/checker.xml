@@ -2,15 +2,11 @@
 <container xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://symfony.com/schema/dic/services"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
-        <service id="Setono\SyliusWishlistPlugin\Twig\Extension">
-            <tag name="twig.extension"/>
-        </service>
+        <service id="Setono\SyliusWishlistPlugin\Checker\WishlistCheckerInterface"
+                 alias="Setono\SyliusWishlistPlugin\Checker\WishlistChecker"/>
 
-        <service id="Setono\SyliusWishlistPlugin\Twig\Runtime">
+        <service id="Setono\SyliusWishlistPlugin\Checker\WishlistChecker">
             <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"/>
-            <argument type="service" id="Setono\SyliusWishlistPlugin\Checker\WishlistCheckerInterface"/>
-
-            <tag name="twig.runtime"/>
         </service>
     </services>
 </container>
