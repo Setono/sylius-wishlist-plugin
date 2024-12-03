@@ -6,6 +6,7 @@ namespace Setono\SyliusWishlistPlugin\Model;
 
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
+use Webmozart\Assert\Assert;
 
 class WishlistItem implements WishlistItemInterface
 {
@@ -55,9 +56,9 @@ class WishlistItem implements WishlistItemInterface
 
         if (null !== $variant) {
             $product = $variant->getProduct();
-            if ($product instanceof ProductInterface) {
-                $this->product = $product;
-            }
+            Assert::isInstanceOf($product, ProductInterface::class);
+
+            $this->product = $product;
         }
     }
 
