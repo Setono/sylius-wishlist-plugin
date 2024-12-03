@@ -8,5 +8,10 @@
         <service id="Setono\SyliusWishlistPlugin\Checker\WishlistChecker">
             <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"/>
         </service>
+
+        <service id="Setono\SyliusWishlistPlugin\Checker\CachedWishlistChecker"
+                 decorates="Setono\SyliusWishlistPlugin\Checker\WishlistCheckerInterface" decoration-priority="64">
+            <argument type="service" id="Setono\SyliusWishlistPlugin\Checker\CachedWishlistChecker.inner"/>
+        </service>
     </services>
 </container>
