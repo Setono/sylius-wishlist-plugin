@@ -2,10 +2,11 @@ setono_sylius_wishlist:
     ui:
         add_wishlist_to_cart: Legg ønskeliste til handlekurv
         copy: Kopier
+        inventory_insufficient: Lageret er utilstrekkelig for mengden du ønsker å legge til ønskelisten
+        remove_from_wishlist: Fjern
+        select_variant: Velg variant...
+        wishlist: Ønskeliste
         wishlist_subheader: Her kan du redigere mengden av produktene i ønskelisten din. Du kan også velge variantene du ønsker og fjerne produkter fra ønskelisten din. Til slutt kan du dele ønskelisten din med andre ved å kopiere URL-en nedenfor.
         wishlists: Ønskelister
         wishlists_header: Ønskelister
         wishlists_subheader: Her kan du administrere ønskelistene dine. Som en innlogget bruker kan du opprette, redigere og slette ønskelister. Du kan også legge til og fjerne produkter fra ønskelistene dine. Hvis du ikke er logget inn, kan du bare legge til og fjerne produkter fra din enkelt ønskeliste.
-        remove_from_wishlist: Fjern
-        inventory_insufficient: Lageret er utilstrekkelig for mengden du ønsker å legge til ønskelisten
-        select_variant: Velg variant...

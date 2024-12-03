@@ -9,6 +9,7 @@
                  decorates="setono_sylius_wishlist.factory.wishlist" decoration-priority="64">
             <argument type="service" id="Symfony\Bundle\SecurityBundle\Security"/>
             <argument type="service" id="setono_client.client_context.default"/>
+            <argument type="service" id="translator"/>
             <argument>%setono_sylius_wishlist.model.guest_wishlist.class%</argument>
             <argument>%setono_sylius_wishlist.model.user_wishlist.class%</argument>
         </service>
