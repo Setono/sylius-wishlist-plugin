@@ -6,7 +6,6 @@ namespace Setono\SyliusWishlistPlugin\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Setono\Doctrine\ORMTrait;
-use Setono\SyliusWishlistPlugin\Model\UserWishlistInterface;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Setono\SyliusWishlistPlugin\Security\Voter\WishlistVoter;
@@ -24,20 +23,20 @@ final class RemoveWishlistItemAction
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly Security $security,
         ManagerRegistry $managerRegistry,
-        /** @var class-string<UserWishlistInterface> $userWishlistClass */
-        private readonly string $userWishlistClass,
+        /** @var class-string<WishlistInterface> $wishlistClass */
+        private readonly string $wishlistClass,
     ) {
         $this->managerRegistry = $managerRegistry;
     }
 
     public function __invoke(string $uuid, int $id): RedirectResponse
     {
-        $manager = $this->getManager($this->userWishlistClass);
+        $manager = $this->getManager($this->wishlistClass);
 
-        /** @var UserWishlistInterface|null $wishlist */
+        /** @var WishlistInterface|null $wishlist */
         $wishlist = $manager->createQueryBuilder()
             ->select('o')
-            ->from($this->userWishlistClass, 'o')
+            ->from($this->wishlistClass, 'o')
             ->andWhere('o.uuid = :uuid')
             ->setParameter('uuid', $uuid)
             ->getQuery()

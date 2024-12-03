@@ -1,16 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <container xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://symfony.com/schema/dic/services"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <parameters>
+        <parameter key="setono_sylius_wishlist.form.type.wishlist.validation_groups" type="collection">
+            <parameter>setono_sylius_wishlist</parameter>
+        </parameter>
+
+        <parameter key="setono_sylius_wishlist.form.type.wishlist_item.validation_groups" type="collection">
+            <parameter>setono_sylius_wishlist</parameter>
+        </parameter>
+    </parameters>
     <services>
-        <!-- TODO: Add validation groups -->
         <service id="Setono\SyliusWishlistPlugin\Form\Type\WishlistType">
             <argument>%setono_sylius_wishlist.model.wishlist.class%</argument>
+            <argument>%setono_sylius_wishlist.form.type.wishlist.validation_groups%</argument>
 
             <tag name="form.type"/>
         </service>
 
         <service id="Setono\SyliusWishlistPlugin\Form\Type\WishlistItemType">
             <argument>%setono_sylius_wishlist.model.wishlist_item.class%</argument>
+            <argument>%setono_sylius_wishlist.form.type.wishlist_item.validation_groups%</argument>
 
             <tag name="form.type"/>
         </service>

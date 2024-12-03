@@ -33,7 +33,7 @@
             <argument type="service" id="router"/>
             <argument type="service" id="Symfony\Bundle\SecurityBundle\Security"/>
             <argument type="service" id="doctrine"/>
-            <argument>%setono_sylius_wishlist.model.user_wishlist.class%</argument>
+            <argument>%setono_sylius_wishlist.model.wishlist.class%</argument>
         </service>
 
         <service id="Setono\SyliusWishlistPlugin\Controller\AddWishlistToCartAction" public="true">

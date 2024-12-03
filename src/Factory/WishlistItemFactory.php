@@ -30,6 +30,12 @@ final class WishlistItemFactory implements WishlistItemFactoryInterface
         $wishlistItem->setProduct($product);
         $wishlistItem->setQuantity($quantity);
 
+        if ($product->isSimple()) {
+            $variant = $product->getVariants()->first();
+            Assert::isInstanceOf($variant, ProductVariantInterface::class);
+            $wishlistItem->setVariant($variant);
+        }
+
         return $wishlistItem;
     }
 

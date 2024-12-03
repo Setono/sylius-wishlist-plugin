@@ -25,7 +25,13 @@ final class CompositeWishlistProvider extends CompositeService implements Wishli
 
     public function getPreSelectedWishlists(): array
     {
-        // todo implement
-        return $this->getWishlists();
+        foreach ($this->services as $service) {
+            $wishlists = $service->getPreSelectedWishlists();
+            if ([] !== $wishlists) {
+                return $wishlists;
+            }
+        }
+
+        return [];
     }
 }
