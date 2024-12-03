@@ -66,11 +66,22 @@ abstract class Wishlist implements WishlistInterface
         }
     }
 
-    public function removeItem(WishlistItemInterface $item): void
+    public function removeItem(WishlistItemInterface|int $item): void
     {
-        if ($this->hasItem($item)) {
+        if ($item instanceof WishlistItemInterface && $this->hasItem($item)) {
             $this->items->removeElement($item);
             $item->setWishlist(null);
+
+            return;
+        }
+
+        foreach ($this->items as $wishlistItem) {
+            if ($wishlistItem->getId() === $item) {
+                $this->items->removeElement($wishlistItem);
+                $wishlistItem->setWishlist(null);
+
+                return;
+            }
         }
     }
 

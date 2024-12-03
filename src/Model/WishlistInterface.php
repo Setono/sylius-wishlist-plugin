@@ -24,7 +24,7 @@ interface WishlistInterface extends ResourceInterface, TimestampableInterface
 
     public function addItem(WishlistItemInterface $item): void;
 
-    public function removeItem(WishlistItemInterface $item): void;
+    public function removeItem(WishlistItemInterface|int $item): void;
 
     public function hasItem(WishlistItemInterface $item): bool;
 
