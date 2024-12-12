@@ -68,7 +68,9 @@
                         </td>
                         <td>
                             <div class="ui form">
-                                {{ form_widget(form.items[key].variant) }}
+                                {% if form.items[key].variant is defined %}
+                                    {{ form_widget(form.items[key].variant) }}
+                                {% endif %}
                             </div>
                         </td>
                         <td>

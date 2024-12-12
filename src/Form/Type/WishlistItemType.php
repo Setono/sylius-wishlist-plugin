@@ -36,11 +36,7 @@ class WishlistItemType extends AbstractResourceType
 
                 $form = $event->getForm();
 
-                if ($product->isSimple()) {
-                    $form->add('variant', TextType::class, [
-                        'disabled' => true,
-                    ]);
-                } else {
+                if (!$product->isSimple()) {
                     $form->add('variant', ProductVariantChoiceType::class, [
                         'choice_label' => fn (ProductVariantInterface $variant) => implode(', ', array_map(static fn ($optionValue) => sprintf('%s: %s', (string) $optionValue->getOption()?->getName(), (string) $optionValue->getValue()), $variant->getOptionValues()->toArray())),
                         'placeholder' => 'setono_sylius_wishlist.ui.select_variant',
