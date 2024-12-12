@@ -51,9 +51,10 @@ class WishlistActionHandler {
                         element.dataset.url = json.toggleUrl;
                         element.classList.toggle('ssw-added', json.event === 'added');
 
-                        element.dispatchEvent(new CustomEvent(`ssw:product-${json.event}`, {
+                        element.dispatchEvent(new CustomEvent(`ssw:product-toggled`, {
                             bubbles: true,
                             detail: {
+                                event: json.event,
                                 wishlistItemsCount: json.wishlistItemsCount,
                             },
                         }));
