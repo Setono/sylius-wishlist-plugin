@@ -11,7 +11,6 @@ use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Sylius\Component\User\Model\UserInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
-use Webmozart\Assert\Assert;
 
 /**
  * When the user logs in, we want to convert the guest wishlist to a user wishlist
@@ -37,7 +36,9 @@ final class ConvertGuestWishlistToUserWishlistSubscriber implements EventSubscri
     public function onLoginSuccess(LoginSuccessEvent $event): void
     {
         $user = $event->getUser();
-        Assert::isInstanceOf($user, UserInterface::class);
+        if (!$user instanceof UserInterface) {
+            return;
+        }
 
         foreach ($this->guestWishlistProvider->getWishlists() as $guestWishlist) {
             if (!$guestWishlist instanceof GuestWishlistInterface || !$guestWishlist->hasItems()) {
