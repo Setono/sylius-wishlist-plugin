@@ -16,6 +16,7 @@
         <service id="Setono\SyliusWishlistPlugin\Controller\ShowWishlistAction" public="true">
             <argument type="service" id="setono_sylius_wishlist.repository.wishlist"/>
             <argument type="service" id="form.factory"/>
+            <argument type="service" id="security.authorization_checker"/>
             <argument type="service" id="twig"/>
         </service>
 
