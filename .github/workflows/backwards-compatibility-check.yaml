@@ -11,11 +11,6 @@ jobs:
 
         runs-on: "ubuntu-latest"
 
-        # Set explicitly so the global config written below is the same home the roave tool's internal
-        # composer reads when it installs the baseline/current dependencies.
-        env:
-            COMPOSER_HOME: "/home/runner/.composer"
-
         steps:
             -   name: "Checkout"
                 uses: "actions/checkout@v4"
@@ -30,17 +25,6 @@ jobs:
 
             -   name: "Install tool"
                 run: "composer global require roave/backward-compatibility-check"
-
-            # Sylius 1.x pins api-platform/core to the unmaintained 2.7 line, which has advisories with no
-            # 2.x fix. composer >=2.10 refuses to install advisory-affected packages, so the baseline (master)
-            # install the roave tool performs would fail. Write the global config directly (so the tool's
-            # internal composer reads it) to disable the block for this throwaway analysis environment.
-            -   name: "Disable composer advisory blocking"
-                run: |
-                    for dir in "$COMPOSER_HOME" "$HOME/.config/composer"; do
-                        mkdir -p "$dir"
-                        echo '{"config":{"policy":{"advisories":{"block":false}}}}' > "$dir/config.json"
-                    done
 
             -   name: "Check for BC breaks"
                 run: "~/.composer/vendor/bin/roave-backward-compatibility-check --from=origin/${{ github.event.pull_request.base.ref }} --format=github-actions"
