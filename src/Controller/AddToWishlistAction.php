@@ -50,10 +50,11 @@ final class AddToWishlistAction
             $preSelectedWishlists = [$this->wishlistFactory->createNew()];
         }
 
-        $manager = $this->getManager($wishlistItem);
+        $manager = null;
 
         $wishlistItemsCount = 0;
         foreach ($preSelectedWishlists as $wishlist) {
+            $manager = $this->getManager($wishlist);
             $manager->persist($wishlist);
 
             $wishlist->addItem($wishlistItem);
