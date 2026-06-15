@@ -11,7 +11,6 @@ use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Sylius\Component\User\Model\UserInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Webmozart\Assert\Assert;
 
 final class WishlistFactory implements WishlistFactoryInterface
 {
@@ -40,7 +39,6 @@ final class WishlistFactory implements WishlistFactoryInterface
     public function createForGuest(string $clientId): GuestWishlistInterface
     {
         $obj = new $this->guestWishlistClass();
-        Assert::isInstanceOf($obj, GuestWishlistInterface::class);
 
         $obj->setClientId($clientId);
         $obj->setName($this->translator->trans('setono_sylius_wishlist.ui.wishlist'));
@@ -51,7 +49,6 @@ final class WishlistFactory implements WishlistFactoryInterface
     public function createForUser(UserInterface $user): UserWishlistInterface
     {
         $obj = new $this->userWishlistClass();
-        Assert::isInstanceOf($obj, UserWishlistInterface::class);
 
         $obj->setUser($user);
         $obj->setName($this->translator->trans('setono_sylius_wishlist.ui.wishlist'));

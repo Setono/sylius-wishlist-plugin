@@ -15,12 +15,8 @@ final class SetonoSyliusWishlistExtension extends AbstractResourceExtension impl
 {
     public function load(array $configs, ContainerBuilder $container): void
     {
-        /**
-         * @psalm-suppress PossiblyNullArgument
-         *
-         * @var array{resources: array} $config
-         */
-        $config = $this->processConfiguration($this->getConfiguration([], $container), $configs);
+        /** @var array{resources: array<string, mixed>} $config */
+        $config = $this->processConfiguration(new Configuration(), $configs);
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
 
         $this->registerResources(

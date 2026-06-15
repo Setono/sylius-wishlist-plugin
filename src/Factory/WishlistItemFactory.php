@@ -12,16 +12,16 @@ use Webmozart\Assert\Assert;
 
 final class WishlistItemFactory implements WishlistItemFactoryInterface
 {
+    /**
+     * @param FactoryInterface<WishlistItemInterface> $decorated
+     */
     public function __construct(private readonly FactoryInterface $decorated)
     {
     }
 
     public function createNew(): WishlistItemInterface
     {
-        $obj = $this->decorated->createNew();
-        Assert::isInstanceOf($obj, WishlistItemInterface::class);
-
-        return $obj;
+        return $this->decorated->createNew();
     }
 
     public function createWithProduct(ProductInterface $product, int $quantity = 1): WishlistItemInterface

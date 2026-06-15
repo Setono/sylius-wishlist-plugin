@@ -58,9 +58,9 @@ final class AddToWishlistAction
             $wishlist->addItem($wishlistItem);
 
             $wishlistItemsCount += $wishlist->getQuantity();
-        }
 
-        $manager->flush();
+            $manager->flush();
+        }
 
         return new JsonResponse(new ToggleWishlistResponse(
             ToggleWishlistResponse::EVENT_ADDED,
