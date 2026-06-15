@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Sylius plugin (`setono/sylius-wishlist-plugin`) that adds a wishlist feature to Sylius stores. It is a library/bundle, not an application — the only runnable app is the test Sylius application under `tests/Application/`, which exists to boot the plugin for integration testing and local development.
 
-Target runtime: PHP >= 8.2, Symfony 6.4 / 7.0, Sylius ~1.12. The dev tooling (`setono/code-quality-pack` v3, PHPStan 2, PHPUnit 11) requires PHP 8.2+, so switch the local PHP with the `8.2` shell alias before running tooling or `composer install`. Static analysis is PHPStan at `level: max` (config in `phpstan.dist.neon`); Rector still targets `UP_TO_PHP_81`, which is a safe subset on 8.2.
+Target runtime: PHP >= 8.1, Symfony 6.4 / 7.0, Sylius ~1.12 — **the library supports 8.1, but the dev tooling does not.** `setono/code-quality-pack` v3 (PHPStan 2, PHPUnit 11, Infection) requires PHP 8.2+, so run all tooling and `composer install` under PHP 8.2 (use the `8.2` shell alias); `composer install` fails on 8.1 because the pack needs 8.2. Code must stay 8.1-compatible: PHPStan analyses against the 8.1 floor declared in `composer.json` (so it flags any 8.2-only feature) and Rector targets `UP_TO_PHP_81`. Static analysis is PHPStan at `level: max` (config in `phpstan.dist.neon`). Because PHPUnit 11 dropped 8.1, the test/analysis CI jobs run on 8.2/8.3; only `dependency-analysis` (which strips `require-dev`) still runs on 8.1 to prove the library installs there.
 
 ## Commands
 

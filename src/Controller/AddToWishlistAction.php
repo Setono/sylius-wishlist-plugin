@@ -50,6 +50,7 @@ final class AddToWishlistAction
             $preSelectedWishlists = [$this->wishlistFactory->createNew()];
         }
 
+        $manager = null;
         $wishlistItemsCount = 0;
         foreach ($preSelectedWishlists as $wishlist) {
             $manager = $this->getManager($wishlist);
@@ -58,9 +59,9 @@ final class AddToWishlistAction
             $wishlist->addItem($wishlistItem);
 
             $wishlistItemsCount += $wishlist->getQuantity();
-
-            $manager->flush();
         }
+
+        $manager->flush();
 
         return new JsonResponse(new ToggleWishlistResponse(
             ToggleWishlistResponse::EVENT_ADDED,
