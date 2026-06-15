@@ -29,7 +29,6 @@
         </service>
 
         <service id="Setono\SyliusWishlistPlugin\Controller\RemoveWishlistItemAction" public="true">
-            <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"/>
             <argument type="service" id="router"/>
             <argument type="service" id="Symfony\Bundle\SecurityBundle\Security"/>
             <argument type="service" id="doctrine"/>
