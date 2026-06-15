@@ -11,6 +11,11 @@ jobs:
 
         runs-on: "ubuntu-latest"
 
+        # Set explicitly so the global config written below is the same home the roave tool's internal
+        # composer reads when it installs the baseline/current dependencies.
+        env:
+            COMPOSER_HOME: "/home/runner/.composer"
+
         steps:
             -   name: "Checkout"
                 uses: "actions/checkout@v4"
