@@ -6,6 +6,7 @@ namespace Setono\SyliusWishlistPlugin\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Setono\Doctrine\ORMTrait;
+use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
 use Sylius\Component\Core\Factory\CartItemFactoryInterface;
 use Sylius\Component\Core\Model\OrderInterface;
@@ -26,6 +27,10 @@ final class AddWishlistToCartAction
 {
     use ORMTrait;
 
+    /**
+     * @param WishlistRepositoryInterface<WishlistInterface> $wishlistRepository
+     * @param CartItemFactoryInterface<OrderItemInterface> $cartItemFactory
+     */
     public function __construct(
         private readonly WishlistRepositoryInterface $wishlistRepository,
         private readonly OrderItemQuantityModifierInterface $orderItemQuantityModifier,

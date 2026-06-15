@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Setono\SyliusWishlistPlugin\Controller;
 
 use Setono\SyliusWishlistPlugin\Form\Type\WishlistType;
+use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,6 +15,9 @@ use Twig\Environment;
 
 final class ShowWishlistAction
 {
+    /**
+     * @param WishlistRepositoryInterface<WishlistInterface> $wishlistRepository
+     */
     public function __construct(
         private readonly WishlistRepositoryInterface $wishlistRepository,
         private readonly FormFactoryInterface $formFactory,

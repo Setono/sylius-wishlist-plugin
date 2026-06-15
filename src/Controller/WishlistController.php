@@ -6,26 +6,15 @@ namespace Setono\SyliusWishlistPlugin\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Setono\Doctrine\ORMTrait;
-use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
-use Sylius\Component\Core\Factory\CartItemFactoryInterface;
-use Sylius\Component\Core\Model\ProductInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Twig\Environment;
 
 final class WishlistController
 {
     use ORMTrait;
 
-    public function __construct(
-        ManagerRegistry $managerRegistry,
-        private readonly Environment $twig,
-        private readonly CartItemFactoryInterface $cartItemFactory,
-        /** @var class-string<ProductInterface> $productClass */
-        private readonly string $productClass,
-        /** @var class-string<WishlistInterface> $wishlistClass */
-        private readonly string $wishlistClass,
-    ) {
+    public function __construct(ManagerRegistry $managerRegistry)
+    {
         $this->managerRegistry = $managerRegistry;
     }
 
