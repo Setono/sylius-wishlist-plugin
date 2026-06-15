@@ -29,6 +29,7 @@ final class AddWishlistToCartAction
 
     /**
      * @param WishlistRepositoryInterface<WishlistInterface> $wishlistRepository
+     * @param CartItemFactoryInterface<OrderItemInterface> $cartItemFactory
      */
     public function __construct(
         private readonly WishlistRepositoryInterface $wishlistRepository,
