@@ -7,6 +7,7 @@ namespace Setono\SyliusWishlistPlugin\Controller;
 use Doctrine\Persistence\ManagerRegistry;
 use Setono\Doctrine\ORMTrait;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
+use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Setono\SyliusWishlistPlugin\Security\Voter\WishlistVoter;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -18,6 +19,7 @@ final class RemoveWishlistItemAction
     use ORMTrait;
 
     public function __construct(
+        private readonly WishlistProviderInterface $wishlistProvider,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly Security $security,
         ManagerRegistry $managerRegistry,
@@ -41,11 +43,12 @@ final class RemoveWishlistItemAction
             ->getOneOrNullResult()
         ;
 
-        if (null === $wishlist) {
-            throw new NotFoundHttpException(sprintf('Wishlist with uuid %s not found', $uuid));
-        }
-
-        if (!$this->security->isGranted(WishlistVoter::EDIT, $wishlist)) {
+        // The wishlist must belong to the current visitor, both directly (the provider only returns
+        // the visitor's wishlists) and through the voter, which authorizes editing it.
+        if (null === $wishlist ||
+            !in_array($wishlist, $this->wishlistProvider->getWishlists(), true) ||
+            !$this->security->isGranted(WishlistVoter::EDIT, $wishlist)
+        ) {
             throw new NotFoundHttpException(sprintf('Wishlist with uuid %s not found', $uuid));
         }
 

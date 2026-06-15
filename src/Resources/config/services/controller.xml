@@ -3,6 +3,8 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
         <service id="Setono\SyliusWishlistPlugin\Controller\WishlistController">
+            <argument type="service" id="doctrine"/>
+
             <tag name="controller.service_arguments"/>
         </service>
 
@@ -23,6 +25,7 @@
         </service>
 
         <service id="Setono\SyliusWishlistPlugin\Controller\RemoveWishlistItemAction" public="true">
+            <argument type="service" id="Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface"/>
             <argument type="service" id="router"/>
             <argument type="service" id="Symfony\Bundle\SecurityBundle\Security"/>
             <argument type="service" id="doctrine"/>

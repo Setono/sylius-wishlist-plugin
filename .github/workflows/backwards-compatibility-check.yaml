@@ -23,6 +23,12 @@ jobs:
                     php-version: "8.1"
                     coverage: "none"
 
+            # Sylius 1.x pins api-platform/core to the unmaintained 2.7 line, which has advisories with no
+            # 2.x fix. composer >=2.10 refuses to install advisory-affected packages, so the baseline (master)
+            # install would fail; disable the block for this throwaway analysis environment.
+            -   name: "Disable composer advisory blocking"
+                run: "composer global config policy.advisories.block false"
+
             -   name: "Install tool"
                 run: "composer global require roave/backward-compatibility-check"
 
