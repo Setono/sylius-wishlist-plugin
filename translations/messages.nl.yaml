@@ -1,0 +1,14 @@
+setono_sylius_wishlist:
+    ui:
+        add_wishlist_to_cart: Verlanglijst aan winkelwagen toevoegen
+        copy: Kopiëren
+        inventory_insufficient: De voorraad is onvoldoende voor de hoeveelheid die je aan de verlanglijst wilt toevoegen
+        note: Notitie
+        remove_from_wishlist: Verwijderen
+        select_variant: Selecteer variant...
+        toggle_wishlist: Verlanglijst in-/uitschakelen
+        wishlist: Verlanglijst
+        wishlist_subheader: Hier kun je het aantal producten in je verlanglijst bewerken. Je kunt ook de gewenste varianten selecteren en producten uit je verlanglijst verwijderen. Tot slot kun je je verlanglijst met anderen delen door de onderstaande URL te kopiëren.
+        wishlists: Verlanglijsten
+        wishlists_header: Verlanglijsten
+        wishlists_subheader: Hier kun je je verlanglijsten beheren. Als ingelogde gebruiker kun je verlanglijsten aanmaken, bewerken en verwijderen. Je kunt ook producten aan je verlanglijsten toevoegen en eruit verwijderen. Als je niet bent ingelogd, kun je alleen producten aan je enige verlanglijst toevoegen of eruit verwijderen.

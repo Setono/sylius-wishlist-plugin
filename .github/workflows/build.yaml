@@ -1,7 +1,9 @@
 name: "build"
 
 on:
-    push: ~
+    push:
+        branches:
+            - "*.x" # Matches our branch versioning that mirrors Sylius', e.g. '2.x', '2.2.x'
     pull_request: ~
     workflow_dispatch: ~
 

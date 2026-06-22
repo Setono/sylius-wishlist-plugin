@@ -79,8 +79,10 @@ return static function (ContainerConfigurator $container): void {
         ])
     ;
 
-    // Add product/variant to wishlist
-    $services->set('setono_sylius_wishlist.controller.add_to_wishlist', AddToWishlistAction::class)
+    // Add product/variant to wishlist. The abstract parent uses the FQCN as its id; the two concrete
+    // children keep their snake-cased ids because they are referenced by name in config/routes/shop.yaml
+    // (and a single class registered twice cannot share one FQCN id).
+    $services->set(AddToWishlistAction::class)
         ->abstract()
         ->public()
         ->args([
@@ -93,19 +95,19 @@ return static function (ContainerConfigurator $container): void {
     ;
 
     $services->set('setono_sylius_wishlist.controller.add_product_to_wishlist')
-        ->parent('setono_sylius_wishlist.controller.add_to_wishlist')
+        ->parent(AddToWishlistAction::class)
         ->public()
         ->arg('$className', param('sylius.model.product.class'))
     ;
 
     $services->set('setono_sylius_wishlist.controller.add_product_variant_to_wishlist')
-        ->parent('setono_sylius_wishlist.controller.add_to_wishlist')
+        ->parent(AddToWishlistAction::class)
         ->public()
         ->arg('$className', param('sylius.model.product_variant.class'))
     ;
 
-    // Remove product/variant from wishlist
-    $services->set('setono_sylius_wishlist.controller.remove_from_wishlist', RemoveFromWishlistAction::class)
+    // Remove product/variant from wishlist (same pattern as above)
+    $services->set(RemoveFromWishlistAction::class)
         ->abstract()
         ->public()
         ->args([
@@ -116,13 +118,13 @@ return static function (ContainerConfigurator $container): void {
     ;
 
     $services->set('setono_sylius_wishlist.controller.remove_product_from_wishlist')
-        ->parent('setono_sylius_wishlist.controller.remove_from_wishlist')
+        ->parent(RemoveFromWishlistAction::class)
         ->public()
         ->arg('$className', param('sylius.model.product.class'))
     ;
 
     $services->set('setono_sylius_wishlist.controller.remove_product_variant_from_wishlist')
-        ->parent('setono_sylius_wishlist.controller.remove_from_wishlist')
+        ->parent(RemoveFromWishlistAction::class)
         ->public()
         ->arg('$className', param('sylius.model.product_variant.class'))
     ;
