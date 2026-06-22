@@ -19,6 +19,8 @@ can move everything to the cart in one click.
 - ❤️ **Drop-in toggle button** – a ready-made "heart" button that adds/removes a product (or a specific variant)
   over AJAX, plus a JS event you can hook into.
 - 🛒 **Add the whole wishlist to the cart** in a single request.
+- 📝 **Per-item notes** – shoppers can add a free-text note to each wishlist item (e.g. a size or colour
+  preference), editable by the owner and visible to anyone they share the wishlist with.
 - 🔗 **Shareable wishlists** – every wishlist has a UUID, so it can be viewed via a stable, shareable URL.
 - 🧩 **Extensible** – all resources (models, repositories, factories) are overridable, and the "whose wishlist is
   this?" logic is a tagged service you can plug into.
@@ -40,7 +42,8 @@ A few concepts are worth understanding before you integrate the plugin.
 | `UserWishlist`  | a logged-in `Sylius\…\User\Model\UserInterface` | the user                            |
 
 Each wishlist holds `WishlistItem`s. An item references either a **product** or a specific **product variant**
-(plus a quantity), and every wishlist exposes a `uuid` (UUID v7) used in its public, shareable URL.
+(plus a quantity and an optional free-text note), and every wishlist exposes a `uuid` (UUID v7) used in its
+public, shareable URL.
 
 ### Who owns the current wishlist?
 
