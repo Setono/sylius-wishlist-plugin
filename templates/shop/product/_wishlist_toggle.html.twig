@@ -1,0 +1,7 @@
+{% set product = hookable_metadata.context.product|default(product|default(null)) %}
+
+{% if product is not null %}
+    <div class="my-3" data-sylius-wishlist-toggle>
+        {{ include('@SetonoSyliusWishlistPlugin/shop/wishlist/_toggle_button.html.twig', { product: product }, with_context = false) }}
+    </div>
+{% endif %}

@@ -81,12 +81,12 @@ you can listen to (e.g. to update a header counter).
 
 ## Requirements
 
-| Package | Version |
-|---------|---------|
-| PHP     | `^8.1`  |
-| Sylius  | `^1.13` |
-| Symfony | `^6.4`  |
-| Twig    | `^3.8`  |
+| Package | Version          |
+|---------|------------------|
+| PHP     | `^8.2`           |
+| Sylius  | `^2.2`           |
+| Symfony | `^6.4 \|\| ^7.4` |
+| Twig    | `^3.8`           |
 
 ## Installation
 
@@ -98,8 +98,7 @@ composer require setono/sylius-wishlist-plugin
 
 ### 2. Register the plugin
 
-Add the bundle to `config/bundles.php` **before** `SyliusGridBundle`, otherwise you'll get a
-`You have requested a non-existent parameter "setono_sylius_wishlist.model.wishlist.class"` exception:
+Add the bundle to `config/bundles.php`:
 
 ```php
 <?php
@@ -107,7 +106,6 @@ Add the bundle to `config/bundles.php` **before** `SyliusGridBundle`, otherwise 
 return [
     // ...
     Setono\SyliusWishlistPlugin\SetonoSyliusWishlistPlugin::class => ['all' => true],
-    Sylius\Bundle\GridBundle\SyliusGridBundle::class => ['all' => true],
     // ...
 ];
 ```
@@ -117,7 +115,7 @@ return [
 ```yaml
 # config/routes/setono_sylius_wishlist.yaml
 setono_sylius_wishlist:
-    resource: "@SetonoSyliusWishlistPlugin/Resources/config/routes.yaml"
+    resource: "@SetonoSyliusWishlistPlugin/config/routes.yaml"
 ```
 
 If your shop doesn't use locales in the URL, import `routes_no_locale.yaml` instead:
@@ -125,7 +123,7 @@ If your shop doesn't use locales in the URL, import `routes_no_locale.yaml` inst
 ```yaml
 # config/routes/setono_sylius_wishlist.yaml
 setono_sylius_wishlist:
-    resource: "@SetonoSyliusWishlistPlugin/Resources/config/routes_no_locale.yaml"
+    resource: "@SetonoSyliusWishlistPlugin/config/routes_no_locale.yaml"
 ```
 
 ### 4. Update your database
@@ -139,8 +137,10 @@ php bin/console doctrine:migrations:migrate
 
 ### 5. Install the assets
 
-The toggle button's stylesheet and script are injected into the shop layout automatically (via `sylius_ui`
-events), but the JS file still needs to be published:
+The toggle button's stylesheet and script are injected into the shop layout automatically (via Sylius
+[Twig hooks](https://docs.sylius.com/the-customization-guide/customizing-templates/twig-hooks) on
+`sylius_shop.base#stylesheets` and `sylius_shop.base#javascripts`), but the JS file still needs to be
+published:
 
 ```bash
 php bin/console assets:install
@@ -150,8 +150,11 @@ php bin/console assets:install
 
 ### Add a wishlist button to your product page
 
-Include the bundled partial wherever you render a product (e.g. the product box or the product show page),
-passing the `product` and – optionally – the selected `productVariant`:
+The toggle button is **automatically injected on the product show page** via the
+`sylius_shop.product.show.content.info.summary` Twig hook — no template changes are required.
+
+To render it elsewhere (e.g. a product box/card), include the bundled partial wherever you render a
+product, passing the `product` and – optionally – the selected `productVariant`:
 
 ```twig
 {% include '@SetonoSyliusWishlistPlugin/shop/wishlist/_toggle_button.html.twig' with {

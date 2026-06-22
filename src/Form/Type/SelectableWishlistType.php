@@ -14,6 +14,9 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Webmozart\Assert\Assert;
 
+/**
+ * @extends AbstractType<mixed>
+ */
 final class SelectableWishlistType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void

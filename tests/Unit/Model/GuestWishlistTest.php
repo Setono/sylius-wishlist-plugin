@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace Setono\SyliusWishlistPlugin\Tests\Unit\Model;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Setono\SyliusWishlistPlugin\Model\GuestWishlist;
 use Sylius\Component\User\Model\UserInterface;
 
 final class GuestWishlistTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_has_no_client_id_by_default(): void
     {
         self::assertNull((new GuestWishlist())->getClientId());
     }
 
-    /** @test */
+    #[Test]
     public function it_sets_and_gets_the_client_id(): void
     {
         $wishlist = new GuestWishlist();
@@ -25,7 +26,7 @@ final class GuestWishlistTest extends TestCase
         self::assertSame('client-123', $wishlist->getClientId());
     }
 
-    /** @test */
+    #[Test]
     public function it_converts_itself_to_a_user_wishlist_by_assigning_the_user(): void
     {
         $wishlist = new GuestWishlist();

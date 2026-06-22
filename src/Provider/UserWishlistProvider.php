@@ -8,11 +8,11 @@ use Setono\SyliusWishlistPlugin\Repository\UserWishlistRepositoryInterface;
 use Sylius\Component\User\Model\UserInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 
-final class UserWishlistProvider implements WishlistProviderInterface
+final readonly class UserWishlistProvider implements WishlistProviderInterface
 {
     public function __construct(
-        private readonly Security $security,
-        private readonly UserWishlistRepositoryInterface $userWishlistRepository,
+        private Security $security,
+        private UserWishlistRepositoryInterface $userWishlistRepository,
     ) {
     }
 

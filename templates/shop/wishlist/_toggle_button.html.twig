@@ -1,0 +1,15 @@
+{#- @var product \Sylius\Component\Core\Model\ProductInterface -#}
+{#- @var productVariant \Sylius\Component\Core\Model\ProductVariantInterface|null -#}
+
+{%- if productVariant is defined and productVariant is not null -%}
+    {%- set onWishlist = setono_sylius_wishlist_on_wishlist(productVariant) -%}
+    {%- set wishlistPath = onWishlist ? path('setono_sylius_wishlist_shop_wishlist_remove_product_variant', { 'id': productVariant.id }) : path('setono_sylius_wishlist_shop_wishlist_add_product_variant', { 'id': productVariant.id }) -%}
+{%- else -%}
+    {%- set onWishlist = setono_sylius_wishlist_on_wishlist(product) -%}
+    {%- set wishlistPath = onWishlist ? path('setono_sylius_wishlist_shop_wishlist_remove_product', { 'id': product.id }) : path('setono_sylius_wishlist_shop_wishlist_add_product', { 'id': product.id }) -%}
+{%- endif -%}
+
+<button type="button" data-url="{{ wishlistPath }}" class="ssw-toggle{{ onWishlist ? ' ssw-added' : '' }}" aria-label="{{ 'setono_sylius_wishlist.ui.toggle_wishlist'|trans }}">
+    <span class="ssw-toggle__filled">{{ ux_icon('tabler:heart-filled') }}</span>
+    <span class="ssw-toggle__outline">{{ ux_icon('tabler:heart') }}</span>
+</button>

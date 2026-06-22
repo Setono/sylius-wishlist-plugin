@@ -10,12 +10,12 @@ use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Resource\Factory\FactoryInterface;
 use Webmozart\Assert\Assert;
 
-final class WishlistItemFactory implements WishlistItemFactoryInterface
+final readonly class WishlistItemFactory implements WishlistItemFactoryInterface
 {
     /**
      * @param FactoryInterface<WishlistItemInterface> $decorated
      */
-    public function __construct(private readonly FactoryInterface $decorated)
+    public function __construct(private FactoryInterface $decorated)
     {
     }
 

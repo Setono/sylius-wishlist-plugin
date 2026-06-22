@@ -10,6 +10,9 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * @extends AbstractType<SelectWishlistsCommand>
+ */
 final class SelectWishlistsType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void

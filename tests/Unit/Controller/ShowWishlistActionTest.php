@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Setono\SyliusWishlistPlugin\Tests\Unit\Controller;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Setono\SyliusWishlistPlugin\Controller\ShowWishlistAction;
@@ -23,7 +24,7 @@ use Twig\Environment;
 
 final class ShowWishlistActionTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_throws_not_found_when_the_wishlist_does_not_exist(): void
     {
         $action = new ShowWishlistAction(
@@ -39,7 +40,7 @@ final class ShowWishlistActionTest extends TestCase
         $action(new Request(), 'missing');
     }
 
-    /** @test */
+    #[Test]
     public function it_saves_the_wishlist_and_redirects_with_a_flash_when_the_owner_submits_a_valid_form(): void
     {
         $wishlist = $this->createMock(WishlistInterface::class);
@@ -74,7 +75,7 @@ final class ShowWishlistActionTest extends TestCase
         self::assertSame(['setono_sylius_wishlist.wishlist_updated'], $session->getFlashBag()->peek('success'));
     }
 
-    /** @test */
+    #[Test]
     public function it_refuses_to_save_when_a_non_owner_submits_a_valid_form(): void
     {
         $repository = $this->repository($this->createMock(WishlistInterface::class));
@@ -93,7 +94,7 @@ final class ShowWishlistActionTest extends TestCase
         $action(new Request(), 'uuid');
     }
 
-    /** @test */
+    #[Test]
     public function it_neither_authorizes_nor_saves_when_the_form_is_not_submitted(): void
     {
         $repository = $this->repository($this->createMock(WishlistInterface::class));
@@ -125,6 +126,9 @@ final class ShowWishlistActionTest extends TestCase
         return $repository;
     }
 
+    /**
+     * @return FormInterface<mixed>&MockObject
+     */
     private function form(bool $submitted): FormInterface
     {
         $form = $this->createMock(FormInterface::class);
@@ -135,6 +139,9 @@ final class ShowWishlistActionTest extends TestCase
         return $form;
     }
 
+    /**
+     * @param FormInterface<mixed> $form
+     */
     private function formFactory(FormInterface $form): FormFactoryInterface
     {
         $formFactory = $this->createMock(FormFactoryInterface::class);

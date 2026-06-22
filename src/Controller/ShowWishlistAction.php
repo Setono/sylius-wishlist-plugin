@@ -18,17 +18,17 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Environment;
 
-final class ShowWishlistAction
+final readonly class ShowWishlistAction
 {
     /**
      * @param WishlistRepositoryInterface<WishlistInterface> $wishlistRepository
      */
     public function __construct(
-        private readonly WishlistRepositoryInterface $wishlistRepository,
-        private readonly FormFactoryInterface $formFactory,
-        private readonly AuthorizationCheckerInterface $authorizationChecker,
-        private readonly Environment $twig,
-        private readonly UrlGeneratorInterface $urlGenerator,
+        private WishlistRepositoryInterface $wishlistRepository,
+        private FormFactoryInterface $formFactory,
+        private AuthorizationCheckerInterface $authorizationChecker,
+        private Environment $twig,
+        private UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
