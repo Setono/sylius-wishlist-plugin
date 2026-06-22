@@ -3,6 +3,7 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Add wishlist to cart
         copy: Copy
         inventory_insufficient: The inventory is insufficient for the quantity you want to add to the wishlist
+        note: Note
         remove_from_wishlist: Remove
         select_variant: Select variant...
         wishlist: Wishlist

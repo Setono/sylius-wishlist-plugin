@@ -20,6 +20,8 @@ class WishlistItem implements WishlistItemInterface
 
     protected int $quantity = 1;
 
+    protected ?string $note = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -70,5 +72,15 @@ class WishlistItem implements WishlistItemInterface
     public function setQuantity(int $quantity): void
     {
         $this->quantity = $quantity;
+    }
+
+    public function getNote(): ?string
+    {
+        return $this->note;
+    }
+
+    public function setNote(?string $note): void
+    {
+        $this->note = $note;
     }
 }

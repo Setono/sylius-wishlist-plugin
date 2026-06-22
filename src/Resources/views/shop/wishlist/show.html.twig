@@ -37,6 +37,7 @@
                     <th>{{ 'sylius.ui.quantity'|trans }}</th>
                     <th>{{ 'sylius.ui.product'|trans }}</th>
                     <th>{{ 'sylius.ui.variant'|trans }}</th>
+                    <th>{{ 'setono_sylius_wishlist.ui.note'|trans }}</th>
                     <th>{{ 'sylius.ui.price'|trans }}</th>
                     <th>&nbsp;</th>
                 </tr>
@@ -72,6 +73,15 @@
                                     {{ form_widget(form.items[key].variant) }}
                                 {% endif %}
                             </div>
+                        </td>
+                        <td>
+                            {% if canEdit %}
+                                <div class="ui form">
+                                    {{ form_widget(form.items[key].note) }}
+                                </div>
+                            {% elseif item.note %}
+                                {{ item.note|nl2br }}
+                            {% endif %}
                         </td>
                         <td>
                             {{ include('@SetonoSyliusWishlistPlugin/shop/wishlist/show/_price.html.twig') }}
@@ -118,6 +128,10 @@
             display: flex;
             flex-wrap: nowrap;
             gap: 20px;
+        }
+
+        .ui.table td {
+            vertical-align: top;
         }
     </style>
 {% endblock %}

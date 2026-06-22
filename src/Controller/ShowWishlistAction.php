@@ -9,9 +9,12 @@ use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
 use Setono\SyliusWishlistPlugin\Security\Voter\WishlistVoter;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Environment;
 
@@ -25,6 +28,7 @@ final class ShowWishlistAction
         private readonly FormFactoryInterface $formFactory,
         private readonly AuthorizationCheckerInterface $authorizationChecker,
         private readonly Environment $twig,
+        private readonly UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
@@ -46,6 +50,16 @@ final class ShowWishlistAction
             }
 
             $this->wishlistRepository->add($wishlist);
+
+            $session = $request->getSession();
+            if ($session instanceof FlashBagAwareSessionInterface) {
+                $session->getFlashBag()->add('success', 'setono_sylius_wishlist.wishlist_updated');
+            }
+
+            // Redirect after a successful update so a browser refresh doesn't re-submit the form (POST/Redirect/GET).
+            return new RedirectResponse($this->urlGenerator->generate('setono_sylius_wishlist_shop_wishlist_show', [
+                'uuid' => $uuid,
+            ]));
         }
 
         return new Response($this->twig->render('@SetonoSyliusWishlistPlugin/shop/wishlist/show.html.twig', [

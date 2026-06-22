@@ -9,6 +9,7 @@ use Sylius\Bundle\ProductBundle\Form\Type\ProductVariantChoiceType;
 use Sylius\Bundle\ResourceBundle\Form\Type\AbstractResourceType;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -21,6 +22,11 @@ class WishlistItemType extends AbstractResourceType
             ->add('quantity', IntegerType::class, [
                 'attr' => ['min' => 1],
                 'label' => 'sylius.ui.quantity',
+            ])
+            ->add('note', TextareaType::class, [
+                'attr' => ['rows' => 3],
+                'label' => 'setono_sylius_wishlist.ui.note',
+                'required' => false,
             ])
             ->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
                 $data = $event->getData();
