@@ -1,0 +1,15 @@
+{# @var wishlists \Setono\SyliusWishlistPlugin\Model\WishlistInterface[] #}
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% block title %}{{ 'setono_sylius_wishlist.ui.wishlists_header'|trans }} | {{ parent() }}{% endblock %}
+
+{% block content %}
+    <div class="container my-4 my-lg-5">
+        <div class="text-center mb-4 mb-lg-5">
+            <h1 class="h2 mb-2">{{ 'setono_sylius_wishlist.ui.wishlists_header'|trans }}</h1>
+            <p class="text-body-secondary">{{ 'setono_sylius_wishlist.ui.wishlists_subheader'|trans }}</p>
+        </div>
+
+        {{ include('@SetonoSyliusWishlistPlugin/shop/wishlist/index/_wishlists.html.twig') }}
+    </div>
+{% endblock %}

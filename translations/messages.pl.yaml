@@ -1,0 +1,14 @@
+setono_sylius_wishlist:
+    ui:
+        add_wishlist_to_cart: Dodaj listę życzeń do koszyka
+        copy: Kopiuj
+        inventory_insufficient: Stan magazynowy jest niewystarczający dla ilości, którą chcesz dodać do listy życzeń
+        note: Notatka
+        remove_from_wishlist: Usuń
+        select_variant: Wybierz wariant...
+        toggle_wishlist: Przełącz listę życzeń
+        wishlist: Lista życzeń
+        wishlist_subheader: Tutaj możesz edytować ilość produktów na swojej liście życzeń. Możesz również wybrać żądane warianty i usunąć produkty ze swojej listy życzeń. Na koniec możesz udostępnić swoją listę życzeń innym, kopiując poniższy adres URL.
+        wishlists: Listy życzeń
+        wishlists_header: Listy życzeń
+        wishlists_subheader: Tutaj możesz zarządzać swoimi listami życzeń. Jako zalogowany użytkownik możesz tworzyć, edytować i usuwać listy życzeń. Możesz również dodawać i usuwać produkty ze swoich list życzeń. Jeśli nie jesteś zalogowany, możesz dodawać i usuwać produkty tylko z jednej listy życzeń.

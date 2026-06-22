@@ -1,0 +1,14 @@
+setono_sylius_wishlist:
+    ui:
+        add_wishlist_to_cart: Přidat seznam přání do košíku
+        copy: Kopírovat
+        inventory_insufficient: Skladová zásoba nestačí pro množství, které chcete přidat do seznamu přání
+        note: Poznámka
+        remove_from_wishlist: Odebrat
+        select_variant: Vyberte variantu...
+        toggle_wishlist: Přepnout seznam přání
+        wishlist: Seznam přání
+        wishlist_subheader: Zde můžete upravit množství produktů ve svém seznamu přání. Můžete také vybrat požadované varianty a odebrat produkty ze svého seznamu přání. Nakonec můžete svůj seznam přání sdílet s ostatními zkopírováním níže uvedené adresy URL.
+        wishlists: Seznamy přání
+        wishlists_header: Seznamy přání
+        wishlists_subheader: Zde můžete spravovat své seznamy přání. Jako přihlášený uživatel můžete vytvářet, upravovat a mazat seznamy přání. Můžete také přidávat a odebírat produkty ze svých seznamů přání. Pokud nejste přihlášeni, můžete přidávat a odebírat produkty pouze z jednoho seznamu přání.

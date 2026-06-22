@@ -1,0 +1,14 @@
+setono_sylius_wishlist:
+    ui:
+        add_wishlist_to_cart: Wunschliste in den Warenkorb legen
+        copy: Kopieren
+        inventory_insufficient: Der Lagerbestand reicht für die Menge, die Sie zur Wunschliste hinzufügen möchten, nicht aus
+        note: Notiz
+        remove_from_wishlist: Entfernen
+        select_variant: Variante auswählen...
+        toggle_wishlist: Wunschliste umschalten
+        wishlist: Wunschliste
+        wishlist_subheader: Hier können Sie die Menge der Produkte in Ihrer Wunschliste bearbeiten. Sie können auch die gewünschten Varianten auswählen und Produkte aus Ihrer Wunschliste entfernen. Schließlich können Sie Ihre Wunschliste mit anderen teilen, indem Sie die untenstehende URL kopieren.
+        wishlists: Wunschlisten
+        wishlists_header: Wunschlisten
+        wishlists_subheader: Hier können Sie Ihre Wunschlisten verwalten. Als angemeldeter Benutzer können Sie Wunschlisten erstellen, bearbeiten und löschen. Sie können auch Produkte zu Ihren Wunschlisten hinzufügen und daraus entfernen. Wenn Sie nicht angemeldet sind, können Sie nur Produkte zu Ihrer einzelnen Wunschliste hinzufügen oder daraus entfernen.

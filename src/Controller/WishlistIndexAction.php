@@ -8,9 +8,9 @@ use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
 
-final class WishlistIndexAction
+final readonly class WishlistIndexAction
 {
-    public function __construct(private readonly Environment $twig, private readonly WishlistProviderInterface $wishlistProvider)
+    public function __construct(private Environment $twig, private WishlistProviderInterface $wishlistProvider)
     {
     }
 

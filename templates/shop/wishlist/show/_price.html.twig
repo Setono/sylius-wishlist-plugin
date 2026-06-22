@@ -1,0 +1,15 @@
+{# @var item \Setono\SyliusWishlistPlugin\Model\WishlistItemInterface #}
+{% import "@SyliusShop/shared/macro/money.html.twig" as money %}
+
+{% set variant = item.product|sylius_resolve_variant %}
+{% set hasDiscount = variant|sylius_has_discount({'channel': sylius.channel}) %}
+
+{% if hasDiscount %}
+    <span class="text-body-secondary text-decoration-line-through">
+        {{ money.calculateOriginalPrice(variant) }}
+    </span>
+{% endif %}
+
+<span>
+    {{ money.calculatePrice(variant) }}
+</span>

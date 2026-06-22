@@ -1,0 +1,14 @@
+setono_sylius_wishlist:
+    ui:
+        add_wishlist_to_cart: Lisää toivelista ostoskoriin
+        copy: Kopioi
+        inventory_insufficient: Varastosaldo ei riitä toivelistalle lisättävälle määrälle
+        note: Huomautus
+        remove_from_wishlist: Poista
+        select_variant: Valitse vaihtoehto...
+        toggle_wishlist: Vaihda toivelistan tila
+        wishlist: Toivelista
+        wishlist_subheader: Täällä voit muokata toivelistasi tuotteiden määrää. Voit myös valita haluamasi vaihtoehdot ja poistaa tuotteita toivelistaltasi. Lopuksi voit jakaa toivelistasi muiden kanssa kopioimalla alla olevan URL-osoitteen.
+        wishlists: Toivelistat
+        wishlists_header: Toivelistat
+        wishlists_subheader: Täällä voit hallita toivelistojasi. Kirjautuneena käyttäjänä voit luoda, muokata ja poistaa toivelistoja. Voit myös lisätä ja poistaa tuotteita toivelistoiltasi. Jos et ole kirjautunut sisään, voit vain lisätä ja poistaa tuotteita yhdeltä toivelistaltasi.

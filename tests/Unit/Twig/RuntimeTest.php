@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Setono\SyliusWishlistPlugin\Tests\Unit\Twig;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Setono\SyliusWishlistPlugin\Checker\WishlistCheckerInterface;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
@@ -13,7 +14,7 @@ use Sylius\Component\Core\Model\ProductInterface;
 
 final class RuntimeTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_delegates_on_wishlist_to_the_checker(): void
     {
         $product = $this->createMock(ProductInterface::class);
@@ -24,7 +25,7 @@ final class RuntimeTest extends TestCase
         self::assertTrue($this->runtime($this->createMock(WishlistProviderInterface::class), $checker)->onWishlist($product));
     }
 
-    /** @test */
+    #[Test]
     public function it_has_a_wishlist_when_the_provider_returns_at_least_one(): void
     {
         $provider = $this->createMock(WishlistProviderInterface::class);
@@ -33,7 +34,7 @@ final class RuntimeTest extends TestCase
         self::assertTrue($this->runtime($provider, $this->createMock(WishlistCheckerInterface::class))->hasWishlist());
     }
 
-    /** @test */
+    #[Test]
     public function it_has_no_wishlist_when_the_provider_returns_none(): void
     {
         $provider = $this->createMock(WishlistProviderInterface::class);

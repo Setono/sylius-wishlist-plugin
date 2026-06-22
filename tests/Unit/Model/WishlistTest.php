@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Setono\SyliusWishlistPlugin\Tests\Unit\Model;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Setono\SyliusWishlistPlugin\Model\UserWishlist;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
@@ -15,7 +16,7 @@ use Symfony\Component\Uid\UuidV7;
 
 final class WishlistTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_generates_a_v7_uuid_on_construction(): void
     {
         $wishlist = $this->createWishlist();
@@ -24,13 +25,13 @@ final class WishlistTest extends TestCase
         self::assertInstanceOf(UuidV7::class, Uuid::fromString($wishlist->getUuid()));
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_a_unique_uuid_per_instance(): void
     {
         self::assertNotSame($this->createWishlist()->getUuid(), $this->createWishlist()->getUuid());
     }
 
-    /** @test */
+    #[Test]
     public function it_sets_and_gets_the_name(): void
     {
         $wishlist = $this->createWishlist();
@@ -40,7 +41,7 @@ final class WishlistTest extends TestCase
         self::assertSame('Christmas', $wishlist->getName());
     }
 
-    /** @test */
+    #[Test]
     public function it_has_no_items_by_default(): void
     {
         $wishlist = $this->createWishlist();
@@ -49,7 +50,7 @@ final class WishlistTest extends TestCase
         self::assertCount(0, $wishlist->getItems());
     }
 
-    /** @test */
+    #[Test]
     public function it_adds_an_item_and_assigns_itself_to_it(): void
     {
         $wishlist = $this->createWishlist();
@@ -63,7 +64,7 @@ final class WishlistTest extends TestCase
         self::assertSame($wishlist, $item->getWishlist());
     }
 
-    /** @test */
+    #[Test]
     public function it_does_not_add_the_same_item_twice(): void
     {
         $wishlist = $this->createWishlist();
@@ -75,7 +76,7 @@ final class WishlistTest extends TestCase
         self::assertCount(1, $wishlist->getItems());
     }
 
-    /** @test */
+    #[Test]
     public function it_removes_an_item_by_reference(): void
     {
         $wishlist = $this->createWishlist();
@@ -89,7 +90,7 @@ final class WishlistTest extends TestCase
         self::assertNull($item->getWishlist());
     }
 
-    /** @test */
+    #[Test]
     public function it_removes_an_item_by_id(): void
     {
         $wishlist = $this->createWishlist();
@@ -105,7 +106,7 @@ final class WishlistTest extends TestCase
         self::assertNull($removed->getWishlist());
     }
 
-    /** @test */
+    #[Test]
     public function it_does_not_remove_anything_when_no_item_matches_the_id(): void
     {
         $wishlist = $this->createWishlist();
@@ -116,7 +117,7 @@ final class WishlistTest extends TestCase
         self::assertCount(1, $wishlist->getItems());
     }
 
-    /** @test */
+    #[Test]
     public function it_knows_whether_it_contains_a_product(): void
     {
         $wishlist = $this->createWishlist();
@@ -129,7 +130,7 @@ final class WishlistTest extends TestCase
         self::assertFalse($wishlist->hasProduct($this->createProduct(11)));
     }
 
-    /** @test */
+    #[Test]
     public function it_removes_items_matching_a_product(): void
     {
         $wishlist = $this->createWishlist();
@@ -149,7 +150,7 @@ final class WishlistTest extends TestCase
         self::assertCount(1, $wishlist->getItems());
     }
 
-    /** @test */
+    #[Test]
     public function it_knows_whether_it_contains_a_product_variant(): void
     {
         $wishlist = $this->createWishlist();
@@ -162,7 +163,7 @@ final class WishlistTest extends TestCase
         self::assertFalse($wishlist->hasProductVariant($this->createVariant(21, 10)));
     }
 
-    /** @test */
+    #[Test]
     public function it_removes_items_matching_a_product_variant(): void
     {
         $wishlist = $this->createWishlist();
@@ -177,7 +178,7 @@ final class WishlistTest extends TestCase
         self::assertCount(0, $wishlist->getItems());
     }
 
-    /** @test */
+    #[Test]
     public function it_sums_the_quantity_of_all_items(): void
     {
         $wishlist = $this->createWishlist();

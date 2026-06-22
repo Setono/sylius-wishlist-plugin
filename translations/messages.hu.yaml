@@ -1,0 +1,14 @@
+setono_sylius_wishlist:
+    ui:
+        add_wishlist_to_cart: Kívánságlista kosárba helyezése
+        copy: Másolás
+        inventory_insufficient: A készlet nem elegendő a kívánságlistához hozzáadni kívánt mennyiséghez
+        note: Megjegyzés
+        remove_from_wishlist: Eltávolítás
+        select_variant: Válasszon változatot...
+        toggle_wishlist: Kívánságlista ki-/bekapcsolása
+        wishlist: Kívánságlista
+        wishlist_subheader: Itt szerkesztheti a kívánságlistáján szereplő termékek mennyiségét. Kiválaszthatja a kívánt változatokat is, és eltávolíthat termékeket a kívánságlistájáról. Végül megoszthatja kívánságlistáját másokkal az alábbi URL másolásával.
+        wishlists: Kívánságlisták
+        wishlists_header: Kívánságlisták
+        wishlists_subheader: Itt kezelheti a kívánságlistáit. Bejelentkezett felhasználóként létrehozhat, szerkeszthet és törölhet kívánságlistákat. Termékeket is hozzáadhat és eltávolíthat a kívánságlistáiról. Ha nincs bejelentkezve, csak az egyetlen kívánságlistájához adhat hozzá és távolíthat el termékeket.

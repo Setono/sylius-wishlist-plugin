@@ -1,5 +1,6 @@
 imports:
     - { resource: "@SyliusCoreBundle/Resources/config/app/config.yml" }
+    - { resource: "@SyliusPayumBundle/Resources/config/app/config.yaml" }
     - { resource: "@SyliusAdminBundle/Resources/config/app/config.yml" }
     - { resource: "@SyliusShopBundle/Resources/config/app/config.yml" }
     - { resource: "@SyliusApiBundle/Resources/config/app/config.yaml" }
@@ -13,10 +14,3 @@ sylius_shop:
 
 sylius_api:
     enabled: true
-
-sylius_ui:
-    events:
-        sylius.shop.layout.stylesheets:
-            blocks:
-                app_styles:
-                    template: "shop/_styles.html.twig"

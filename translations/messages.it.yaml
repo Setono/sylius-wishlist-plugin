@@ -1,0 +1,14 @@
+setono_sylius_wishlist:
+    ui:
+        add_wishlist_to_cart: Aggiungi la lista dei desideri al carrello
+        copy: Copia
+        inventory_insufficient: La disponibilità non è sufficiente per la quantità che vuoi aggiungere alla lista dei desideri
+        note: Nota
+        remove_from_wishlist: Rimuovi
+        select_variant: Seleziona variante...
+        toggle_wishlist: Attiva/disattiva lista dei desideri
+        wishlist: Lista dei desideri
+        wishlist_subheader: "Qui puoi modificare la quantità dei prodotti nella tua lista dei desideri. Puoi anche selezionare le varianti che desideri e rimuovere prodotti dalla tua lista dei desideri. Infine puoi condividere la tua lista dei desideri con altri copiando l'URL qui sotto."
+        wishlists: Liste dei desideri
+        wishlists_header: Liste dei desideri
+        wishlists_subheader: "Qui puoi gestire le tue liste dei desideri. Come utente registrato puoi creare, modificare ed eliminare liste dei desideri. Puoi anche aggiungere e rimuovere prodotti dalle tue liste dei desideri. Se non hai effettuato l'accesso, puoi solo aggiungere e rimuovere prodotti dalla tua unica lista dei desideri."

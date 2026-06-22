@@ -1,0 +1,14 @@
+setono_sylius_wishlist:
+    ui:
+        add_wishlist_to_cart: Adaugă lista de dorințe în coș
+        copy: Copiază
+        inventory_insufficient: Stocul este insuficient pentru cantitatea pe care doriți să o adăugați în lista de dorințe
+        note: Notă
+        remove_from_wishlist: Elimină
+        select_variant: Selectați varianta...
+        toggle_wishlist: Comută lista de dorințe
+        wishlist: Listă de dorințe
+        wishlist_subheader: Aici puteți edita cantitatea produselor din lista dvs. de dorințe. De asemenea, puteți selecta variantele dorite și puteți elimina produse din lista de dorințe. În final, puteți partaja lista de dorințe cu alții copiind adresa URL de mai jos.
+        wishlists: Liste de dorințe
+        wishlists_header: Liste de dorințe
+        wishlists_subheader: Aici vă puteți gestiona listele de dorințe. Ca utilizator autentificat, puteți crea, edita și șterge liste de dorințe. De asemenea, puteți adăuga și elimina produse din listele dvs. de dorințe. Dacă nu sunteți autentificat, puteți adăuga și elimina produse doar din singura dvs. listă de dorințe.

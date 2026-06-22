@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Setono\SyliusWishlistPlugin\Tests\Unit\Security\Voter;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
@@ -13,7 +14,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
 final class WishlistVoterTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_grants_editing_a_wishlist_owned_by_the_current_visitor(): void
     {
         $wishlist = $this->createMock(WishlistInterface::class);
@@ -24,7 +25,7 @@ final class WishlistVoterTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function it_denies_editing_a_wishlist_not_owned_by_the_current_visitor(): void
     {
         self::assertSame(
@@ -33,7 +34,7 @@ final class WishlistVoterTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function it_abstains_from_unsupported_attributes(): void
     {
         $wishlist = $this->createMock(WishlistInterface::class);
@@ -44,7 +45,7 @@ final class WishlistVoterTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function it_abstains_from_unsupported_subjects(): void
     {
         self::assertSame(

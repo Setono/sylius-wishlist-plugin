@@ -1,0 +1,131 @@
+{# @var wishlist \Setono\SyliusWishlistPlugin\Model\WishlistInterface #}
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% set canEdit = is_granted('wishlist_edit', wishlist) %}
+
+{% block title %}{{ wishlist.name }} | {{ parent() }}{% endblock %}
+
+{% block content %}
+    <div class="container my-4 my-lg-5">
+        {{ form_start(form, { 'attr': { 'novalidate': 'novalidate' } }) }}
+            {{ form_row(form._token) }}
+            <input type="hidden" name="_method" value="PATCH" />
+            {{ form_errors(form) }}
+
+            <div class="text-center mb-4">
+                <h1 class="h2 mb-1">
+                    {% if canEdit %}
+                        <span role="button" data-editable="{{ form_widget(form.name)|e('html_attr') }}">{{ wishlist.name }}</span>
+                    {% else %}
+                        {{ wishlist.name }}
+                    {% endif %}
+                </h1>
+                <p class="text-body-secondary">{{ 'setono_sylius_wishlist.ui.wishlist_subheader'|trans }}</p>
+            </div>
+
+            <div class="row justify-content-center mb-4">
+                <div class="col-12 col-lg-8">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" readonly value="{{ url('setono_sylius_wishlist_shop_wishlist_show', { 'uuid': wishlist.uuid }) }}">
+                        <button class="btn btn-outline-secondary" type="button" data-wishlist-copy>
+                            {{ ux_icon('tabler:copy') }} {{ 'setono_sylius_wishlist.ui.copy'|trans }}
+                        </button>
+                    </div>
+                    <a href="{{ path('setono_sylius_wishlist_shop_wishlist_add_to_cart', { 'uuid': wishlist.uuid }) }}" class="btn btn-primary">
+                        {{ ux_icon('tabler:shopping-cart-plus') }} {{ 'setono_sylius_wishlist.ui.add_wishlist_to_cart'|trans }}
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">&nbsp;</th>
+                            <th scope="col">{{ 'sylius.ui.quantity'|trans }}</th>
+                            <th scope="col">{{ 'sylius.ui.product'|trans }}</th>
+                            <th scope="col">{{ 'sylius.ui.variant'|trans }}</th>
+                            <th scope="col">{{ 'setono_sylius_wishlist.ui.note'|trans }}</th>
+                            <th scope="col">{{ 'sylius.ui.price'|trans }}</th>
+                            <th scope="col">&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, item in wishlist.items %}
+                            {% set image = item.variant and item.variant.images.first ? item.variant.images.first : item.product.images.first %}
+                            <tr>
+                                <td style="width: 80px">
+                                    {% if image %}
+                                        <img src="{{ image.path|imagine_filter('sylius_shop_product_small_thumbnail') }}" class="img-fluid" alt="{{ item.product.name }}">
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ form_widget(form.items[key].quantity, { 'attr': { 'class': 'form-control form-control-sm', 'style': 'width: 5rem' } }) }}
+                                    {% if item.variant and not sylius_inventory_is_sufficient(item.variant, item.quantity) %}
+                                        <div class="text-danger small mt-1">
+                                            {{ 'setono_sylius_wishlist.ui.inventory_insufficient'|trans }}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ path('sylius_shop_product_show', { 'slug': item.product.slug }) }}" class="text-decoration-none">
+                                        {{ item.product.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if form.items[key].variant is defined %}
+                                        {{ form_widget(form.items[key].variant, { 'attr': { 'class': 'form-select form-select-sm' } }) }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if canEdit %}
+                                        {{ form_widget(form.items[key].note, { 'attr': { 'class': 'form-control form-control-sm' } }) }}
+                                    {% elseif item.note %}
+                                        {{ item.note|nl2br }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ include('@SetonoSyliusWishlistPlugin/shop/wishlist/show/_price.html.twig') }}
+                                </td>
+                                <td class="text-end">
+                                    {% if canEdit %}
+                                        <a href="{{ path('setono_sylius_wishlist_shop_wishlist_item_remove', { 'uuid': wishlist.uuid, 'id': item.id }) }}" class="btn btn-outline-danger btn-sm">
+                                            {{ ux_icon('tabler:trash') }}
+                                            <span class="visually-hidden">{{ 'setono_sylius_wishlist.ui.remove_from_wishlist'|trans }}</span>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if canEdit %}
+                <button type="submit" class="btn btn-primary">
+                    {{ ux_icon('tabler:device-floppy') }} {{ 'sylius.ui.update'|trans }}
+                </button>
+            {% endif %}
+        {{ form_end(form, { 'render_rest': false }) }}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const copyButton = document.querySelector('[data-wishlist-copy]');
+            if (copyButton) {
+                copyButton.addEventListener('click', function () {
+                    const input = copyButton.closest('.input-group').querySelector('input');
+                    input.select();
+                    input.setSelectionRange(0, 99999);
+                    navigator.clipboard.writeText(input.value);
+                });
+            }
+
+            document.querySelectorAll('[data-editable]').forEach(function (element) {
+                element.addEventListener('click', function () {
+                    element.innerHTML = element.dataset.editable;
+                }, { once: true });
+            });
+        });
+    </script>
+{% endblock %}

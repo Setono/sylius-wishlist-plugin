@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Setono\SyliusWishlistPlugin\Tests\Unit\Controller\DTO;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Setono\SyliusWishlistPlugin\Controller\DTO\ToggleWishlistResponse;
 
 final class ToggleWishlistResponseTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_exposes_the_data_it_was_constructed_with(): void
     {
         $response = new ToggleWishlistResponse(ToggleWishlistResponse::EVENT_ADDED, '/toggle-url', 3);

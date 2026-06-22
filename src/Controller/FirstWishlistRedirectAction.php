@@ -14,11 +14,11 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * This class is used to redirect the user to the first wishlist.
  * This is useful if your application only needs one wishlist per user.
  */
-final class FirstWishlistRedirectAction
+final readonly class FirstWishlistRedirectAction
 {
     public function __construct(
-        private readonly WishlistProviderInterface $wishlistProvider,
-        private readonly UrlGeneratorInterface $urlGenerator,
+        private WishlistProviderInterface $wishlistProvider,
+        private UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
