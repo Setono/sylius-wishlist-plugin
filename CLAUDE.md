@@ -84,4 +84,4 @@ Controllers are single-action invokable classes under `Controller/` (e.g. `AddTo
 - Prefer the established decorator + composite-tag patterns over adding conditionals to existing providers/checkers.
 - Never commit debug calls (`dd`, `dump`, `var_dump`, `print_r`, `exit`). Note: the Psalm `forbiddenFunctions` guard that previously enforced this was dropped in the PHPStan migration — there is no automated check for it now.
 - Doctrine access in subscribers/controllers uses `Setono\Doctrine\ORMTrait` (`getManager()`), not a directly injected `EntityManager`.
-- Branch versioning mirrors Sylius (e.g. `1.12.x`); `master` is the dev branch.
+- Branch versioning mirrors Sylius (e.g. `1.12.x`); `1.x` is the default/dev branch (replaced `master`).
