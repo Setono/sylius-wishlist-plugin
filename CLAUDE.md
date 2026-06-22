@@ -21,7 +21,7 @@ composer fix-style      # ECS auto-fix
 composer phpunit        # PHPUnit
 vendor/bin/rector process --dry-run         # refactor check
 vendor/bin/composer-dependency-analyser     # unused/missing composer deps
-vendor/bin/infection                        # mutation testing (requires 100% MSI)
+vendor/bin/infection                        # mutation testing (minMsi 25, minCoveredMsi 95)
 ```
 
 User shell aliases map to these: `ca` (analyse), `cf` (fix-style), `cfca` (fix then analyse), `crc` (dependency check). `phpunit`, `rector`, `infection` aliases call the project-local `vendor/bin`.
@@ -38,7 +38,7 @@ bin/console lint:container
 bin/console doctrine:schema:validate -vvv
 ```
 
-Note: there are currently no PHPUnit/spec test classes in `tests/` (only the test Application). `infection.json.dist` pins `minMsi`/`minCoveredMsi` to 100, so adding source without covering tests will fail the mutation job.
+Note: unit tests live under `tests/Unit/`, mirroring `src/` (e.g. `tests/Unit/Controller/ShowWishlistActionTest.php`), alongside the test Application. `infection.json.dist` pins `minMsi` to 25 and `minCoveredMsi` to 95 — covered-code MSI is effectively 100% today, so add a unit test under `tests/Unit/` for any new source or the mutation job will regress.
 
 ## Architecture
 
