@@ -12,8 +12,12 @@ use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Environment;
 
@@ -27,6 +31,7 @@ final class ShowWishlistActionTest extends TestCase
             $this->formFactory($this->form(false)),
             $this->authorizationChecker(true),
             $this->twig(),
+            $this->urlGenerator(),
         );
 
         $this->expectException(NotFoundHttpException::class);
@@ -35,21 +40,38 @@ final class ShowWishlistActionTest extends TestCase
     }
 
     /** @test */
-    public function it_saves_the_wishlist_when_the_owner_submits_a_valid_form(): void
+    public function it_saves_the_wishlist_and_redirects_with_a_flash_when_the_owner_submits_a_valid_form(): void
     {
         $wishlist = $this->createMock(WishlistInterface::class);
 
         $repository = $this->repository($wishlist);
         $repository->expects(self::once())->method('add')->with($wishlist);
 
+        $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
+        $urlGenerator
+            ->expects(self::once())
+            ->method('generate')
+            ->with('setono_sylius_wishlist_shop_wishlist_show', ['uuid' => 'uuid'])
+            ->willReturn('/wishlists/uuid')
+        ;
+
         $action = new ShowWishlistAction(
             $repository,
             $this->formFactory($this->form(true)),
             $this->authorizationChecker(true),
             $this->twig(),
+            $urlGenerator,
         );
 
-        $action(new Request(), 'uuid');
+        $session = new Session(new MockArraySessionStorage());
+        $request = new Request();
+        $request->setSession($session);
+
+        $response = $action($request, 'uuid');
+
+        self::assertInstanceOf(RedirectResponse::class, $response);
+        self::assertSame('/wishlists/uuid', $response->getTargetUrl());
+        self::assertSame(['setono_sylius_wishlist.wishlist_updated'], $session->getFlashBag()->peek('success'));
     }
 
     /** @test */
@@ -63,6 +85,7 @@ final class ShowWishlistActionTest extends TestCase
             $this->formFactory($this->form(true)),
             $this->authorizationChecker(false),
             $this->twig(),
+            $this->urlGenerator(),
         );
 
         $this->expectException(NotFoundHttpException::class);
@@ -84,6 +107,7 @@ final class ShowWishlistActionTest extends TestCase
             $this->formFactory($this->form(false)),
             $authorizationChecker,
             $this->twig(),
+            $this->urlGenerator(),
         );
 
         $action(new Request(), 'uuid');
@@ -133,5 +157,13 @@ final class ShowWishlistActionTest extends TestCase
         $twig->method('render')->willReturn('');
 
         return $twig;
+    }
+
+    private function urlGenerator(): UrlGeneratorInterface
+    {
+        $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
+        $urlGenerator->method('generate')->willReturn('/wishlists/uuid');
+
+        return $urlGenerator;
     }
 }

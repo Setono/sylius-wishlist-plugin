@@ -1,2 +1,3 @@
 setono_sylius_wishlist:
     no_wishlists: You haven't added anything to your wishlist yet
+    wishlist_updated: Your wishlist has been updated
