@@ -12,5 +12,7 @@
 /.php-version
 /php.ini
 
+/.claude/
+
 # Local MCP server config (editor / Claude Code tooling)
 /.mcp.json
