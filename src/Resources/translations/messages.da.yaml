@@ -3,6 +3,7 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Tilføj ønskeliste til kurv
         copy: Kopier
         inventory_insufficient: Lageret er utilstrækkeligt til den mængde, du ønsker at tilføje til ønskelisten
+        note: Note
         remove_from_wishlist: Fjern
         select_variant: Vælg variant...
         wishlist: Ønskeliste

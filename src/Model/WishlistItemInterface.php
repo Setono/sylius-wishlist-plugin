@@ -25,4 +25,8 @@ interface WishlistItemInterface extends ResourceInterface
     public function getQuantity(): int;
 
     public function setQuantity(int $quantity): void;
+
+    public function getNote(): ?string;
+
+    public function setNote(?string $note): void;
 }
