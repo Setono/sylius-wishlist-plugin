@@ -60,4 +60,5 @@ return [
     Setono\ClientBundle\SetonoClientBundle::class => ['all' => true],
     Setono\SyliusWishlistPlugin\SetonoSyliusWishlistPlugin::class => ['all' => true],
     DAMA\DoctrineTestBundle\DAMADoctrineTestBundle::class => ['test' => true],
+    Playwright\Symfony\PlaywrightSymfonyBundle::class => ['test' => true],
 ];

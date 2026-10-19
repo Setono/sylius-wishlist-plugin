@@ -1,0 +1,8 @@
+when@test:
+    playwright:
+        base_url: 'http://localhost'
+        intercepted_hosts: ['localhost']
+        assets:
+            # Served straight from the test application's public/ directory: the shop's Webpack Encore build, the
+            # bundles' public files (bin/console assets:install, incl. this plugin's JavaScript) and product images
+            prefixes: ['/build', '/bundles', '/media']
