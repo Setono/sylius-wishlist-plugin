@@ -23,14 +23,18 @@ composer analyse        # PHPStan static analysis (level max)
 composer check-style    # ECS dry-run (sylius-labs/coding-standard)
 composer fix-style      # ECS auto-fix
 composer phpunit        # PHPUnit (both test suites)
+vendor/bin/phpunit --coverage-text          # line coverage (needs pcov or Xdebug, and the test database for the functional suite)
 vendor/bin/rector process --dry-run         # refactor check
 vendor/bin/composer-dependency-analyser     # unused/missing composer deps (see note above)
-vendor/bin/infection                        # mutation testing (minMsi 25, minCoveredMsi 95)
+vendor/bin/infection                        # mutation testing (minMsi 99, minCoveredMsi 99)
+composer validate --strict                  # validate composer.json
+composer normalize --dry-run                # check composer.json normalization (run `composer normalize` after `composer require`)
+symfony lsp:check                           # Symfony-aware diagnostics for the plugin and its test app (needs Symfony CLI >= 5.20)
 ```
 
 User shell aliases map to these: `ca` (analyse), `cf` (fix-style), `cfca` (fix then analyse), `crc` (dependency check). `phpunit`, `rector`, `infection` aliases call the project-local `vendor/bin`.
 
-PHPUnit is split into two suites (`phpunit.xml.dist`): `tests/Unit/` (no kernel boot, fast) and `tests/Functional/` (boots the kernel, needs MySQL with the schema and default fixtures loaded in the `test` env, as CI does: from `tests/Application`, `APP_ENV=test bin/console doctrine:database:create`, `doctrine:schema:create`, `sylius:fixtures:load -n`; some tests drive the real shop/admin login through `KernelBrowser` as `shop@example.com` / `sylius`). The `functional-tests` and `code-coverage` CI jobs set up the database and the test app's assets (pass both `node-version: "22"`, which Webpack Encore 6 needs), but the `mutation-tests` job doesn't, so Infection (`testFrameworkOptions` in `infection.json5`) runs the unit suite only — logic covered solely by functional tests needs a unit test to count for mutation testing. Run one: `vendor/bin/phpunit --testsuite unit` / `--testsuite functional`, or `vendor/bin/phpunit --filter testMethodName`. Use the `#[Test]` attribute (not the `/** @test */` annotation — deprecated in PHPUnit 11). `infection.json5` pins `minMsi` 25 / `minCoveredMsi` 95 — covered-code MSI is ~98% (the remaining escapes are equivalent mutants), so add a unit test under `tests/Unit/` for any new source, including DI code (`tests/Unit/DependencyInjection/` uses `matthiasnoback/symfony-dependency-injection-test` / `symfony-config-test`). If Infection ever reports every mutant as an error (`E`) yet a 100% score, mutation testing is broken, not perfect — that happened while `tests/Application/config/bootstrap.php` had a malformed autoload path that plain PHP tolerated but Infection's include interceptor didn't. CI runs the global `infection` tool from setup-php (newer than the vendored one).
+PHPUnit is split into two suites (`phpunit.xml.dist`): `unit` and `functional`. Run one with `vendor/bin/phpunit --testsuite unit` / `--testsuite functional`, a file with `vendor/bin/phpunit tests/path/ToTest.php`, or a test with `vendor/bin/phpunit --filter it_does_something`. See [Testing](#testing).
 
 Commands that need the booted application run from inside the test app (they mirror the CI `build.yaml`):
 
@@ -51,7 +55,7 @@ To preview the shop in a browser: from `tests/Application`, run `bin/console doc
 Four configurable Sylius resources are registered in `DependencyInjection/SetonoSyliusWishlistExtension::load()` via `registerResources()`, with classes overridable under the `setono_sylius_wishlist.resources.*` config tree (`Configuration.php`): `wishlist`, `guest_wishlist`, `user_wishlist`, `wishlist_item`.
 
 `Wishlist` is an **abstract base** (`Model/Wishlist.php`) holding items, uuid (UUID v7), name, user, and the item/product/variant manipulation logic. Two concrete subclasses:
-- `GuestWishlist` — keyed by a `clientId` (anonymous visitor), can `convertToUserWishlist()`.
+- `GuestWishlist` — keyed by a `clientId` (anonymous visitor). After its owner logs in it can be an empty placeholder whose `mergedInto` points at the user wishlist its items went to.
 - `UserWishlist` — bound to a Sylius `UserInterface`.
 
 The bundle still extends `AbstractResourceBundle` (overriding `getPath()` → repo root and `getConfigFilesPath()` → `config/doctrine/model`, since resources moved out of `src/Resources/`). Doctrine mapping is **XML** in `config/doctrine/model/*.orm.xml` (ORM 3 compatible; not annotations/attributes). Validation constraints are XML too, in `config/validation/*.xml` (group `setono_sylius_wishlist`, picked up by FrameworkBundle from the bundle path).
@@ -68,11 +72,11 @@ To add a new wishlist source, implement `WishlistProviderInterface` and tag it �
 
 ### Guest → user conversion
 
-`EventSubscriber/ConvertGuestWishlistToUserWishlistSubscriber` listens for Symfony's `LoginSuccessEvent`; on login it attaches the guest's wishlist items to the now-authenticated user. Guest identity comes from `setono/client-bundle`'s cookie-based `ClientContextInterface`.
+`EventSubscriber/ConvertGuestWishlistToUserWishlistSubscriber` listens for Symfony's `LoginSuccessEvent` (shop users only; admin logins fire it too). It reads the guest wishlist from `GuestWishlistProvider` (not the composite, which answers with the user's wishlists once logged in), copies its items onto the customer's first wishlist (creating one if needed, skipping products already on it), empties it, clears its `clientId` and points `mergedInto` at the user wishlist. `ShowWishlistAction` redirects only that wishlist's owner from the old guest URL; anyone else gets a 404 (see #13). Doctrine can't change an entity's discriminator, which is why the items are copied. Guest identity comes from `setono/client-bundle`'s cookie-based `ClientContextInterface`.
 
 ### Checker + Twig + shop UI
 
-`WishlistCheckerInterface::onWishlist(product|variant)` reports whether a product is already wishlisted; `CachedWishlistChecker` decorates it (memoizes by `spl_object_hash`). Exposed to templates through `Twig/Runtime` (`onWishlist()`, `hasWishlist()`).
+`WishlistCheckerInterface::onWishlist(product|variant)` reports whether a product is already wishlisted; `CachedWishlistChecker` decorates it (memoizes by `spl_object_hash`). `WishlistItemAvailabilityCheckerInterface` decides whether an item can still be bought in a channel (product enabled and in the channel; the chosen variant enabled and priced there). `AddWishlistToCartAction` and the wishlist page both use it, so they agree; the action additionally checks stock like Sylius' `CartItemAvailabilityValidator`. Exposed to templates through `Twig/Runtime` (`onWishlist()`, `hasWishlist()`, `isAvailable()`).
 
 Shop templates live in `templates/shop/` and target the **Sylius 2 Bootstrap 5 shop theme** (extend `@SyliusShop/shared/layout/base.html.twig`; icons via `ux_icon('tabler:...')`). The extension's `prepend()` registers the plugin's `_styles`/`_javascripts` and the product-page toggle button via **Twig hooks** (`sylius_twig_hooks`): `sylius_shop.base#stylesheets`, `sylius_shop.base#javascripts`, and `sylius_shop.product.show.content.info.summary`. So the CSS/JS (`public/js/wishlist-action-handler.js`, published by `assets:install`) and the toggle button load without host-app template edits. Sylius 2 removed the `sylius_ui` `events` mechanism — use Twig hooks.
 
@@ -94,3 +98,35 @@ Controllers are single-action invokable classes under `Controller/` (e.g. `AddTo
 - Always update **all** translation locales (`translations/messages.*.yaml`, `flashes.*.yaml`), not just English.
 - Verify UI changes in a real browser (Playwright) — Twig hook misconfiguration only surfaces at render time.
 - Branch versioning mirrors Sylius: `2.x` is the default/dev branch for Sylius 2; `1.x` remains for Sylius 1.
+- Classes are `final` by default and stateless services `final readonly`; resource models and repositories are deliberate extension points and aren't. Every service has an interface next to it, and consumers depend on the interface.
+- Use `Webmozart\Assert\Assert` for runtime assertions, never PHP's `assert()`. Comments explain why, not what.
+- Services that memoize per request implement `Symfony\Contracts\Service\ResetInterface` and are tagged `kernel.reset`.
+- Doctrine models are mapped as `<entity>` (single-table inheritance for guest/user wishlists), not as `<mapped-superclass>` like the skeleton suggests, and the plugin ships no migrations.
+
+## Workflow
+
+- Before each commit run `composer fix-style`, `composer analyse` and `composer phpunit`, and fix what they flag. Never weaken a gate to get green: no PHPStan baselines, no lowered thresholds, no `--no-verify`.
+- Pull requests target `2.x` (pass `--base 2.x` to `gh pr create`) and are merged with a merge commit (`gh pr merge --merge --delete-branch`), not a squash.
+- Commit subjects are imperative, sentence case and describe the outcome, without Conventional Commit prefixes. The body explains why and links upstream issues or PRs.
+- When behaviour users see changes, update `README.md`. When users must act during an upgrade (renamed/removed classes, services, templates, config keys, changed defaults, schema changes), document it in `UPGRADE.md`.
+- Keep this file current: when a tool, dependency or convention changes how things are done, update CLAUDE.md in the same change.
+
+## Testing
+
+- Every change ships with tests: unit tests by default, functional tests when behaviour is only visible with the kernel or the database. Assert values and outcomes, not just that methods were called, so mutants get killed.
+- `tests/Unit/` mirrors `src/` and never boots the kernel or touches the database. `tests/Functional/` boots `tests/Application` and runs against MySQL with the default fixtures (from `tests/Application`: `APP_ENV=test bin/console doctrine:database:create`, `doctrine:schema:create`, `sylius:fixtures:load -n`). Some functional tests drive the real shop/admin login through `KernelBrowser` as `shop@example.com` / `sylius` (admin `sylius` / `sylius`).
+- `dama/doctrine-test-bundle` runs each test in a transaction that is rolled back afterwards, so functional tests may write to the database (and change fixture data) without cleaning up.
+- **Use Prophecy for all test doubles** (`Prophecy\PhpUnit\ProphecyTrait`, `$this->prophesize()`), never PHPUnit's `createMock()`/`createStub()`. Classes Prophecy can't double (final ones, e.g. Doctrine's `Query`) are tested functionally instead. Once any method of a double is configured, every other call the code makes on it must be stubbed too, and `->will()` callbacks must be `static` closures (Prophecy re-binds `$this`, so copy what they need into locals).
+- Mark tests with `#[Test]` (not `/** @test */`) and name them in snake_case BDD style (`it_does_something`). Use `self::assert…()`; data providers are `public static`. Kernel and web tests call `restore_exception_handler()` in `tearDown()`.
+- DI code is tested with `matthiasnoback/symfony-dependency-injection-test` (`AbstractExtensionTestCase`) and `symfony-config-test`; form types extend `Symfony\Component\Form\Test\TypeTestCase` and are created through `$this->factory`.
+- If Infection ever reports every mutant as an error (`E`) yet a 100% score, mutation testing is broken, not perfect — that happened while `tests/Application/config/bootstrap.php` had a malformed autoload path that plain PHP tolerated but Infection's include interceptor didn't.
+
+## Quality gates
+
+- **PHPStan** runs at level max (Symfony, Doctrine, PHPUnit and Prophecy extensions) without a baseline. When an ignore is unavoidable, scope it to the error identifier and line, with a comment saying why.
+- **Code coverage** must be at least 90% for the project and for the lines each change adds or modifies (`codecov.yml`). Both suites count: the `code-coverage` CI job sets up MySQL, the fixtures and the test app's assets like `functional-tests` does.
+- **Infection** (`infection.json5`: `minMsi` 99, `minCoveredMsi` 99) runs the unit suite only, because the `mutation-tests` CI job has no database (`testFrameworkOptions`), so logic covered only by functional tests isn't mutated. The thresholds only ever go up: raise them in the same change when tests raise the score. CI runs the global `infection` from setup-php.
+- **composer-dependency-analyser** runs with `require-dev` removed: every package used in `src/` or `config/` must be in `require` (e.g. `sylius/channel`, `sylius/inventory`).
+- **Dev-only version pins** go in `require-dev`, never `conflict`, and prefer a floor on the fixed package over holding back others. `gedmo/doctrine-extensions: ^3.22.2` is one: older versions declare a template bound that `symfony/type-info` >= 7.4.6 rejects, which breaks loading the API routes (doctrine-extensions/DoctrineExtensions#3044). It can go once `sylius/sylius` requires >= 3.22.2 itself.
+- **Symfony LSP:** the shared `coding-standards` CI job runs `symfony lsp:check` because `.symfony-lsp.json` exists. It reports unknown routes, services, templates and translation keys in the plugin and the test app.
+- Before pushing dependency changes, sanity-check them with `composer update --prefer-lowest && composer analyse && composer phpunit`.

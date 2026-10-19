@@ -245,12 +245,18 @@ subject wishlist belongs to the current visitor. Override the voter if you need 
 ## Development
 
 The repository contains a full test Sylius application under `tests/Application` used for integration testing.
+The functional tests run against its MySQL database with the default fixtures, each inside a transaction that is
+rolled back afterwards ([dama/doctrine-test-bundle](https://github.com/dmaicher/doctrine-test-bundle)).
 
 ```bash
 composer install
 composer analyse        # PHPStan (level max)
 composer check-style    # Easy Coding Standard
-composer phpunit        # unit tests
+composer phpunit        # unit and functional tests
+vendor/bin/infection    # mutation testing (unit tests)
+
+# the test application's database, once:
+(cd tests/Application && APP_ENV=test bin/console doctrine:database:create && APP_ENV=test bin/console doctrine:schema:create && APP_ENV=test bin/console sylius:fixtures:load -n)
 
 # commands that need the booted app:
 (cd tests/Application && bin/console lint:container)
