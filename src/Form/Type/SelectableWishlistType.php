@@ -12,7 +12,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Webmozart\Assert\Assert;
 
 /**
  * @extends AbstractType<mixed>
@@ -36,11 +35,11 @@ final class SelectableWishlistType extends AbstractType
                     return;
                 }
 
-                Assert::keyExists($options, 'selected');
-                Assert::isArray($options['selected']);
+                /** @var array<array-key, mixed> $selected guaranteed by the allowed types in configureOptions() */
+                $selected = $options['selected'];
 
                 $event->setData([
-                    'selected' => in_array($data, $options['selected'], true), // todo test that this works when objects are being fetched from two different places
+                    'selected' => in_array($data, $selected, true), // todo test that this works when objects are being fetched from two different places
                     'name' => $data->getName(),
                 ]);
             })
@@ -53,5 +52,7 @@ final class SelectableWishlistType extends AbstractType
             'data_class' => null,
             'selected' => [],
         ]);
+
+        $resolver->setAllowedTypes('selected', 'array');
     }
 }
