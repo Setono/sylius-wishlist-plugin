@@ -29,35 +29,46 @@ class WishlistActionHandler {
                     onToggle: async function (event, element) {
                         event.preventDefault();
 
-                        const response = await fetch(element.dataset.url, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        });
-
-                        // todo how to handle this?
-                        if (!response.ok) {
-                            throw new Error(`Response status: ${response.status}`);
+                        // Ignore clicks while a request is in flight, so a double click doesn't toggle twice
+                        if (element.disabled) {
+                            return;
                         }
 
-                        /**
-                         * @type {Object}
-                         * @property {string} event - Either 'added' or 'removed'
-                         * @property {string} toggleUrl - The new URL to toggle the wishlist
-                         * @property {string} wishlistItemsCount - The number of items in all wishlists
-                         */
-                        const json = await response.json();
+                        element.disabled = true;
 
-                        element.dataset.url = json.toggleUrl;
-                        element.classList.toggle('ssw-added', json.event === 'added');
+                        try {
+                            const response = await fetch(element.dataset.url, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            });
 
-                        element.dispatchEvent(new CustomEvent(`ssw:product-toggled`, {
-                            bubbles: true,
-                            detail: {
-                                event: json.event,
-                                wishlistItemsCount: json.wishlistItemsCount,
-                            },
-                        }));
+                            // todo how to handle this?
+                            if (!response.ok) {
+                                throw new Error(`Response status: ${response.status}`);
+                            }
+
+                            /**
+                             * @type {Object}
+                             * @property {string} event - Either 'added' or 'removed'
+                             * @property {string} toggleUrl - The new URL to toggle the wishlist
+                             * @property {string} wishlistItemsCount - The number of items in all wishlists
+                             */
+                            const json = await response.json();
+
+                            element.dataset.url = json.toggleUrl;
+                            element.classList.toggle('ssw-added', json.event === 'added');
+
+                            element.dispatchEvent(new CustomEvent(`ssw:product-toggled`, {
+                                bubbles: true,
+                                detail: {
+                                    event: json.event,
+                                    wishlistItemsCount: json.wishlistItemsCount,
+                                },
+                            }));
+                        } finally {
+                            element.disabled = false;
+                        }
                     },
                 }
             },

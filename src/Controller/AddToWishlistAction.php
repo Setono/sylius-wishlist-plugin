@@ -43,8 +43,6 @@ final class AddToWishlistAction
             throw new NotFoundHttpException(sprintf('Product with id %s not found', $id));
         }
 
-        $wishlistItem = $entity instanceof ProductInterface ? $this->wishlistItemFactory->createWithProduct($entity) : $this->wishlistItemFactory->createWithProductVariant($entity);
-
         $preSelectedWishlists = $this->wishlistProvider->getPreSelectedWishlists();
         if ([] === $preSelectedWishlists) {
             $preSelectedWishlists = [$this->wishlistFactory->createNew()];
@@ -57,7 +55,13 @@ final class AddToWishlistAction
             $manager = $this->getManager($wishlist);
             $manager->persist($wishlist);
 
-            $wishlist->addItem($wishlistItem);
+            // Adding is idempotent, so a double click or a stale button in another tab neither duplicates the item
+            // nor violates the unique (wishlist, product, variant) constraint
+            $onWishlist = $entity instanceof ProductInterface ? $wishlist->hasProduct($entity) : $wishlist->hasProductVariant($entity);
+            if (!$onWishlist) {
+                // An item belongs to exactly one wishlist, so each pre-selected wishlist gets its own
+                $wishlist->addItem($entity instanceof ProductInterface ? $this->wishlistItemFactory->createWithProduct($entity) : $this->wishlistItemFactory->createWithProductVariant($entity));
+            }
 
             $wishlistItemsCount += $wishlist->getQuantity();
         }
