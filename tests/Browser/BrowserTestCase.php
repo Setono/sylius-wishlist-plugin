@@ -19,9 +19,10 @@ abstract class BrowserTestCase extends PlaywrightTestCase
 {
     /**
      * playwright-symfony handles every request with the same kernel, like a worker-mode server. Like KernelBrowser
-     * (and PHP-FPM), each request gets fresh services instead, so state that isn't reset between requests (e.g. setono/
-     * client-bundle's cached client) doesn't leak from one visitor or request into the next. The database transaction
-     * survives this, because dama/doctrine-test-bundle keeps its connection in a static
+     * (and PHP-FPM), each request gets fresh services instead, so state that isn't reset between requests doesn't leak
+     * from one visitor or request into the next: setono/client-bundle's cached client would otherwise be handed to
+     * every later browser (https://github.com/Setono/client-bundle/issues/10). The database transaction survives this,
+     * because dama/doctrine-test-bundle keeps its connection in a static
      */
     public function beforeRequest(Request $request): void
     {
