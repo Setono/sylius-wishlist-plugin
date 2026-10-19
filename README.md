@@ -83,7 +83,7 @@ you can listen to (e.g. to update a header counter).
 
 | Package | Version          |
 |---------|------------------|
-| PHP     | `^8.2`           |
+| PHP     | `>=8.3`          |
 | Sylius  | `^2.2`           |
 | Symfony | `^6.4 \|\| ^7.4` |
 | Twig    | `^3.8`           |

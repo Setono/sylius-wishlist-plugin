@@ -2,17 +2,18 @@
 
 ## From 1.x to 2.0
 
-Version 2.0 targets **Sylius 2.2**. It is a hard major upgrade — there is no backwards-compatibility
-layer for Sylius 1.x. If you are still on Sylius 1.x, stay on the `1.x` line of this plugin.
+Version 2.0 targets **Sylius 2.2 and 2.3** (it is developed and tested against 2.3). It is a hard major
+upgrade — there is no backwards-compatibility layer for Sylius 1.x. If you are still on Sylius 1.x, stay on
+the `1.x` line of this plugin. PHP 8.3 is now the minimum, even on Sylius 2.2.
 
 ### 1. Requirements
 
-| Package | 1.x            | 2.0              |
-|---------|----------------|------------------|
-| PHP     | `^8.1`         | `^8.2`           |
-| Sylius  | `^1.13`        | `^2.2`           |
-| Symfony | `^6.4`         | `^6.4 \|\| ^7.4` |
-| Doctrine ORM | `^2`      | `^2.8 \|\| ^3`   |
+| Package      | 1.x       | 2.0                 |
+|--------------|-----------|---------------------|
+| PHP          | `>=8.1`   | `>=8.3`             |
+| Sylius       | `^1.13`   | `^2.2`              |
+| Symfony      | `^6.4`    | `^6.4 \|\| ^7.4`    |
+| Doctrine ORM | `^2`      | `^2.18 \|\| ^3.5`   |
 
 ### 2. Default value / behavior changes
 
@@ -53,16 +54,26 @@ action is required — assets are still injected automatically.
 
 ### 5. Service configuration
 
-Service definitions were converted from XML to the PHP DSL and now use **fully-qualified class names** as
-service IDs (with interface aliases). If you fetched a plugin service by a snake-cased ID, use the FQCN /
-interface instead. The Sylius ResourceBundle-managed IDs are unchanged:
+Service definitions were converted from XML to the PHP DSL (`config/services.php` + `config/services/*.php`).
+Almost every service already used its fully-qualified class name as its ID in 1.x — those IDs, and the
+interface aliases, are unchanged. Two IDs were renamed:
 
-| Unchanged (resource-bundle managed) |
-|-------------------------------------|
-| `setono_sylius_wishlist.factory.*`  |
-| `setono_sylius_wishlist.repository.*` |
-| `setono_sylius_wishlist.manager.*`  |
-| `setono_sylius_wishlist.controller.add_product_to_wishlist` (and the `*_variant` / `remove_*` siblings) |
+| 1.x                                                             | 2.0                                                              |
+|-----------------------------------------------------------------|------------------------------------------------------------------|
+| `setono_sylius_wishlist.controller.add_to_wishlist` (abstract)      | `Setono\SyliusWishlistPlugin\Controller\AddToWishlistAction`      |
+| `setono_sylius_wishlist.controller.remove_from_wishlist` (abstract) | `Setono\SyliusWishlistPlugin\Controller\RemoveFromWishlistAction` |
+
+Both are abstract parent definitions, so this only affects you if you declared your own service with
+`parent:` pointing at one of them.
+
+These IDs are also unchanged:
+
+- The Sylius ResourceBundle-managed `setono_sylius_wishlist.factory.*`, `setono_sylius_wishlist.repository.*`
+  and `setono_sylius_wishlist.manager.*` services.
+- The four concrete add/remove controllers (`setono_sylius_wishlist.controller.add_product_to_wishlist`,
+  `…add_product_variant_to_wishlist`, `…remove_product_from_wishlist`, `…remove_product_variant_from_wishlist`).
+  They keep their snake-cased IDs because the routes reference them by name, and the same class is registered
+  twice, so they can't share one FQCN ID.
 
 ### 6. Removed
 

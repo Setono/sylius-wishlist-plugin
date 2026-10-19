@@ -1,14 +1,15 @@
 {
     "name": "setono/sylius-wishlist-plugin",
-    "description": "Setono example plugin for Sylius.",
+    "description": "Wishlist plugin for Sylius.",
     "license": "MIT",
     "type": "sylius-plugin",
     "keywords": [
         "sylius",
-        "sylius-plugin"
+        "sylius-plugin",
+        "wishlist"
     ],
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.3",
         "doctrine/collections": "^2.0",
         "doctrine/persistence": "^3.0 || ^4.0",
         "setono/client-bundle": "^1.2",
@@ -37,10 +38,10 @@
         "webmozart/assert": "^1.11"
     },
     "require-dev": {
-        "api-platform/symfony": "~4.2.1",
+        "api-platform/symfony": "^4.3.17 || ^5.0",
         "setono/sylius-plugin": "^2.0",
         "sylius/grid-bundle": "^1.15",
-        "sylius/sylius": "~2.2.5",
+        "sylius/sylius": "~2.3.1",
         "symfony/debug-bundle": "^6.4 || ^7.4",
         "symfony/dotenv": "^6.4 || ^7.4",
         "symfony/intl": "^6.4 || ^7.4",

@@ -20,18 +20,14 @@ final class CachedWishlistProvider implements WishlistProviderInterface
 
     public function getWishlists(): array
     {
-        if (null === $this->wishlists) {
-            $this->wishlists = $this->decorated->getWishlists();
-        }
+        $this->wishlists ??= $this->decorated->getWishlists();
 
         return $this->wishlists;
     }
 
     public function getPreSelectedWishlists(): array
     {
-        if (null === $this->preSelectedWishlists) {
-            $this->preSelectedWishlists = $this->decorated->getPreSelectedWishlists();
-        }
+        $this->preSelectedWishlists ??= $this->decorated->getPreSelectedWishlists();
 
         return $this->preSelectedWishlists;
     }

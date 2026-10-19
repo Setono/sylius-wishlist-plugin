@@ -6,13 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Sylius plugin (`setono/sylius-wishlist-plugin`) that adds a wishlist feature to Sylius stores. It is a library/bundle, not an application — the only runnable app is the test Sylius application under `tests/Application/`, which exists to boot the plugin for integration testing and local development.
 
-Target runtime: PHP >= 8.2, Symfony `^6.4 || ^7.4`, Sylius `^2.2`. This is the `2.x` line; the `1.x` branch is for Sylius 1. Use the `8.2` shell alias locally — PHP 8.2 is the declared floor, so PHPStan/Rector flag any 8.3+-only feature; Rector targets `UP_TO_PHP_82`. Config is `phpstan.neon`.
+Target runtime: PHP >= 8.3, Symfony `^6.4 || ^7.4`, Sylius `^2.2` (the split `sylius/*` packages in `require`; never `sylius/sylius`). The test app and CI run on Sylius 2.3 (`require-dev` pins `sylius/sylius: ~2.3.1`), which needs PHP 8.3 — that is why the floor is 8.3 even though Sylius 2.2 itself allows 8.2. Lowest-deps static analysis still covers the 2.2.0 split packages. This is the `2.x` line; the `1.x` branch is for Sylius 1. Use the `8.3` shell alias locally — PHP 8.3 is the declared floor, so Rector targets `UP_TO_PHP_83` and the CI `coding-standards` job is pinned to `php-version: "8.3"` (it must always run on the lowest supported PHP; bump it together with the `composer.json` floor). Config is `phpstan.neon`.
 
 The dev toolchain comes from the **`setono/sylius-plugin`** meta dev-pack (`require-dev`), which provides PHPStan (level max + Symfony/Doctrine/PHPUnit extensions), ECS (`sylius-labs/coding-standard`), Rector, Infection, `shipmonk/composer-dependency-analyser`, Prophecy, and the reusable `setono/sylius-plugin/*@v2` GitHub composite actions used by `.github/workflows/build.yaml`.
 
 The `static-code-analysis` and `dependency-analysis` CI jobs run `composer remove sylius/sylius` (or strip `require-dev`) first, so the analysers see the real split component packages (`sylius/core`, `sylius/order`, …) rather than the `sylius/sylius` monolith pinned in `require-dev`. Locally, with `sylius/sylius` installed, `composer-dependency-analyser` reports false positives (the split packages look "unused" and `sylius/sylius` looks like a prod dep, because the monolith `replace`s them) — that's expected; trust CI.
 
-**api-platform dev pin (gotcha):** `require-dev` pins `api-platform/symfony: ~4.2.1`, not the skeleton's `^4.3.3`. api-platform 4.3.x emits an `object|<class>` PHPDoc union that `symfony/type-info` 7.4.x rejects (`Cannot create union with both "object" and class type`) while loading the API routes, which prevents the whole test app from booting. Sylius 2.2 is built against api-platform 4.2.x, so we pin to it. This only affects the test app (api-platform is not a runtime dep of the plugin). Revisit when the upstream incompatibility is fixed.
+**api-platform dev dep:** `require-dev` lists `api-platform/symfony` (`^4.3.17 || ^5.0`, the same range Sylius 2.3 allows) even though `sylius/sylius` already pulls it in. The `static-code-analysis` job removes `sylius/sylius`, and PHPStan still boots the test kernel, which registers the API Platform bundle. It is not a runtime dependency of the plugin.
 
 ## Commands
 
@@ -42,7 +42,7 @@ bin/console lint:container
 bin/console doctrine:schema:validate -vvv
 ```
 
-To preview the shop in a browser: from `tests/Application`, run `bin/console doctrine:database:create`, `doctrine:schema:create`, `sylius:fixtures:load default`, `assets:install public`, `yarn install && yarn build`, then `symfony server:start`. (Local MySQL is reachable on `127.0.0.1:3306` as `root` with no password.)
+To preview the shop in a browser: from `tests/Application`, run `bin/console doctrine:database:create`, `doctrine:schema:create`, `sylius:fixtures:load default`, `assets:install public`, `yarn install && yarn build` (needs Node `^22.13 || >=24` for Webpack Encore 6), then `symfony server:start`. (Local MySQL is reachable on `127.0.0.1:3306` as `root` with no password.)
 
 ## Architecture
 

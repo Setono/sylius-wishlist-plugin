@@ -6,9 +6,9 @@ namespace Setono\SyliusWishlistPlugin\Controller\DTO;
 
 final readonly class ToggleWishlistResponse
 {
-    public const EVENT_ADDED = 'added';
+    public const string EVENT_ADDED = 'added';
 
-    public const EVENT_REMOVED = 'removed';
+    public const string EVENT_REMOVED = 'removed';
 
     public function __construct(
         public string $event,

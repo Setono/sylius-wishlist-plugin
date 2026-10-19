@@ -13,18 +13,23 @@ jobs:
         if: "github.event_name == 'pull_request'"
         steps:
             -   uses: "setono/sylius-plugin/backwards-compatibility@v2"
+                with:
+                    php-version: "8.3"
 
     coding-standards:
         runs-on: "ubuntu-latest"
         steps:
+            # Always run on the lowest supported PHP version, so syntax newer than the floor is caught
             -   uses: "setono/sylius-plugin/coding-standards@v2"
+                with:
+                    php-version: "8.3"
 
     dependency-analysis:
         runs-on: "ubuntu-latest"
         strategy:
             fail-fast: false
             matrix:
-                php-version: ["8.2", "8.3", "8.4"]
+                php-version: ["8.3", "8.4"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -39,7 +44,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: ["8.2", "8.3", "8.4"]
+                php-version: ["8.3", "8.4"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -54,7 +59,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: ["8.2", "8.3", "8.4"]
+                php-version: ["8.3", "8.4"]
                 dependencies: ["lowest", "highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -70,7 +75,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: ["8.2", "8.3", "8.4"]
+                php-version: ["8.3", "8.4"]
                 dependencies: ["highest"]
                 symfony: ["~6.4.0", "~7.4.0"]
         steps:
@@ -80,6 +85,7 @@ jobs:
                     dependencies: "${{ matrix.dependencies }}"
                     symfony: "${{ matrix.symfony }}"
                     testsuite: "functional"
+                    node-version: "22" # Webpack Encore 6 (Sylius 2.3) requires Node ^22.13 || >=24
 
     mutation-tests:
         runs-on: "ubuntu-latest"

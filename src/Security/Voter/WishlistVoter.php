@@ -7,6 +7,7 @@ namespace Setono\SyliusWishlistPlugin\Security\Voter;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
@@ -14,7 +15,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
  */
 final class WishlistVoter extends Voter
 {
-    final public const EDIT = 'wishlist_edit';
+    final public const string EDIT = 'wishlist_edit';
 
     public function __construct(private readonly WishlistProviderInterface $wishlistProvider)
     {
@@ -26,9 +27,11 @@ final class WishlistVoter extends Voter
     }
 
     /**
+     * The $vote argument is passed by Symfony >= 7.3 (and required from Symfony 8); on 6.4 it is never given
+     *
      * @param mixed|WishlistInterface $subject
      */
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
     {
         return in_array($subject, $this->wishlistProvider->getWishlists(), true);
     }
