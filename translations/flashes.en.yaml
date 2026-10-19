@@ -1,5 +1,6 @@
 setono_sylius_wishlist:
     no_wishlists: You haven't added anything to your wishlist yet
+    products_out_of_stock_not_added_to_cart: "There isn't enough stock of these products, so they weren't added to your cart: %products%"
     products_unavailable_not_added_to_cart: "These products are unavailable and weren't added to your cart: %products%"
     products_without_variant_not_added_to_cart: "These products weren't added to your cart because no variant has been selected: %products%"
     wishlist_added_to_cart: "Products from the wishlist have been added to your cart"

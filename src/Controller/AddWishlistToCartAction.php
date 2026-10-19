@@ -14,6 +14,7 @@ use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
+use Sylius\Component\Inventory\Checker\AvailabilityCheckerInterface;
 use Sylius\Component\Order\Context\CartContextInterface;
 use Sylius\Component\Order\Modifier\OrderItemQuantityModifierInterface;
 use Sylius\Component\Order\Modifier\OrderModifierInterface;
@@ -42,6 +43,7 @@ final class AddWishlistToCartAction
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly CartItemFactoryInterface $cartItemFactory,
         ManagerRegistry $managerRegistry,
+        private readonly AvailabilityCheckerInterface $availabilityChecker,
     ) {
         $this->managerRegistry = $managerRegistry;
     }
@@ -62,6 +64,7 @@ final class AddWishlistToCartAction
         $added = false;
         $productsWithoutVariant = [];
         $unavailableProducts = [];
+        $productsOutOfStock = [];
 
         // Instead of failing the whole wishlist on an item that can't go into the cart, we add everything else
         // and tell the visitor which products weren't added and why
@@ -81,6 +84,13 @@ final class AddWishlistToCartAction
 
             if (!self::isAvailable($product, $variant, $channel)) {
                 $unavailableProducts[] = self::getName($product);
+
+                continue;
+            }
+
+            // Like Sylius' own add to cart, the quantity already in the cart counts too
+            if (!$this->availabilityChecker->isStockSufficient($variant, $item->getQuantity() + self::getQuantityInCart($cart, $variant))) {
+                $productsOutOfStock[] = self::getName($product);
 
                 continue;
             }
@@ -106,6 +116,7 @@ final class AddWishlistToCartAction
 
         $this->addProductsFlash($request, 'setono_sylius_wishlist.products_without_variant_not_added_to_cart', $productsWithoutVariant);
         $this->addProductsFlash($request, 'setono_sylius_wishlist.products_unavailable_not_added_to_cart', $unavailableProducts);
+        $this->addProductsFlash($request, 'setono_sylius_wishlist.products_out_of_stock_not_added_to_cart', $productsOutOfStock);
 
         return new RedirectResponse($this->urlGenerator->generate('setono_sylius_wishlist_shop_wishlist_show', [
             'uuid' => $uuid,
@@ -123,6 +134,20 @@ final class AddWishlistToCartAction
             $variant->isEnabled() &&
             null !== $variant->getChannelPricingForChannel($channel)?->getPrice()
         ;
+    }
+
+    /**
+     * Adding a variant that is already in the cart increases the quantity of its cart item, so there is at most one
+     */
+    private static function getQuantityInCart(OrderInterface $cart, ProductVariantInterface $variant): int
+    {
+        foreach ($cart->getItems() as $cartItem) {
+            if ($cartItem->getVariant() === $variant) {
+                return $cartItem->getQuantity();
+            }
+        }
+
+        return 0;
     }
 
     /**

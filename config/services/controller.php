@@ -15,6 +15,7 @@ use Setono\SyliusWishlistPlugin\Controller\WishlistIndexAction;
 use Setono\SyliusWishlistPlugin\Factory\WishlistFactoryInterface;
 use Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
+use Sylius\Component\Inventory\Checker\AvailabilityCheckerInterface;
 use Sylius\Component\Order\Modifier\OrderItemQuantityModifierInterface;
 use Sylius\Component\Order\Modifier\OrderModifierInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -76,6 +77,7 @@ return static function (ContainerConfigurator $container): void {
             service('router'),
             service('sylius.factory.order_item'),
             service('doctrine'),
+            service(AvailabilityCheckerInterface::class),
         ])
     ;
 

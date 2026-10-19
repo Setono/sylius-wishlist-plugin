@@ -17,6 +17,7 @@
         "setono/doctrine-orm-trait": "^1.4",
         "sylius/core": "^2.2",
         "sylius/core-bundle": "^2.2",
+        "sylius/inventory": "^2.2",
         "sylius/order": "^2.2",
         "sylius/product-bundle": "^2.2",
         "sylius/resource-bundle": "^1.12",

@@ -18,8 +18,8 @@ final class AddWishlistToCartTest extends WebTestCase
 
     private KernelBrowser $client;
 
-    /** @var array<int, int|null> the original fixture prices by channel pricing id */
-    private array $originalPrices = [];
+    /** @var list<array{string, list<int|null>}> the statements that restore the fixture data a test changed */
+    private array $restoreStatements = [];
 
     protected function setUp(): void
     {
@@ -32,8 +32,8 @@ final class AddWishlistToCartTest extends WebTestCase
     {
         $this->deleteWishlists();
 
-        foreach ($this->originalPrices as $id => $price) {
-            $this->connection()->executeStatement('UPDATE sylius_channel_pricing SET price = ? WHERE id = ?', [$price, $id]);
+        foreach ($this->restoreStatements as [$sql, $params]) {
+            $this->connection()->executeStatement($sql, $params);
         }
 
         parent::tearDown();
@@ -80,7 +80,7 @@ final class AddWishlistToCartTest extends WebTestCase
         foreach ($this->connection()->fetchAllKeyValue('SELECT id, price FROM sylius_channel_pricing WHERE product_variant_id = ?', [$unpriced['variant_id']]) as $id => $price) {
             self::assertIsNumeric($id);
             self::assertTrue(null === $price || is_numeric($price));
-            $this->originalPrices[(int) $id] = null === $price ? null : (int) $price;
+            $this->restoreStatements[] = ['UPDATE sylius_channel_pricing SET price = ? WHERE id = ?', [null === $price ? null : (int) $price, (int) $id]];
         }
         $this->connection()->executeStatement('UPDATE sylius_channel_pricing SET price = NULL WHERE product_variant_id = ?', [$unpriced['variant_id']]);
 
@@ -94,6 +94,39 @@ final class AddWishlistToCartTest extends WebTestCase
         self::assertStringContainsString('Products from the wishlist have been added to your cart', $content);
         self::assertStringContainsString(sprintf("unavailable and weren't added to your cart: %s", $unpriced['name']), $content);
         self::assertStringContainsString('Unavailable', $content);
+    }
+
+    #[Test]
+    public function it_adds_the_items_in_stock_and_names_the_products_without_enough_stock(): void
+    {
+        $inStock = $this->fetchProduct('NOT EXISTS');
+        $outOfStock = $this->fetchProduct('NOT EXISTS', 1);
+
+        $this->client->request('GET', sprintf('/en_US/wishlist/add-product/%d', $inStock['id']));
+        $this->client->request('GET', sprintf('/en_US/wishlist/add-product/%d', $outOfStock['id']));
+
+        // The fixtures don't track stock, so we make one variant tracked and sold out
+        $original = $this->connection()->fetchAssociative('SELECT tracked, on_hand, on_hold FROM sylius_product_variant WHERE id = ?', [$outOfStock['variant_id']]);
+        self::assertIsArray($original);
+        self::assertIsNumeric($original['tracked']);
+        self::assertIsNumeric($original['on_hand']);
+        self::assertIsNumeric($original['on_hold']);
+        $this->restoreStatements[] = [
+            'UPDATE sylius_product_variant SET tracked = ?, on_hand = ?, on_hold = ? WHERE id = ?',
+            [(int) $original['tracked'], (int) $original['on_hand'], (int) $original['on_hold'], $outOfStock['variant_id']],
+        ];
+        $this->connection()->executeStatement('UPDATE sylius_product_variant SET tracked = 1, on_hand = 0, on_hold = 0 WHERE id = ?', [$outOfStock['variant_id']]);
+
+        $uuid = $this->connection()->fetchOne("SELECT uuid FROM setono_sylius_wishlist__wishlist WHERE kind = 'guest'");
+        self::assertIsString($uuid);
+
+        self::assertSame([$inStock['variant_id']], $this->addWishlistToCart($uuid));
+
+        $content = $this->followRedirect();
+        self::assertStringContainsString('Products from the wishlist have been added to your cart', $content);
+        self::assertStringContainsString(sprintf("so they weren't added to your cart: %s", $outOfStock['name']), $content);
+        // The owner already sees which row lacks stock
+        self::assertStringContainsString('The inventory is insufficient', $content);
     }
 
     /**
