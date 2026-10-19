@@ -37,7 +37,7 @@
             <div class="row justify-content-center mb-4">
                 <div class="col-12 col-lg-8">
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" readonly value="{{ url('setono_sylius_wishlist_shop_wishlist_show', { 'uuid': wishlist.uuid }) }}">
+                        <input type="text" class="form-control" readonly value="{{ url('setono_sylius_wishlist_shop_wishlist_show', { 'uuid': wishlist.uuid }) }}" {{ sylius_test_html_attribute('wishlist-url') }}>
                         <button class="btn btn-outline-secondary" type="button" data-wishlist-copy>
                             {{ ux_icon('tabler:copy') }} {{ 'setono_sylius_wishlist.ui.copy'|trans }}
                         </button>
@@ -64,7 +64,7 @@
                     <tbody>
                         {% for key, item in wishlist.items %}
                             {% set available = setono_sylius_wishlist_is_available(item) %}
-                            <tr>
+                            <tr {{ sylius_test_html_attribute('wishlist-item', item.product.code) }}>
                                 <td style="width: 80px">
                                     {# @symfony-lsp-ignore twig_component.not_found (false positive, see https://github.com/symfony/language-tools/issues/122) #}
                                     {{ component('sylius_shop:main_image', {

@@ -46,6 +46,7 @@
         "api-platform/symfony": "^4.3.17 || ^5.0",
         "dama/doctrine-test-bundle": "^8.3",
         "gedmo/doctrine-extensions": "^3.22.2",
+        "playwright-php/playwright-symfony": "^0.11",
         "setono/sylius-plugin": "^2.0",
         "sylius/grid-bundle": "^1.15",
         "sylius/sylius": "~2.3.1",

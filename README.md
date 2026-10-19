@@ -255,6 +255,11 @@ composer check-style    # Easy Coding Standard
 composer phpunit        # unit and functional tests
 vendor/bin/infection    # mutation testing (unit tests)
 
+# browser tests in a real Chromium (needs Node 20+; the assets must be copies, not symlinks):
+vendor/bin/playwright-install chromium
+(cd tests/Application && bin/console assets:install public)
+vendor/bin/phpunit --testsuite browser
+
 # the test application's database, once:
 (cd tests/Application && APP_ENV=test bin/console doctrine:database:create && APP_ENV=test bin/console doctrine:schema:create && APP_ENV=test bin/console sylius:fixtures:load -n)
 
