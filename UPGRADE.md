@@ -28,7 +28,11 @@ the `1.x` line of this plugin. PHP 8.3 is now the minimum, even on Sylius 2.2.
   attached, so it stayed a guest wishlist: the customer couldn't see it on other devices, and the next visitor
   on the same browser could (see [#10](https://github.com/Setono/sylius-wishlist-plugin/issues/10) and
   [#11](https://github.com/Setono/sylius-wishlist-plugin/issues/11)). Now the guest items are copied onto the
-  customer's first wishlist (a new one is created if they have none) and the guest wishlist is deleted.
+  customer's first wishlist (a new one is created if they have none). The guest wishlist is emptied, detached
+  from the browser and kept as a placeholder pointing to that wishlist, so its old URL redirects the customer
+  there. Anyone else gets a 404 for it (see [#13](https://github.com/Setono/sylius-wishlist-plugin/issues/13)).
+  The pointer is a new nullable `merged_into_id` column on `setono_sylius_wishlist__wishlist`, so generate and
+  run a migration (`doctrine:migrations:diff`).
   Only customer (shop user) logins do this; an administrator logging in leaves the guest wishlist alone.
   Guest wishlists that have a user attached are no longer returned for the browser's client id. Run the data
   fix in §7 for the wishlists 1.x already "converted".

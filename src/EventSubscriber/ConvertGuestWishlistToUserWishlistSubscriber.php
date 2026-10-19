@@ -18,7 +18,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 
 /**
- * When the user logs in, we copy the items of the guest wishlist onto the user's wishlist and remove the guest wishlist.
+ * When the user logs in, we move the items of the guest wishlist onto the user's wishlist and detach the guest
+ * wishlist from the browser.
  *
  * Doctrine can't change the type (i.e. the discriminator) of an existing entity, so the guest wishlist can't
  * simply be turned into a user wishlist
@@ -61,18 +62,26 @@ final class ConvertGuestWishlistToUserWishlistSubscriber implements EventSubscri
                 continue;
             }
 
-            if ($guestWishlist->hasItems()) {
-                $userWishlist ??= $this->getUserWishlist($user);
+            $manager = $this->getManager($guestWishlist);
 
-                foreach ($guestWishlist->getItems() as $item) {
-                    $this->copyItem($item, $userWishlist);
-                }
+            if (!$guestWishlist->hasItems()) {
+                $manager->remove($guestWishlist);
+
+                continue;
             }
 
-            // The guest wishlist is tied to the browser, not the user. If we kept it, the next anonymous visitor
-            // (or another customer) on this browser would get the items that now belong to this user
-            $manager = $this->getManager($guestWishlist);
-            $manager->remove($guestWishlist);
+            $userWishlist ??= $this->getUserWishlist($user);
+
+            foreach ($guestWishlist->getItems()->toArray() as $item) {
+                $this->copyItem($item, $userWishlist);
+                $guestWishlist->removeItem($item);
+            }
+
+            // The guest wishlist is tied to the browser, not the user. Unless we detach it, the next anonymous visitor
+            // (or another customer) on this browser would get the items that now belong to this user.
+            // We keep it as an empty placeholder, so its URL (an open tab, a bookmark) leads the user to their wishlist
+            $guestWishlist->setClientId(null);
+            $guestWishlist->setMergedInto($userWishlist);
         }
 
         $manager?->flush();

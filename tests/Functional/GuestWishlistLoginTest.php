@@ -53,7 +53,11 @@ final class GuestWishlistLoginTest extends WebTestCase
         $this->logIn();
 
         self::assertSame([['kind' => 'user', 'product_id' => $product]], $this->items());
-        self::assertSame([['kind' => 'user', 'user_id' => $this->userId()]], $this->wishlists());
+        self::assertSame([
+            // The emptied guest wishlist is detached from the browser and points to where its items went
+            ['kind' => 'guest', 'user_id' => null, 'client_id' => null, 'merged_into_user_id' => $this->userId()],
+            ['kind' => 'user', 'user_id' => $this->userId(), 'client_id' => null, 'merged_into_user_id' => null],
+        ], $this->wishlists());
     }
 
     #[Test]
@@ -74,7 +78,36 @@ final class GuestWishlistLoginTest extends WebTestCase
             ['kind' => 'user', 'product_id' => $first],
             ['kind' => 'user', 'product_id' => $second],
         ], $this->items());
-        self::assertSame([['kind' => 'user', 'user_id' => $this->userId()]], $this->wishlists());
+        self::assertSame([
+            ['kind' => 'user', 'user_id' => $this->userId(), 'client_id' => null, 'merged_into_user_id' => null],
+            ['kind' => 'guest', 'user_id' => null, 'client_id' => null, 'merged_into_user_id' => $this->userId()],
+        ], $this->wishlists());
+    }
+
+    #[Test]
+    public function it_redirects_only_the_owner_from_the_old_guest_wishlist_url(): void
+    {
+        [$product] = $this->productIds(1);
+
+        $this->addToWishlist($product);
+        $guestWishlistUrl = sprintf('/en_US/wishlists/%s', $this->uuid('guest'));
+
+        $this->client->request('GET', $guestWishlistUrl);
+        self::assertResponseIsSuccessful();
+
+        $this->logIn();
+
+        // E.g. an open tab or a bookmark of the guest wishlist
+        $this->client->request('GET', $guestWishlistUrl);
+        self::assertResponseRedirects(sprintf('/en_US/wishlists/%s', $this->uuid('user')), 302);
+
+        $this->client->followRedirect();
+        self::assertResponseIsSuccessful();
+
+        // Anyone else might have been given the guest wishlist's URL, but the user wishlist may hold more than that
+        $this->logOut();
+        $this->client->request('GET', $guestWishlistUrl);
+        self::assertResponseStatusCodeSame(404);
     }
 
     #[Test]
@@ -174,17 +207,29 @@ final class GuestWishlistLoginTest extends WebTestCase
     }
 
     /**
-     * @return list<array{kind: string, user_id: int|null}>
+     * @return list<array{kind: string, user_id: int|null, client_id: string|null, merged_into_user_id: int|null}>
      */
     private function wishlists(): array
     {
-        /** @var list<array{kind: string, user_id: int|string|null}> $rows */
-        $rows = $this->connection()->fetchAllAssociative('SELECT kind, user_id FROM setono_sylius_wishlist__wishlist ORDER BY id');
+        /** @var list<array{kind: string, user_id: int|string|null, client_id: string|null, merged_into_user_id: int|string|null}> $rows */
+        $rows = $this->connection()->fetchAllAssociative(
+            'SELECT w.kind, w.user_id, w.clientId AS client_id, m.user_id AS merged_into_user_id FROM setono_sylius_wishlist__wishlist w LEFT JOIN setono_sylius_wishlist__wishlist m ON m.id = w.merged_into_id ORDER BY w.id',
+        );
 
         return array_map(static fn (array $row): array => [
             'kind' => $row['kind'],
             'user_id' => null === $row['user_id'] ? null : (int) $row['user_id'],
+            'client_id' => $row['client_id'],
+            'merged_into_user_id' => null === $row['merged_into_user_id'] ? null : (int) $row['merged_into_user_id'],
         ], $rows);
+    }
+
+    private function uuid(string $kind): string
+    {
+        $uuid = $this->connection()->fetchOne('SELECT uuid FROM setono_sylius_wishlist__wishlist WHERE kind = ?', [$kind]);
+        self::assertIsString($uuid);
+
+        return $uuid;
     }
 
     /**

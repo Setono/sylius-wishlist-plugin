@@ -10,6 +10,8 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Setono\SyliusWishlistPlugin\Controller\ShowWishlistAction;
 use Setono\SyliusWishlistPlugin\Form\Type\WishlistType;
+use Setono\SyliusWishlistPlugin\Model\GuestWishlist;
+use Setono\SyliusWishlistPlugin\Model\UserWishlist;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
 use Setono\SyliusWishlistPlugin\Security\Voter\WishlistVoter;
@@ -41,6 +43,112 @@ final class ShowWishlistActionTest extends TestCase
         $this->expectException(NotFoundHttpException::class);
 
         $action(new Request(), 'missing');
+    }
+
+    #[Test]
+    #[DataProvider('provideMethods')]
+    public function it_redirects_the_owner_from_a_merged_guest_wishlist_to_the_user_wishlist(string $method): void
+    {
+        $userWishlist = new UserWishlist();
+        $guestWishlist = new GuestWishlist();
+        $guestWishlist->setMergedInto($userWishlist);
+
+        $form = $this->form(true);
+        $form->expects(self::never())->method('handleRequest');
+
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
+        $authorizationChecker
+            ->expects(self::once())
+            ->method('isGranted')
+            ->with(WishlistVoter::EDIT, $userWishlist)
+            ->willReturn(true)
+        ;
+
+        $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
+        $urlGenerator
+            ->expects(self::once())
+            ->method('generate')
+            ->with('setono_sylius_wishlist_shop_wishlist_show', ['uuid' => $userWishlist->getUuid()])
+            ->willReturn('/wishlists/user-wishlist')
+        ;
+
+        $action = new ShowWishlistAction(
+            $this->repository($guestWishlist),
+            $this->formFactory($form),
+            $authorizationChecker,
+            $this->twig(),
+            $urlGenerator,
+        );
+
+        $response = $action(Request::create('/wishlists/uuid', $method), 'uuid');
+
+        self::assertInstanceOf(RedirectResponse::class, $response);
+        self::assertSame(302, $response->getStatusCode());
+        self::assertSame('/wishlists/user-wishlist', $response->getTargetUrl());
+    }
+
+    #[Test]
+    #[DataProvider('provideMethods')]
+    public function it_throws_not_found_to_anyone_else_viewing_a_merged_guest_wishlist(string $method): void
+    {
+        $userWishlist = new UserWishlist();
+        $guestWishlist = new GuestWishlist();
+        $guestWishlist->setMergedInto($userWishlist);
+
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
+        $authorizationChecker
+            ->expects(self::once())
+            ->method('isGranted')
+            ->with(WishlistVoter::EDIT, $userWishlist)
+            ->willReturn(false)
+        ;
+
+        $action = new ShowWishlistAction(
+            $this->repository($guestWishlist),
+            $this->formFactory($this->form(false)),
+            $authorizationChecker,
+            $this->twig(),
+            $this->urlGenerator(),
+        );
+
+        $this->expectException(NotFoundHttpException::class);
+
+        $action(Request::create('/wishlists/uuid', $method), 'uuid');
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function provideMethods(): iterable
+    {
+        yield 'GET' => ['GET'];
+        yield 'PATCH' => ['PATCH'];
+    }
+
+    #[Test]
+    public function it_renders_a_guest_wishlist_that_has_not_been_merged(): void
+    {
+        $guestWishlist = new GuestWishlist();
+
+        $twig = $this->createMock(Environment::class);
+        $twig
+            ->expects(self::once())
+            ->method('render')
+            ->with('@SetonoSyliusWishlistPlugin/shop/wishlist/show.html.twig', self::callback(
+                static fn (array $context): bool => $context['wishlist'] === $guestWishlist,
+            ))
+            ->willReturn('rendered')
+        ;
+
+        $action = new ShowWishlistAction(
+            $this->repository($guestWishlist),
+            $this->formFactory($this->form(false)),
+            $this->authorizationChecker(false),
+            $twig,
+            $this->urlGenerator(),
+        );
+
+        self::assertSame('rendered', $action(new Request(), 'uuid')->getContent());
     }
 
     #[Test]

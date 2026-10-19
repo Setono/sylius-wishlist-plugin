@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Setono\SyliusWishlistPlugin\Controller;
 
 use Setono\SyliusWishlistPlugin\Form\Type\WishlistType;
+use Setono\SyliusWishlistPlugin\Model\GuestWishlistInterface;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
 use Setono\SyliusWishlistPlugin\Security\Voter\WishlistVoter;
@@ -38,6 +39,19 @@ final readonly class ShowWishlistAction
 
         if (null === $wishlist) {
             throw new NotFoundHttpException(sprintf('Wishlist with id %s not found', $uuid));
+        }
+
+        // The guest logged in, so the items of this guest wishlist were moved onto a user wishlist. Only the owner of that
+        // wishlist is redirected: it may hold items that were never on the (maybe shared) guest wishlist, and the
+        // redirect would reveal its URL. See https://github.com/Setono/sylius-wishlist-plugin/issues/13
+        if ($wishlist instanceof GuestWishlistInterface && null !== $mergedInto = $wishlist->getMergedInto()) {
+            if (!$this->authorizationChecker->isGranted(WishlistVoter::EDIT, $mergedInto)) {
+                throw new NotFoundHttpException(sprintf('Wishlist with id %s not found', $uuid));
+            }
+
+            return new RedirectResponse($this->urlGenerator->generate('setono_sylius_wishlist_shop_wishlist_show', [
+                'uuid' => $mergedInto->getUuid(),
+            ]));
         }
 
         // A wishlist may be viewed by anyone holding its (shareable) URL, but only its owner may edit it.
