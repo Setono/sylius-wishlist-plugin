@@ -9,6 +9,7 @@ use Playwright\Locator\LocatorInterface;
 use Playwright\Page\PageInterface;
 use Playwright\Symfony\Test\PlaywrightTestCase;
 use function Playwright\Testing\expect;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -29,15 +30,12 @@ abstract class BrowserTestCase extends PlaywrightTestCase
     {
         parent::beforeRequest($request);
 
-        self::currentKernel()?->shutdown();
-    }
-
-    /**
-     * KernelTestCase::$kernel is nullable from Symfony 7, but declared non-nullable on 6.4 even though it can be null
-     */
-    private static function currentKernel(): ?KernelInterface
-    {
-        return self::$kernel;
+        // KernelTestCase::$kernel is ?KernelInterface on Symfony 7 but declared a non-nullable KernelInterface on 6.4,
+        // so reading it directly can't pass static analysis on both. Reading it through reflection can
+        $kernel = (new \ReflectionProperty(KernelTestCase::class, 'kernel'))->getValue();
+        if ($kernel instanceof KernelInterface) {
+            $kernel->shutdown();
+        }
     }
 
     /**
