@@ -3,6 +3,7 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Adaugă lista de dorințe în coș
         copy: Copiază
         inventory_insufficient: Stocul este insuficient pentru cantitatea pe care doriți să o adăugați în lista de dorințe
+        item_unavailable: "Acest articol nu este disponibil momentan, așa că nu poate fi adăugat în coș"
         note: Notă
         remove_from_wishlist: Elimină
         select_variant: Selectați varianta...

@@ -129,6 +129,37 @@ final class AddWishlistToCartTest extends WebTestCase
         self::assertStringContainsString('The inventory is insufficient', $content);
     }
 
+    #[Test]
+    public function it_flags_a_disabled_product_on_the_wishlist_and_does_not_add_it_to_the_cart(): void
+    {
+        $enabled = $this->fetchProduct('NOT EXISTS');
+        $disabled = $this->fetchProduct('NOT EXISTS', 1);
+
+        $this->client->request('GET', sprintf('/en_US/wishlist/add-product/%d', $enabled['id']));
+        $this->client->request('GET', sprintf('/en_US/wishlist/add-product/%d', $disabled['id']));
+
+        $this->restoreStatements[] = ['UPDATE sylius_product SET enabled = 1 WHERE id = ?', [$disabled['id']]];
+        $this->connection()->executeStatement('UPDATE sylius_product SET enabled = 0 WHERE id = ?', [$disabled['id']]);
+
+        $uuid = $this->connection()->fetchOne("SELECT uuid FROM setono_sylius_wishlist__wishlist WHERE kind = 'guest'");
+        self::assertIsString($uuid);
+
+        $this->client->request('GET', sprintf('/en_US/wishlists/%s', $uuid));
+        self::assertResponseIsSuccessful();
+        $content = html_entity_decode((string) $this->client->getResponse()->getContent(), \ENT_QUOTES);
+
+        self::assertSame(1, substr_count($content, "This item is currently unavailable, so it can't be added to the cart"));
+        self::assertStringContainsString('Unavailable', $content);
+        // Sylius has no page for a disabled product, so it isn't linked
+        self::assertStringContainsString(sprintf('/en_US/products/%s"', $enabled['slug']), $content);
+        self::assertStringNotContainsString(sprintf('/en_US/products/%s"', $disabled['slug']), $content);
+
+        self::assertSame([$enabled['variant_id']], $this->addWishlistToCart($uuid));
+
+        $content = $this->followRedirect();
+        self::assertStringContainsString(sprintf("unavailable and weren't added to your cart: %s", $disabled['name']), $content);
+    }
+
     /**
      * @return list<int> the variants in the cart that was created by adding the wishlist to it
      */
@@ -166,25 +197,26 @@ final class AddWishlistToCartTest extends WebTestCase
     /**
      * @param 'EXISTS'|'NOT EXISTS' $options EXISTS for a configurable product, NOT EXISTS for a simple one
      *
-     * @return array{id: int, name: string, variant_id: int}
+     * @return array{id: int, name: string, slug: string, variant_id: int}
      */
     private function fetchProduct(string $options, int $offset = 0): array
     {
         $row = $this->connection()->fetchAssociative(sprintf(
-            "SELECT p.id, t.name, MIN(v.id) AS variant_id FROM sylius_product p
+            "SELECT p.id, t.name, t.slug, MIN(v.id) AS variant_id FROM sylius_product p
                 JOIN sylius_product_translation t ON t.translatable_id = p.id AND t.locale = 'en_US'
                 JOIN sylius_product_variant v ON v.product_id = p.id
                 WHERE p.enabled = 1 AND %s (SELECT 1 FROM sylius_product_options po WHERE po.product_id = p.id)
-                GROUP BY p.id, t.name ORDER BY p.id LIMIT 1 OFFSET %d",
+                GROUP BY p.id, t.name, t.slug ORDER BY p.id LIMIT 1 OFFSET %d",
             $options,
             $offset,
         ));
         self::assertIsArray($row, 'Load the fixtures (sylius:fixtures:load) before running the functional tests');
         self::assertIsNumeric($row['id']);
         self::assertIsString($row['name']);
+        self::assertIsString($row['slug']);
         self::assertIsNumeric($row['variant_id']);
 
-        return ['id' => (int) $row['id'], 'name' => $row['name'], 'variant_id' => (int) $row['variant_id']];
+        return ['id' => (int) $row['id'], 'name' => $row['name'], 'slug' => $row['slug'], 'variant_id' => (int) $row['variant_id']];
     }
 
     private function deleteWishlists(): void

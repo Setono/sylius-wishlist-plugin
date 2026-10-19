@@ -3,6 +3,7 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Додати список бажань у кошик
         copy: Копіювати
         inventory_insufficient: Залишків на складі недостатньо для кількості, яку ви хочете додати до списку бажань
+        item_unavailable: "Цей товар зараз недоступний, тому його не можна додати до кошика"
         note: Примітка
         remove_from_wishlist: Видалити
         select_variant: Виберіть варіант...

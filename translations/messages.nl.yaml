@@ -3,6 +3,7 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Verlanglijst aan winkelwagen toevoegen
         copy: Kopiëren
         inventory_insufficient: De voorraad is onvoldoende voor de hoeveelheid die je aan de verlanglijst wilt toevoegen
+        item_unavailable: "Dit artikel is momenteel niet beschikbaar en kan daarom niet aan de winkelwagen worden toegevoegd"
         note: Notitie
         remove_from_wishlist: Verwijderen
         select_variant: Selecteer variant...

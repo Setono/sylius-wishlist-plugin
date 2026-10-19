@@ -12,6 +12,7 @@ use Setono\SyliusWishlistPlugin\Controller\RemoveWishlistItemAction;
 use Setono\SyliusWishlistPlugin\Controller\ShowWishlistAction;
 use Setono\SyliusWishlistPlugin\Controller\WishlistController;
 use Setono\SyliusWishlistPlugin\Controller\WishlistIndexAction;
+use Setono\SyliusWishlistPlugin\Checker\WishlistItemAvailabilityCheckerInterface;
 use Setono\SyliusWishlistPlugin\Factory\WishlistFactoryInterface;
 use Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
@@ -78,6 +79,7 @@ return static function (ContainerConfigurator $container): void {
             service('sylius.factory.order_item'),
             service('doctrine'),
             service(AvailabilityCheckerInterface::class),
+            service(WishlistItemAvailabilityCheckerInterface::class),
         ])
     ;
 

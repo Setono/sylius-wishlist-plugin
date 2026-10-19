@@ -3,6 +3,7 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Aggiungi la lista dei desideri al carrello
         copy: Copia
         inventory_insufficient: La disponibilità non è sufficiente per la quantità che vuoi aggiungere alla lista dei desideri
+        item_unavailable: "Questo articolo al momento non è disponibile, quindi non può essere aggiunto al carrello"
         note: Nota
         remove_from_wishlist: Rimuovi
         select_variant: Seleziona variante...

@@ -6,6 +6,7 @@ namespace Setono\SyliusWishlistPlugin\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Setono\Doctrine\ORMTrait;
+use Setono\SyliusWishlistPlugin\Checker\WishlistItemAvailabilityCheckerInterface;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
 use Sylius\Component\Core\Factory\CartItemFactoryInterface;
@@ -44,6 +45,7 @@ final class AddWishlistToCartAction
         private readonly CartItemFactoryInterface $cartItemFactory,
         ManagerRegistry $managerRegistry,
         private readonly AvailabilityCheckerInterface $availabilityChecker,
+        private readonly WishlistItemAvailabilityCheckerInterface $wishlistItemAvailabilityChecker,
     ) {
         $this->managerRegistry = $managerRegistry;
     }
@@ -74,16 +76,17 @@ final class AddWishlistToCartAction
                 continue;
             }
 
-            // A configurable product can be put on the wishlist before a variant is chosen
-            $variant = $item->getVariant();
-            if (null === $variant) {
-                $productsWithoutVariant[] = self::getName($product);
+            // Checked before the variant: choosing a variant doesn't help if the product isn't sold anymore
+            if (!$this->wishlistItemAvailabilityChecker->isAvailable($item, $channel)) {
+                $unavailableProducts[] = self::getName($product);
 
                 continue;
             }
 
-            if (!self::isAvailable($product, $variant, $channel)) {
-                $unavailableProducts[] = self::getName($product);
+            // A configurable product can be put on the wishlist before a variant is chosen
+            $variant = $item->getVariant();
+            if (null === $variant) {
+                $productsWithoutVariant[] = self::getName($product);
 
                 continue;
             }
@@ -121,19 +124,6 @@ final class AddWishlistToCartAction
         return new RedirectResponse($this->urlGenerator->generate('setono_sylius_wishlist_shop_wishlist_show', [
             'uuid' => $uuid,
         ]));
-    }
-
-    /**
-     * Wishlist items can stay around long after the product stopped being sold. Sylius can't price a variant without
-     * a price in the channel (adding it to the cart would throw), and disabled products can't be bought
-     */
-    private static function isAvailable(ProductInterface $product, ProductVariantInterface $variant, ChannelInterface $channel): bool
-    {
-        return $product->isEnabled() &&
-            $product->hasChannel($channel) &&
-            $variant->isEnabled() &&
-            null !== $variant->getChannelPricingForChannel($channel)?->getPrice()
-        ;
     }
 
     /**

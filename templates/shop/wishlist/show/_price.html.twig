@@ -4,8 +4,9 @@
 {# A product-level item (no variant chosen yet) shows the price of the product's default variant #}
 {% set variant = item.variant ?: item.product|sylius_resolve_variant %}
 {% set channelPricing = variant is not null ? variant.getChannelPricingForChannel(sylius.channel) : null %}
+{% set available = setono_sylius_wishlist_is_available(item) %}
 
-{% if channelPricing is not null and channelPricing.price is not null %}
+{% if available and channelPricing is not null and channelPricing.price is not null %}
     {% set hasDiscount = variant|sylius_has_discount({'channel': sylius.channel}) %}
 
     {% if hasDiscount %}
@@ -17,7 +18,7 @@
     <span>
         {{ money.calculatePrice(variant) }}
     </span>
-{% elseif variant is not null %}
+{% elseif variant is not null or not available %}
     {# Sylius can't calculate a price without one in this channel (it throws), e.g. for a product that is no longer sold here #}
     <span class="text-body-secondary">{{ 'sylius.ui.unavailable'|trans }}</span>
 {% endif %}

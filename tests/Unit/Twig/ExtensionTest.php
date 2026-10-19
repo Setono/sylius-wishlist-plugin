@@ -22,6 +22,7 @@ final class ExtensionTest extends TestCase
         self::assertSame([
             'setono_sylius_wishlist_on_wishlist' => [Runtime::class, 'onWishlist'],
             'setono_sylius_wishlist_has_wishlist' => [Runtime::class, 'hasWishlist'],
+            'setono_sylius_wishlist_is_available' => [Runtime::class, 'isAvailable'],
         ], $callables);
     }
 }

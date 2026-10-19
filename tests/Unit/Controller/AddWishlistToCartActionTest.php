@@ -7,18 +7,18 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Controller;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Setono\SyliusWishlistPlugin\Checker\WishlistItemAvailabilityCheckerInterface;
 use Setono\SyliusWishlistPlugin\Controller\AddWishlistToCartAction;
 use Setono\SyliusWishlistPlugin\Model\UserWishlist;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Model\WishlistItem;
+use Setono\SyliusWishlistPlugin\Model\WishlistItemInterface;
 use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
 use Sylius\Component\Core\Factory\CartItemFactoryInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
-use Sylius\Component\Core\Model\ChannelPricingInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Core\Model\ProductInterface;
@@ -200,23 +200,14 @@ final class AddWishlistToCartActionTest extends TestCase
         self::assertSame(['success' => ['setono_sylius_wishlist.wishlist_added_to_cart']], $this->flashes($request));
     }
 
-    /**
-     * @param array{productEnabled?: bool, inChannel?: bool, variantEnabled?: bool, price?: int|null, priced?: bool} $availability
-     */
     #[Test]
-    #[DataProvider('provideUnavailableVariants')]
-    public function it_names_the_unavailable_products_instead_of_adding_them(array $availability): void
+    public function it_names_the_unavailable_products_instead_of_adding_them(): void
     {
-        $unavailable = $this->variant(
-            $this->product('T-shirt', productEnabled: $availability['productEnabled'] ?? true, inChannel: $availability['inChannel'] ?? true),
-            enabled: $availability['variantEnabled'] ?? true,
-            price: array_key_exists('price', $availability) ? $availability['price'] : 100,
-            priced: $availability['priced'] ?? true,
-        );
+        $unavailableItem = $this->item($this->variant($this->product('T-shirt')), 1);
         $available = $this->variant($this->product('Cap'));
 
         $wishlist = new UserWishlist();
-        $wishlist->addItem($this->item($unavailable, 1));
+        $wishlist->addItem($unavailableItem);
         $wishlist->addItem($this->item($available, 1));
 
         $cartItem = $this->createMock(OrderItemInterface::class);
@@ -227,7 +218,11 @@ final class AddWishlistToCartActionTest extends TestCase
 
         $request = $this->request();
 
-        $this->action($wishlist, cartItemFactory: $cartItemFactory)($request, 'uuid');
+        $this->action(
+            $wishlist,
+            cartItemFactory: $cartItemFactory,
+            itemAvailabilityChecker: $this->itemAvailabilityChecker($unavailableItem),
+        )($request, 'uuid');
 
         self::assertSame([
             'success' => ['setono_sylius_wishlist.wishlist_added_to_cart'],
@@ -238,28 +233,39 @@ final class AddWishlistToCartActionTest extends TestCase
         ], $this->flashes($request));
     }
 
-    /**
-     * @return iterable<string, array{array{productEnabled?: bool, inChannel?: bool, variantEnabled?: bool, price?: int|null, priced?: bool}}>
-     */
-    public static function provideUnavailableVariants(): iterable
+    #[Test]
+    public function it_names_an_unavailable_product_as_unavailable_even_if_no_variant_is_chosen(): void
     {
-        yield 'disabled product' => [['productEnabled' => false]];
-        yield 'product not in the channel' => [['inChannel' => false]];
-        yield 'disabled variant' => [['variantEnabled' => false]];
-        yield 'no channel pricing' => [['priced' => false]];
-        yield 'channel pricing without a price' => [['price' => null]];
+        // Choosing a variant doesn't help if the product isn't sold anymore
+        $item = $this->productItem($this->product('T-shirt'));
+
+        $wishlist = new UserWishlist();
+        $wishlist->addItem($item);
+
+        $request = $this->request();
+
+        $this->action($wishlist, itemAvailabilityChecker: $this->itemAvailabilityChecker($item))($request, 'uuid');
+
+        self::assertSame([
+            'warning' => [[
+                'message' => 'setono_sylius_wishlist.products_unavailable_not_added_to_cart',
+                'parameters' => ['%products%' => 'T-shirt'],
+            ]],
+        ], $this->flashes($request));
     }
 
     #[Test]
     public function it_reports_products_without_a_variant_and_unavailable_products_separately(): void
     {
+        $unavailableItem = $this->item($this->variant($this->product('Cap')), 1);
+
         $wishlist = new UserWishlist();
         $wishlist->addItem($this->productItem($this->product('T-shirt')));
-        $wishlist->addItem($this->item($this->variant($this->product('Cap'), enabled: false), 1));
+        $wishlist->addItem($unavailableItem);
 
         $request = $this->request();
 
-        $this->action($wishlist)($request, 'uuid');
+        $this->action($wishlist, itemAvailabilityChecker: $this->itemAvailabilityChecker($unavailableItem))($request, 'uuid');
 
         self::assertSame([
             'warning' => [
@@ -421,6 +427,7 @@ final class AddWishlistToCartActionTest extends TestCase
         ?ManagerRegistry $managerRegistry = null,
         ?UrlGeneratorInterface $urlGenerator = null,
         ?AvailabilityCheckerInterface $availabilityChecker = null,
+        ?WishlistItemAvailabilityCheckerInterface $itemAvailabilityChecker = null,
     ): AddWishlistToCartAction {
         /** @var MockObject&WishlistRepositoryInterface<WishlistInterface> $repository */
         $repository = $this->createMock(WishlistRepositoryInterface::class);
@@ -460,7 +467,21 @@ final class AddWishlistToCartActionTest extends TestCase
             $cartItemFactory,
             $managerRegistry,
             $availabilityChecker,
+            $itemAvailabilityChecker ?? $this->itemAvailabilityChecker(),
         );
+    }
+
+    /**
+     * Every item is available in the cart's channel, except the given ones
+     */
+    private function itemAvailabilityChecker(WishlistItemInterface ...$unavailableItems): WishlistItemAvailabilityCheckerInterface
+    {
+        $checker = $this->createMock(WishlistItemAvailabilityCheckerInterface::class);
+        $checker->method('isAvailable')->willReturnCallback(
+            fn (WishlistItemInterface $item, ChannelInterface $channel): bool => $channel === $this->channel && !in_array($item, $unavailableItems, true),
+        );
+
+        return $checker;
     }
 
     private function request(): Request
@@ -514,28 +535,19 @@ final class AddWishlistToCartActionTest extends TestCase
         return $cart;
     }
 
-    private function product(?string $name, ?string $code = null, bool $productEnabled = true, bool $inChannel = true): ProductInterface&MockObject
+    private function product(?string $name, ?string $code = null): ProductInterface&MockObject
     {
         $product = $this->createMock(ProductInterface::class);
         $product->method('getName')->willReturn($name);
         $product->method('getCode')->willReturn($code);
-        $product->method('isEnabled')->willReturn($productEnabled);
-        $product->method('hasChannel')->willReturnCallback(fn (ChannelInterface $channel): bool => $inChannel && $channel === $this->channel);
 
         return $product;
     }
 
-    private function variant(ProductInterface $product, bool $enabled = true, ?int $price = 100, bool $priced = true): ProductVariantInterface&MockObject
+    private function variant(ProductInterface $product): ProductVariantInterface&MockObject
     {
-        $channelPricing = $this->createMock(ChannelPricingInterface::class);
-        $channelPricing->method('getPrice')->willReturn($price);
-
         $variant = $this->createMock(ProductVariantInterface::class);
         $variant->method('getProduct')->willReturn($product);
-        $variant->method('isEnabled')->willReturn($enabled);
-        $variant->method('getChannelPricingForChannel')->willReturnCallback(
-            fn (ChannelInterface $channel): ?ChannelPricingInterface => $priced && $channel === $this->channel ? $channelPricing : null,
-        );
 
         return $variant;
     }

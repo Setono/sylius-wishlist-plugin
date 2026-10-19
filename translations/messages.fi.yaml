@@ -3,6 +3,7 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Lisää toivelista ostoskoriin
         copy: Kopioi
         inventory_insufficient: Varastosaldo ei riitä toivelistalle lisättävälle määrälle
+        item_unavailable: "Tämä tuote ei ole tällä hetkellä saatavilla, joten sitä ei voi lisätä ostoskoriin"
         note: Huomautus
         remove_from_wishlist: Poista
         select_variant: Valitse vaihtoehto...
