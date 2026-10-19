@@ -66,6 +66,29 @@ final class WishlistItemFactoryTest extends TestCase
         self::assertSame(4, $item->getQuantity());
     }
 
+    #[Test]
+    public function it_defaults_the_quantity_to_one_for_a_product_variant(): void
+    {
+        $variant = $this->createMock(ProductVariantInterface::class);
+        $variant->method('getProduct')->willReturn($this->createMock(ProductInterface::class));
+
+        $item = $this->factory(new WishlistItem())->createWithProductVariant($variant);
+
+        self::assertSame(1, $item->getQuantity());
+    }
+
+    #[Test]
+    public function it_rejects_a_simple_product_without_variants(): void
+    {
+        $product = $this->createMock(ProductInterface::class);
+        $product->method('isSimple')->willReturn(true);
+        $product->method('getVariants')->willReturn(new ArrayCollection());
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->factory(new WishlistItem())->createWithProduct($product);
+    }
+
     private function factory(WishlistItemInterface $item): WishlistItemFactory
     {
         /** @var MockObject&FactoryInterface<WishlistItemInterface> $decorated */

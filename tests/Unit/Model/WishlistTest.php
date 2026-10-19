@@ -179,6 +179,34 @@ final class WishlistTest extends TestCase
     }
 
     #[Test]
+    public function it_skips_items_without_a_product_when_matching_products(): void
+    {
+        $wishlist = $this->createWishlist();
+        $wishlist->addItem(new WishlistItem());
+        $product = $this->createProduct(10);
+
+        self::assertFalse($wishlist->hasProduct($product));
+
+        $wishlist->removeProduct($product);
+        self::assertCount(1, $wishlist->getItems());
+    }
+
+    #[Test]
+    public function it_skips_items_without_a_variant_when_matching_product_variants(): void
+    {
+        $wishlist = $this->createWishlist();
+        $item = new WishlistItem();
+        $item->setProduct($this->createProduct(10));
+        $wishlist->addItem($item);
+        $variant = $this->createVariant(20, 10);
+
+        self::assertFalse($wishlist->hasProductVariant($variant));
+
+        $wishlist->removeProductVariant($variant);
+        self::assertCount(1, $wishlist->getItems());
+    }
+
+    #[Test]
     public function it_sums_the_quantity_of_all_items(): void
     {
         $wishlist = $this->createWishlist();

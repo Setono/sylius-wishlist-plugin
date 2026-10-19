@@ -77,6 +77,29 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
         $subscriber->onLoginSuccess($this->event($user));
     }
 
+    #[Test]
+    public function it_keeps_converting_after_skipping_a_guest_wishlist_without_items(): void
+    {
+        $user = $this->createMock(SyliusUserInterface::class);
+
+        $empty = $this->createMock(GuestWishlistInterface::class);
+        $empty->method('hasItems')->willReturn(false);
+        $empty->expects(self::never())->method('convertToUserWishlist');
+
+        $withItems = $this->createMock(GuestWishlistInterface::class);
+        $withItems->method('hasItems')->willReturn(true);
+        $withItems->expects(self::once())->method('convertToUserWishlist')->with($user);
+
+        $provider = $this->createMock(WishlistProviderInterface::class);
+        $provider->method('getWishlists')->willReturn([$empty, $withItems]);
+
+        $managerRegistry = $this->createMock(ManagerRegistry::class);
+        $managerRegistry->method('getManagerForClass')->willReturn($this->createMock(EntityManagerInterface::class));
+
+        $subscriber = new ConvertGuestWishlistToUserWishlistSubscriber($provider, $managerRegistry);
+        $subscriber->onLoginSuccess($this->event($user));
+    }
+
     private function event(SymfonyUserInterface $user): LoginSuccessEvent
     {
         $event = $this->createMock(LoginSuccessEvent::class);

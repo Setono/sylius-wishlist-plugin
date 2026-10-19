@@ -28,8 +28,3 @@ parameters:
         -
             identifier: missingType.generics
             path: src/DependencyInjection/Configuration.php
-
-        # Symfony\Component\Security\Core\Authorization\Voter\Vote only exists from Symfony 7.3
-        -
-            identifier: class.notFound
-            path: src/Security/Voter/WishlistVoter.php

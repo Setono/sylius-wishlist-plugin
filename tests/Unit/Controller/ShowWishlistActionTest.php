@@ -95,6 +95,40 @@ final class ShowWishlistActionTest extends TestCase
     }
 
     #[Test]
+    public function it_handles_the_request_and_renders_the_wishlist_with_its_form(): void
+    {
+        $wishlist = $this->createMock(WishlistInterface::class);
+        $request = new Request();
+        $formView = new FormView();
+
+        $form = $this->createMock(FormInterface::class);
+        $form->expects(self::once())->method('handleRequest')->with($request);
+        $form->method('isSubmitted')->willReturn(false);
+        $form->method('createView')->willReturn($formView);
+
+        $twig = $this->createMock(Environment::class);
+        $twig
+            ->expects(self::once())
+            ->method('render')
+            ->with('@SetonoSyliusWishlistPlugin/shop/wishlist/show.html.twig', [
+                'wishlist' => $wishlist,
+                'form' => $formView,
+            ])
+            ->willReturn('rendered')
+        ;
+
+        $action = new ShowWishlistAction(
+            $this->repository($wishlist),
+            $this->formFactory($form),
+            $this->authorizationChecker(true),
+            $twig,
+            $this->urlGenerator(),
+        );
+
+        self::assertSame('rendered', $action($request, 'uuid')->getContent());
+    }
+
+    #[Test]
     public function it_neither_authorizes_nor_saves_when_the_form_is_not_submitted(): void
     {
         $repository = $this->repository($this->createMock(WishlistInterface::class));

@@ -75,6 +75,17 @@ final class WishlistItemTest extends TestCase
     }
 
     #[Test]
+    public function it_rejects_a_variant_without_a_product(): void
+    {
+        $variant = $this->createMock(ProductVariantInterface::class);
+        $variant->method('getProduct')->willReturn(null);
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        (new WishlistItem())->setVariant($variant);
+    }
+
+    #[Test]
     public function it_keeps_the_product_when_the_variant_is_unset(): void
     {
         $product = $this->createMock(ProductInterface::class);
