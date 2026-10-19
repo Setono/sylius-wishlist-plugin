@@ -10,11 +10,11 @@ use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 use Twig\Extension\RuntimeExtensionInterface;
 
-final class Runtime implements RuntimeExtensionInterface
+final readonly class Runtime implements RuntimeExtensionInterface
 {
     public function __construct(
-        private readonly WishlistProviderInterface $wishlistProvider,
-        private readonly WishlistCheckerInterface $wishlistChecker,
+        private WishlistProviderInterface $wishlistProvider,
+        private WishlistCheckerInterface $wishlistChecker,
     ) {
     }
 

@@ -7,11 +7,11 @@ namespace Setono\SyliusWishlistPlugin\Provider;
 use Setono\ClientBundle\Context\ClientContextInterface;
 use Setono\SyliusWishlistPlugin\Repository\GuestWishlistRepositoryInterface;
 
-final class GuestWishlistProvider implements WishlistProviderInterface
+final readonly class GuestWishlistProvider implements WishlistProviderInterface
 {
     public function __construct(
-        private readonly ClientContextInterface $clientContext,
-        private readonly GuestWishlistRepositoryInterface $guestWishlistRepository,
+        private ClientContextInterface $clientContext,
+        private GuestWishlistRepositoryInterface $guestWishlistRepository,
     ) {
     }
 

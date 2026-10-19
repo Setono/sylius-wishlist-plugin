@@ -9,7 +9,7 @@ use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 
 final class SetonoSyliusWishlistExtension extends AbstractResourceExtension implements PrependExtensionInterface
 {
@@ -17,7 +17,7 @@ final class SetonoSyliusWishlistExtension extends AbstractResourceExtension impl
     {
         /** @var array{resources: array<string, mixed>} $config */
         $config = $this->processConfiguration(new Configuration(), $configs);
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
 
         $this->registerResources(
             'setono_sylius_wishlist',
@@ -26,25 +26,29 @@ final class SetonoSyliusWishlistExtension extends AbstractResourceExtension impl
             $container,
         );
 
-        $loader->load('services.xml');
+        $loader->load('services.php');
     }
 
     public function prepend(ContainerBuilder $container): void
     {
-        $container->prependExtensionConfig('sylius_ui', [
-            'events' => [
-                'sylius.shop.layout.stylesheets' => [
-                    'blocks' => [
-                        'setono_sylius_wishlist__styles' => [
-                            'template' => '@SetonoSyliusWishlistPlugin/shop/_styles.html.twig',
-                        ],
+        $container->prependExtensionConfig('sylius_twig_hooks', [
+            'hooks' => [
+                'sylius_shop.base#stylesheets' => [
+                    'setono_sylius_wishlist_styles' => [
+                        'template' => '@SetonoSyliusWishlistPlugin/shop/_styles.html.twig',
+                        'priority' => 0,
                     ],
                 ],
-                'sylius.shop.layout.javascripts' => [
-                    'blocks' => [
-                        'setono_sylius_wishlist__javascripts' => [
-                            'template' => '@SetonoSyliusWishlistPlugin/shop/_javascripts.html.twig',
-                        ],
+                'sylius_shop.base#javascripts' => [
+                    'setono_sylius_wishlist_javascripts' => [
+                        'template' => '@SetonoSyliusWishlistPlugin/shop/_javascripts.html.twig',
+                        'priority' => 0,
+                    ],
+                ],
+                'sylius_shop.product.show.content.info.summary' => [
+                    'setono_sylius_wishlist_toggle' => [
+                        'template' => '@SetonoSyliusWishlistPlugin/shop/product/_wishlist_toggle.html.twig',
+                        'priority' => 5,
                     ],
                 ],
             ],

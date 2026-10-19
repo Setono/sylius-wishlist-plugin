@@ -12,17 +12,17 @@ use Sylius\Component\User\Model\UserInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final class WishlistFactory implements WishlistFactoryInterface
+final readonly class WishlistFactory implements WishlistFactoryInterface
 {
     public function __construct(
-        private readonly Security $security,
-        private readonly ClientContextInterface $clientContext,
-        private readonly TranslatorInterface $translator,
+        private Security $security,
+        private ClientContextInterface $clientContext,
+        private TranslatorInterface $translator,
         /** @var class-string<GuestWishlistInterface> $guestWishlistClass */
-        private readonly string $guestWishlistClass,
+        private string $guestWishlistClass,
 
         /** @var class-string<UserWishlistInterface> $userWishlistClass */
-        private readonly string $userWishlistClass,
+        private string $userWishlistClass,
     ) {
     }
 

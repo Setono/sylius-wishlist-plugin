@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Setono\SyliusWishlistPlugin\Tests\Unit\Factory;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Setono\Client\Client;
 use Setono\ClientBundle\Context\ClientContextInterface;
@@ -18,7 +19,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class WishlistFactoryTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_creates_a_guest_wishlist(): void
     {
         $wishlist = $this->factory()->createForGuest('client-1');
@@ -27,7 +28,7 @@ final class WishlistFactoryTest extends TestCase
         self::assertSame('My wishlist', $wishlist->getName());
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_a_user_wishlist(): void
     {
         $user = $this->createMock(UserInterface::class);
@@ -38,7 +39,7 @@ final class WishlistFactoryTest extends TestCase
         self::assertSame('My wishlist', $wishlist->getName());
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_a_user_wishlist_when_a_user_is_logged_in(): void
     {
         $user = $this->createMock(UserInterface::class);
@@ -49,7 +50,7 @@ final class WishlistFactoryTest extends TestCase
         self::assertSame($user, $wishlist->getUser());
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_a_guest_wishlist_when_no_user_is_logged_in(): void
     {
         $wishlist = $this->factory(null, 'client-9')->createNew();

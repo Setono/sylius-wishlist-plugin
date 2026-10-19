@@ -1,0 +1,14 @@
+setono_sylius_wishlist:
+    ui:
+        add_wishlist_to_cart: Añadir lista de deseos al carrito
+        copy: Copiar
+        inventory_insufficient: El inventario es insuficiente para la cantidad que deseas añadir a la lista de deseos
+        note: Nota
+        remove_from_wishlist: Eliminar
+        select_variant: Seleccionar variante...
+        toggle_wishlist: Alternar lista de deseos
+        wishlist: Lista de deseos
+        wishlist_subheader: Aquí puedes editar la cantidad de los productos de tu lista de deseos. También puedes seleccionar las variantes que quieras y eliminar productos de tu lista de deseos. Por último, puedes compartir tu lista de deseos con otras personas copiando la URL de abajo.
+        wishlists: Listas de deseos
+        wishlists_header: Listas de deseos
+        wishlists_subheader: Aquí puedes gestionar tus listas de deseos. Como usuario registrado puedes crear, editar y eliminar listas de deseos. También puedes añadir y eliminar productos de tus listas de deseos. Si no has iniciado sesión, solo puedes añadir y eliminar productos de tu única lista de deseos.

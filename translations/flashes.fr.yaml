@@ -1,0 +1,3 @@
+setono_sylius_wishlist:
+    no_wishlists: "Vous n'avez encore rien ajouté à votre liste de souhaits"
+    wishlist_updated: Votre liste de souhaits a été mise à jour

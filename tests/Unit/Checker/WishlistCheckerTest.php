@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Setono\SyliusWishlistPlugin\Tests\Unit\Checker;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Setono\SyliusWishlistPlugin\Checker\WishlistChecker;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
@@ -13,7 +14,7 @@ use Sylius\Component\Core\Model\ProductVariantInterface;
 
 final class WishlistCheckerTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_reports_a_product_on_a_wishlist(): void
     {
         $product = $this->createMock(ProductInterface::class);
@@ -24,7 +25,7 @@ final class WishlistCheckerTest extends TestCase
         self::assertTrue($this->checker([$wishlist])->onWishlist($product));
     }
 
-    /** @test */
+    #[Test]
     public function it_reports_a_product_not_on_any_wishlist(): void
     {
         $product = $this->createMock(ProductInterface::class);
@@ -35,7 +36,7 @@ final class WishlistCheckerTest extends TestCase
         self::assertFalse($this->checker([$wishlist])->onWishlist($product));
     }
 
-    /** @test */
+    #[Test]
     public function it_reports_a_product_variant_on_a_wishlist(): void
     {
         $variant = $this->createMock(ProductVariantInterface::class);
@@ -46,7 +47,7 @@ final class WishlistCheckerTest extends TestCase
         self::assertTrue($this->checker([$wishlist])->onWishlist($variant));
     }
 
-    /** @test */
+    #[Test]
     public function it_reports_false_when_there_are_no_wishlists(): void
     {
         self::assertFalse($this->checker([])->onWishlist($this->createMock(ProductInterface::class)));

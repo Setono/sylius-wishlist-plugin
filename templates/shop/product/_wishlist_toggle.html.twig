@@ -1,0 +1,9 @@
+{% set product = hookable_metadata.context.product|default(product|default(null)) %}
+{# The product summary is a live component that re-renders with the variant the shopper picks, so a configurable product's heart toggles that variant #}
+{% set productVariant = product is not null and not product.simple ? hookable_metadata.context.variant|default(productVariant|default(null)) : null %}
+
+{% if product is not null %}
+    <div class="my-3" data-sylius-wishlist-toggle>
+        {{ include('@SetonoSyliusWishlistPlugin/shop/wishlist/_toggle_button.html.twig', { product: product, productVariant: productVariant }, with_context = false) }}
+    </div>
+{% endif %}

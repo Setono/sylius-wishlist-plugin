@@ -25,6 +25,11 @@ final class SetonoSyliusWishlistPlugin extends AbstractResourceBundle
         ));
     }
 
+    public function getPath(): string
+    {
+        return \dirname(__DIR__);
+    }
+
     /**
      * @return list<string>
      */
@@ -33,5 +38,14 @@ final class SetonoSyliusWishlistPlugin extends AbstractResourceBundle
         return [
             SyliusResourceBundle::DRIVER_DOCTRINE_ORM,
         ];
+    }
+
+    protected function getConfigFilesPath(): string
+    {
+        return sprintf(
+            '%s/config/doctrine/%s',
+            $this->getPath(),
+            strtolower($this->getDoctrineMappingDirectory()),
+        );
     }
 }

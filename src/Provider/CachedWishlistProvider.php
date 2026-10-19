@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace Setono\SyliusWishlistPlugin\Provider;
 
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
-final class CachedWishlistProvider implements WishlistProviderInterface
+/**
+ * Memoizes the wishlists for the current request. It's reset between requests (kernel.reset), so a long-running
+ * worker (FrankenPHP, RoadRunner, Swoole, ...) never serves one visitor's wishlists to the next.
+ */
+final class CachedWishlistProvider implements WishlistProviderInterface, ResetInterface
 {
     /** @var list<WishlistInterface>|null */
     private ?array $wishlists = null;
@@ -20,19 +25,21 @@ final class CachedWishlistProvider implements WishlistProviderInterface
 
     public function getWishlists(): array
     {
-        if (null === $this->wishlists) {
-            $this->wishlists = $this->decorated->getWishlists();
-        }
+        $this->wishlists ??= $this->decorated->getWishlists();
 
         return $this->wishlists;
     }
 
     public function getPreSelectedWishlists(): array
     {
-        if (null === $this->preSelectedWishlists) {
-            $this->preSelectedWishlists = $this->decorated->getPreSelectedWishlists();
-        }
+        $this->preSelectedWishlists ??= $this->decorated->getPreSelectedWishlists();
 
         return $this->preSelectedWishlists;
+    }
+
+    public function reset(): void
+    {
+        $this->wishlists = null;
+        $this->preSelectedWishlists = null;
     }
 }

@@ -14,7 +14,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
  */
 final class WishlistVoter extends Voter
 {
-    final public const EDIT = 'wishlist_edit';
+    final public const string EDIT = 'wishlist_edit';
 
     public function __construct(private readonly WishlistProviderInterface $wishlistProvider)
     {
@@ -26,9 +26,12 @@ final class WishlistVoter extends Voter
     }
 
     /**
+     * Symfony >= 7.3 passes a ?Vote as $vote (and requires the argument from Symfony 8). It is typed as mixed
+     * because the Vote class doesn't exist on Symfony 6.4, which we still support
+     *
      * @param mixed|WishlistInterface $subject
      */
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, mixed $vote = null): bool
     {
         return in_array($subject, $this->wishlistProvider->getWishlists(), true);
     }

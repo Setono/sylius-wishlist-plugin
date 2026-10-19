@@ -6,8 +6,13 @@ namespace Setono\SyliusWishlistPlugin\Checker;
 
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
-final class CachedWishlistChecker implements WishlistCheckerInterface
+/**
+ * Memoizes the checks for the current request. It's reset between requests (kernel.reset), so a long-running
+ * worker (FrankenPHP, RoadRunner, Swoole, ...) never answers for one visitor with another visitor's wishlists.
+ */
+final class CachedWishlistChecker implements WishlistCheckerInterface, ResetInterface
 {
     /** @var array<string, bool> */
     private array $cache = [];
@@ -25,5 +30,10 @@ final class CachedWishlistChecker implements WishlistCheckerInterface
         }
 
         return $this->cache[$key];
+    }
+
+    public function reset(): void
+    {
+        $this->cache = [];
     }
 }

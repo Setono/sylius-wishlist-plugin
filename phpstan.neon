@@ -1,0 +1,30 @@
+parameters:
+    level: max
+
+    paths:
+        - src
+        - tests
+
+    excludePaths:
+        - tests/Application/*
+
+    bootstrapFiles:
+        - tests/Application/config/bootstrap.php
+
+    # Symfony Configuration
+    symfony:
+        consoleApplicationLoader: tests/PHPStan/console_application.php
+
+    # Doctrine Configuration
+    doctrine:
+        repositoryClass: Doctrine\ORM\EntityRepository
+
+    reportUnmatchedIgnoredErrors: false
+    treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+        # symfony/config < 7.4.10 declares template types without defaults on the tree/node builders,
+        # while 6.4 has no generics at all, so they can't be annotated for both (fails on lowest ~7.4.0)
+        -
+            identifier: missingType.generics
+            path: src/DependencyInjection/Configuration.php

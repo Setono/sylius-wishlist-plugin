@@ -1,0 +1,14 @@
+setono_sylius_wishlist:
+    ui:
+        add_wishlist_to_cart: Lägg önskelista i varukorgen
+        copy: Kopiera
+        inventory_insufficient: Lagret är otillräckligt för den kvantitet du vill lägga till i önskelistan
+        note: Anteckning
+        remove_from_wishlist: Ta bort
+        select_variant: Välj variant...
+        toggle_wishlist: Växla önskelista
+        wishlist: Önskelista
+        wishlist_subheader: Här kan du redigera antalet produkter i din önskelista. Du kan också välja de varianter du vill ha och ta bort produkter från din önskelista. Slutligen kan du dela din önskelista med andra genom att kopiera URL:en nedan.
+        wishlists: Önskelistor
+        wishlists_header: Önskelistor
+        wishlists_subheader: Här kan du hantera dina önskelistor. Som inloggad användare kan du skapa, redigera och ta bort önskelistor. Du kan också lägga till och ta bort produkter från dina önskelistor. Om du inte är inloggad kan du bara lägga till och ta bort produkter från din enda önskelista.

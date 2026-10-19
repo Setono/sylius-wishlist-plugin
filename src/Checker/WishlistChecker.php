@@ -8,9 +8,9 @@ use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 
-final class WishlistChecker implements WishlistCheckerInterface
+final readonly class WishlistChecker implements WishlistCheckerInterface
 {
-    public function __construct(private readonly WishlistProviderInterface $wishlistProvider)
+    public function __construct(private WishlistProviderInterface $wishlistProvider)
     {
     }
 

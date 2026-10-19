@@ -1,0 +1,8 @@
+{# @var wishlists \Setono\SyliusWishlistPlugin\Model\WishlistInterface[] #}
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+    {% for wishlist in wishlists %}
+        <div class="col">
+            {{ include('@SetonoSyliusWishlistPlugin/shop/wishlist/index/_wishlist.html.twig', { 'wishlist': wishlist }) }}
+        </div>
+    {% endfor %}
+</div>

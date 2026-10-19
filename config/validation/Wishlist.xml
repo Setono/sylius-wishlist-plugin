@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<constraint-mapping xmlns="http://symfony.com/schema/dic/constraint-mapping"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://symfony.com/schema/dic/constraint-mapping http://symfony.com/schema/dic/services/constraint-mapping-1.0.xsd">
+    <class name="Setono\SyliusWishlistPlugin\Model\Wishlist">
+        <property name="name">
+            <constraint name="NotBlank">
+                <option name="groups">setono_sylius_wishlist</option>
+            </constraint>
+            <constraint name="Length">
+                <option name="max">255</option>
+                <option name="groups">setono_sylius_wishlist</option>
+            </constraint>
+        </property>
+        <property name="items">
+            <constraint name="Valid"/>
+        </property>
+    </class>
+</constraint-mapping>
