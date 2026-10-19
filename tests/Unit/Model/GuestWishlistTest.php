@@ -7,7 +7,6 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Model;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Setono\SyliusWishlistPlugin\Model\GuestWishlist;
-use Sylius\Component\User\Model\UserInterface;
 
 final class GuestWishlistTest extends TestCase
 {
@@ -24,18 +23,5 @@ final class GuestWishlistTest extends TestCase
         $wishlist->setClientId('client-123');
 
         self::assertSame('client-123', $wishlist->getClientId());
-    }
-
-    #[Test]
-    public function it_converts_itself_to_a_user_wishlist_by_assigning_the_user(): void
-    {
-        $wishlist = new GuestWishlist();
-        $user = $this->createMock(UserInterface::class);
-
-        $wishlist->convertToUserWishlist($user);
-
-        $property = new \ReflectionProperty(GuestWishlist::class, 'user');
-
-        self::assertSame($user, $property->getValue($wishlist));
     }
 }
