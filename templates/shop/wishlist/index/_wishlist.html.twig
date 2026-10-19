@@ -1,10 +1,12 @@
 {# @var wishlist \Setono\SyliusWishlistPlugin\Model\WishlistInterface #}
 {% set item = wishlist.items.first %}
-{% set image = item ? (item.variant and item.variant.images.first ? item.variant.images.first : item.product.images.first) : null %}
 
 <div class="card h-100">
-    {% if image %}
-        <img src="{{ image.path|imagine_filter('sylius_shop_product_thumbnail') }}" class="card-img-top" alt="{{ wishlist.name }}">
+    {% if item %}
+        {{ component('sylius_shop:main_image', {
+            product: item.variant and item.variant.hasImages ? item.variant : item.product,
+            class: 'card-img-top'
+        }) }}
     {% endif %}
     <div class="card-body">
         <a class="card-title h5 stretched-link text-decoration-none" href="{{ path('setono_sylius_wishlist_shop_wishlist_show', { 'uuid': wishlist.uuid }) }}">

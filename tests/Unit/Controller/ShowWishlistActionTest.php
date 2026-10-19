@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Setono\SyliusWishlistPlugin\Tests\Unit\Controller;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Setono\SyliusWishlistPlugin\Controller\ShowWishlistAction;
+use Setono\SyliusWishlistPlugin\Form\Type\WishlistType;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
+use Setono\SyliusWishlistPlugin\Security\Voter\WishlistVoter;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
@@ -65,7 +68,7 @@ final class ShowWishlistActionTest extends TestCase
         );
 
         $session = new Session(new MockArraySessionStorage());
-        $request = new Request();
+        $request = Request::create('/wishlists/uuid', 'PATCH');
         $request->setSession($session);
 
         $response = $action($request, 'uuid');
@@ -76,20 +79,67 @@ final class ShowWishlistActionTest extends TestCase
     }
 
     #[Test]
-    public function it_refuses_to_save_when_a_non_owner_submits_a_valid_form(): void
+    #[DataProvider('provideUnsafeMethods')]
+    public function it_refuses_a_non_owner_submission_before_the_form_touches_the_wishlist(string $method): void
     {
-        $repository = $this->repository($this->createMock(WishlistInterface::class));
+        $wishlist = $this->createMock(WishlistInterface::class);
+
+        $repository = $this->repository($wishlist);
         $repository->expects(self::never())->method('add');
+
+        $form = $this->form(true);
+        $form->expects(self::never())->method('handleRequest');
+
+        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
+        $authorizationChecker
+            ->expects(self::once())
+            ->method('isGranted')
+            ->with(WishlistVoter::EDIT, $wishlist)
+            ->willReturn(false)
+        ;
 
         $action = new ShowWishlistAction(
             $repository,
-            $this->formFactory($this->form(true)),
-            $this->authorizationChecker(false),
+            $this->formFactory($form),
+            $authorizationChecker,
             $this->twig(),
             $this->urlGenerator(),
         );
 
         $this->expectException(NotFoundHttpException::class);
+
+        $action(Request::create('/wishlists/uuid', $method), 'uuid');
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function provideUnsafeMethods(): iterable
+    {
+        yield 'PATCH' => ['PATCH'];
+        yield 'POST' => ['POST'];
+    }
+
+    #[Test]
+    public function it_builds_the_form_for_the_wishlist_with_the_patch_method(): void
+    {
+        $wishlist = $this->createMock(WishlistInterface::class);
+
+        $formFactory = $this->createMock(FormFactoryInterface::class);
+        $formFactory
+            ->expects(self::once())
+            ->method('create')
+            ->with(WishlistType::class, $wishlist, ['method' => 'PATCH'])
+            ->willReturn($this->form(false))
+        ;
+
+        $action = new ShowWishlistAction(
+            $this->repository($wishlist),
+            $formFactory,
+            $this->authorizationChecker(true),
+            $this->twig(),
+            $this->urlGenerator(),
+        );
 
         $action(new Request(), 'uuid');
     }
@@ -129,7 +179,7 @@ final class ShowWishlistActionTest extends TestCase
     }
 
     #[Test]
-    public function it_neither_authorizes_nor_saves_when_the_form_is_not_submitted(): void
+    public function it_neither_authorizes_nor_saves_on_a_safe_request(): void
     {
         $repository = $this->repository($this->createMock(WishlistInterface::class));
         $repository->expects(self::never())->method('add');

@@ -22,6 +22,8 @@ class WishlistItemType extends AbstractResourceType
             ->add('quantity', IntegerType::class, [
                 'attr' => ['min' => 1],
                 'label' => 'sylius.ui.quantity',
+                // An empty input would otherwise be mapped as null onto the non-nullable quantity
+                'empty_data' => '1',
             ])
             ->add('note', TextareaType::class, [
                 'attr' => ['rows' => 3],

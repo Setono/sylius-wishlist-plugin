@@ -40,15 +40,18 @@ final readonly class ShowWishlistAction
             throw new NotFoundHttpException(sprintf('Wishlist with id %s not found', $uuid));
         }
 
-        $form = $this->formFactory->create(WishlistType::class, $wishlist);
+        // A wishlist may be viewed by anyone holding its (shareable) URL, but only its owner may edit it.
+        // This is checked before handling the request, so a stranger's submission never touches the managed wishlist.
+        // Throwing "not found" rather than "access denied" avoids disclosing which wishlists exist.
+        if (!$request->isMethodSafe() && !$this->authorizationChecker->isGranted(WishlistVoter::EDIT, $wishlist)) {
+            throw new NotFoundHttpException(sprintf('Wishlist with id %s not found', $uuid));
+        }
+
+        // PATCH (sent as POST with a _method override, like the rest of Sylius) leaves fields that aren't submitted
+        // untouched, e.g. the name, whose input is only added to the page when the owner clicks it
+        $form = $this->formFactory->create(WishlistType::class, $wishlist, ['method' => 'PATCH']);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            // A wishlist may be viewed by anyone holding its (shareable) URL, but only its owner may edit it.
-            // Throwing "not found" rather than "access denied" avoids disclosing which wishlists exist.
-            if (!$this->authorizationChecker->isGranted(WishlistVoter::EDIT, $wishlist)) {
-                throw new NotFoundHttpException(sprintf('Wishlist with id %s not found', $uuid));
-            }
-
             $this->wishlistRepository->add($wishlist);
 
             $session = $request->getSession();

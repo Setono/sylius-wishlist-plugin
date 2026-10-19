@@ -9,12 +9,16 @@
     <div class="container my-4 my-lg-5">
         {{ form_start(form, { 'attr': { 'novalidate': 'novalidate' } }) }}
             {{ form_row(form._token) }}
-            <input type="hidden" name="_method" value="PATCH" />
             {{ form_errors(form) }}
 
             <div class="text-center mb-4">
                 <h1 class="h2 mb-1">
-                    {% if canEdit %}
+                    {% if canEdit and not form.name.vars.valid %}
+                        {{ form_widget(form.name, { 'attr': { 'class': 'form-control is-invalid' } }) }}
+                        {% for error in form.name.vars.errors %}
+                            <div class="invalid-feedback d-block fs-6">{{ error.message }}</div>
+                        {% endfor %}
+                    {% elseif canEdit %}
                         <span role="button" data-editable="{{ form_widget(form.name)|e('html_attr') }}">{{ wishlist.name }}</span>
                     {% else %}
                         {{ wishlist.name }}
@@ -52,15 +56,18 @@
                     </thead>
                     <tbody>
                         {% for key, item in wishlist.items %}
-                            {% set image = item.variant and item.variant.images.first ? item.variant.images.first : item.product.images.first %}
                             <tr>
                                 <td style="width: 80px">
-                                    {% if image %}
-                                        <img src="{{ image.path|imagine_filter('sylius_shop_product_small_thumbnail') }}" class="img-fluid" alt="{{ item.product.name }}">
-                                    {% endif %}
+                                    {{ component('sylius_shop:main_image', {
+                                        product: item.variant and item.variant.hasImages ? item.variant : item.product,
+                                        filter: 'sylius_shop_product_small_thumbnail'
+                                    }) }}
                                 </td>
                                 <td>
                                     {{ form_widget(form.items[key].quantity, { 'attr': { 'class': 'form-control form-control-sm', 'style': 'width: 5rem' } }) }}
+                                    {% for error in form.items[key].quantity.vars.errors %}
+                                        <div class="invalid-feedback d-block">{{ error.message }}</div>
+                                    {% endfor %}
                                     {% if item.variant and not sylius_inventory_is_sufficient(item.variant, item.quantity) %}
                                         <div class="text-danger small mt-1">
                                             {{ 'setono_sylius_wishlist.ui.inventory_insufficient'|trans }}
@@ -68,9 +75,14 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{{ path('sylius_shop_product_show', { 'slug': item.product.slug }) }}" class="text-decoration-none">
+                                    {# A product without a translation in the current (or fallback) locale has no slug to link to #}
+                                    {% if item.product.slug %}
+                                        <a href="{{ path('sylius_shop_product_show', { 'slug': item.product.slug }) }}" class="text-decoration-none">
+                                            {{ item.product.name }}
+                                        </a>
+                                    {% else %}
                                         {{ item.product.name }}
-                                    </a>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     {% if form.items[key].variant is defined %}
@@ -116,8 +128,16 @@
                 copyButton.addEventListener('click', function () {
                     const input = copyButton.closest('.input-group').querySelector('input');
                     input.select();
-                    input.setSelectionRange(0, 99999);
-                    navigator.clipboard.writeText(input.value);
+                    input.setSelectionRange(0, 99999); // For mobile devices
+
+                    // The Clipboard API only exists in secure contexts (HTTPS); without it the URL is left selected for manual copying
+                    if (!navigator.clipboard) {
+                        return;
+                    }
+
+                    navigator.clipboard.writeText(input.value).catch(function (error) {
+                        console.error('Could not copy the wishlist URL: ', error);
+                    });
                 });
             }
 
