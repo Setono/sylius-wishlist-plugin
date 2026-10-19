@@ -100,4 +100,5 @@ jobs:
             -   uses: "setono/sylius-plugin/code-coverage@v2"
                 with:
                     codecov-token: "${{ secrets.CODECOV_TOKEN }}"
+                    symfony: "~7.4.0" # Otherwise Symfony 8 components that only arrive transitively can mix into the 7.4 app
                     node-version: "22" # Webpack Encore 6 (Sylius 2.3) requires Node ^22.13 || >=24
