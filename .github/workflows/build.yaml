@@ -87,6 +87,31 @@ jobs:
                     testsuite: "functional"
                     node-version: "22" # Webpack Encore 6 (Sylius 2.3) requires Node ^22.13 || >=24
 
+    browser-tests:
+        runs-on: "ubuntu-latest"
+        steps:
+            # Sets up MySQL, PHP, Node, the dependencies, the test application's assets, schema and fixtures. Without a
+            # testsuite input it runs no tests, so the steps below can add the browser
+            -   uses: "setono/sylius-plugin/functional-tests@v2"
+                with:
+                    php-version: "8.3"
+                    symfony: "~7.4.0"
+                    node-version: "22" # Webpack Encore 6 (Sylius 2.3) requires Node ^22.13 || >=24
+
+            # Copies, not symlinks: playwright-symfony doesn't serve a file whose real path is outside tests/Application/public
+            -   working-directory: "tests/Application"
+                env:
+                    APP_ENV: "test"
+                    DATABASE_URL: "mysql://root:root@127.0.0.1/sylius?serverVersion=8.0"
+                run: "bin/console assets:install public"
+
+            -   run: "vendor/bin/playwright-install --with-deps chromium"
+
+            -   env:
+                    APP_ENV: "test"
+                    DATABASE_URL: "mysql://root:root@127.0.0.1/sylius?serverVersion=8.0"
+                run: "vendor/bin/phpunit --testsuite=browser"
+
     mutation-tests:
         runs-on: "ubuntu-latest"
         steps:
