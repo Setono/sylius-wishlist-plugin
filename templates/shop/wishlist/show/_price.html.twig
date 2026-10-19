@@ -20,6 +20,6 @@
     </span>
 {% elseif variant is not null or not available %}
     {# Sylius can't calculate a price without one in this channel (it throws), e.g. for a product that is no longer sold here #}
-    {# @symfony-lsp-ignore translation.not_found (Sylius' translation in Resources/translations/*.yml, which symfony lsp:check doesn't index) #}
+    {# @symfony-lsp-ignore translation.not_found (false positive, see https://github.com/symfony/language-tools/issues/121) #}
     <span class="text-body-secondary">{{ 'sylius.ui.unavailable'|trans }}</span>
 {% endif %}

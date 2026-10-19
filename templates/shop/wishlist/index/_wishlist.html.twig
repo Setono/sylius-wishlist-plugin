@@ -3,8 +3,7 @@
 
 <div class="card h-100">
     {% if item %}
-        {# symfony lsp:check doesn't know anonymous Twig components or the translations in Sylius' Resources/translations/*.yml #}
-        {# @symfony-lsp-ignore twig_component.not_found (anonymous component of Sylius' shop) #}
+        {# @symfony-lsp-ignore twig_component.not_found (false positive, see https://github.com/symfony/language-tools/issues/122) #}
         {{ component('sylius_shop:main_image', {
             product: item.variant and item.variant.hasImages ? item.variant : item.product,
             class: 'card-img-top'
@@ -17,6 +16,6 @@
     </div>
     <div class="card-footer text-body-secondary d-flex align-items-center gap-2">
         {{ ux_icon('tabler:gift') }}
-        {{ wishlist.items.count }} {{ 'sylius.ui.items'|trans }}{# @symfony-lsp-ignore translation.not_found (Sylius' translation) #}
+        {{ wishlist.items.count }} {{ 'sylius.ui.items'|trans }}{# @symfony-lsp-ignore translation.not_found (false positive, see https://github.com/symfony/language-tools/issues/121) #}
     </div>
 </div>

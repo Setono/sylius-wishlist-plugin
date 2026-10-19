@@ -3,9 +3,11 @@
 
 {% set canEdit = is_granted('wishlist_edit', wishlist) %}
 
-{# symfony lsp:check doesn't index the translations Sylius ships in its bundles' Resources/translations/*.yml, nor
-   anonymous Twig components like sylius_shop:main_image, so it reports them as missing. The ignores below are for that #}
-{# @symfony-lsp-ignore translation.not_found (Sylius' translation) #}
+{# symfony lsp:check reports Sylius' translations and anonymous Twig components as missing, although both work: it only
+   reads the en_US catalogue, not its en fallback (https://github.com/symfony/language-tools/issues/121), and it ignores
+   Sylius' decorated component template finder (https://github.com/symfony/language-tools/issues/122). Remove the
+   ignore comments that link those issues once they are fixed #}
+{# @symfony-lsp-ignore translation.not_found (false positive, see https://github.com/symfony/language-tools/issues/121) #}
 {% set updateLabel = 'sylius.ui.update'|trans %}
 
 {% block title %}{{ wishlist.name }} | {{ parent() }}{% endblock %}
@@ -51,11 +53,11 @@
                     <thead>
                         <tr>
                             <th scope="col">&nbsp;</th>
-                            <th scope="col">{{ 'sylius.ui.quantity'|trans }}</th>{# @symfony-lsp-ignore translation.not_found (Sylius' translation) #}
-                            <th scope="col">{{ 'sylius.ui.product'|trans }}</th>{# @symfony-lsp-ignore translation.not_found (Sylius' translation) #}
-                            <th scope="col">{{ 'sylius.ui.variant'|trans }}</th>{# @symfony-lsp-ignore translation.not_found (Sylius' translation) #}
+                            <th scope="col">{{ 'sylius.ui.quantity'|trans }}</th>{# @symfony-lsp-ignore translation.not_found (false positive, see https://github.com/symfony/language-tools/issues/121) #}
+                            <th scope="col">{{ 'sylius.ui.product'|trans }}</th>{# @symfony-lsp-ignore translation.not_found (false positive, see https://github.com/symfony/language-tools/issues/121) #}
+                            <th scope="col">{{ 'sylius.ui.variant'|trans }}</th>{# @symfony-lsp-ignore translation.not_found (false positive, see https://github.com/symfony/language-tools/issues/121) #}
                             <th scope="col">{{ 'setono_sylius_wishlist.ui.note'|trans }}</th>
-                            <th scope="col">{{ 'sylius.ui.price'|trans }}</th>{# @symfony-lsp-ignore translation.not_found (Sylius' translation) #}
+                            <th scope="col">{{ 'sylius.ui.price'|trans }}</th>{# @symfony-lsp-ignore translation.not_found (false positive, see https://github.com/symfony/language-tools/issues/121) #}
                             <th scope="col">&nbsp;</th>
                         </tr>
                     </thead>
@@ -64,7 +66,7 @@
                             {% set available = setono_sylius_wishlist_is_available(item) %}
                             <tr>
                                 <td style="width: 80px">
-                                    {# @symfony-lsp-ignore twig_component.not_found (anonymous component of Sylius' shop) #}
+                                    {# @symfony-lsp-ignore twig_component.not_found (false positive, see https://github.com/symfony/language-tools/issues/122) #}
                                     {{ component('sylius_shop:main_image', {
                                         product: item.variant and item.variant.hasImages ? item.variant : item.product,
                                         filter: 'sylius_shop_product_small_thumbnail'
