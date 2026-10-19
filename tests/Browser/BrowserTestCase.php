@@ -10,6 +10,7 @@ use Playwright\Page\PageInterface;
 use Playwright\Symfony\Test\PlaywrightTestCase;
 use function Playwright\Testing\expect;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * Runs the shop in a real browser against the test application's database and default fixtures. Like the functional
@@ -28,7 +29,15 @@ abstract class BrowserTestCase extends PlaywrightTestCase
     {
         parent::beforeRequest($request);
 
-        self::$kernel?->shutdown();
+        self::currentKernel()?->shutdown();
+    }
+
+    /**
+     * KernelTestCase::$kernel is nullable from Symfony 7, but declared non-nullable on 6.4 even though it can be null
+     */
+    private static function currentKernel(): ?KernelInterface
+    {
+        return self::$kernel;
     }
 
     /**
