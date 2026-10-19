@@ -6,6 +6,7 @@ setono_sylius_wishlist:
         note: Huomautus
         remove_from_wishlist: Poista
         select_variant: Valitse vaihtoehto...
+        select_variant_to_add_to_cart: "Valitse vaihtoehto ja napsauta \"%button%\", jotta voit lisätä tämän tuotteen ostoskoriin"
         toggle_wishlist: Vaihda toivelistan tila
         wishlist: Toivelista
         wishlist_subheader: Täällä voit muokata toivelistasi tuotteiden määrää. Voit myös valita haluamasi vaihtoehdot ja poistaa tuotteita toivelistaltasi. Lopuksi voit jakaa toivelistasi muiden kanssa kopioimalla alla olevan URL-osoitteen.

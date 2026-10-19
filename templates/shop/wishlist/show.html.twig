@@ -86,7 +86,14 @@
                                 </td>
                                 <td>
                                     {% if form.items[key].variant is defined %}
-                                        {{ form_widget(form.items[key].variant, { 'attr': { 'class': 'form-select form-select-sm' } }) }}
+                                        {# Only the owner can save a variant, so only the owner is asked to pick one #}
+                                        {% set missingVariant = canEdit and item.variant is null %}
+                                        {{ form_widget(form.items[key].variant, { 'attr': { 'class': 'form-select form-select-sm' ~ (missingVariant ? ' is-invalid') } }) }}
+                                        {% if missingVariant %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ 'setono_sylius_wishlist.ui.select_variant_to_add_to_cart'|trans({ '%button%': 'sylius.ui.update'|trans }) }}
+                                            </div>
+                                        {% endif %}
                                     {% endif %}
                                 </td>
                                 <td>

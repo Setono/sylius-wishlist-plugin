@@ -1,3 +1,6 @@
 setono_sylius_wishlist:
     no_wishlists: Non hai ancora aggiunto nulla alla tua lista dei desideri
+    products_unavailable_not_added_to_cart: "Questi prodotti non sono disponibili e non sono stati aggiunti al carrello: %products%"
+    products_without_variant_not_added_to_cart: "Questi prodotti non sono stati aggiunti al carrello perché non è stata selezionata alcuna variante: %products%"
+    wishlist_added_to_cart: "I prodotti della lista dei desideri sono stati aggiunti al tuo carrello"
     wishlist_updated: La tua lista dei desideri è stata aggiornata

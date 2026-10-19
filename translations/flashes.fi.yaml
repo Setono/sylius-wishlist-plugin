@@ -1,3 +1,6 @@
 setono_sylius_wishlist:
     no_wishlists: Et ole vielä lisännyt mitään toivelistallesi
+    products_unavailable_not_added_to_cart: "Nämä tuotteet eivät ole saatavilla, eikä niitä lisätty ostoskoriin: %products%"
+    products_without_variant_not_added_to_cart: "Näitä tuotteita ei lisätty ostoskoriin, koska vaihtoehtoa ei ole valittu: %products%"
+    wishlist_added_to_cart: "Toivelistan tuotteita on lisätty ostoskoriisi"
     wishlist_updated: Toivelistasi on päivitetty

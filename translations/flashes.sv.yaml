@@ -1,3 +1,6 @@
 setono_sylius_wishlist:
     no_wishlists: Du har inte lagt till något i din önskelista ännu
+    products_unavailable_not_added_to_cart: "De här produkterna är inte tillgängliga och lades inte i varukorgen: %products%"
+    products_without_variant_not_added_to_cart: "De här produkterna lades inte i varukorgen eftersom ingen variant har valts: %products%"
+    wishlist_added_to_cart: "Produkter från önskelistan har lagts i din varukorg"
     wishlist_updated: Din önskelista har uppdaterats

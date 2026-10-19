@@ -6,6 +6,7 @@ setono_sylius_wishlist:
         note: Note
         remove_from_wishlist: Fjern
         select_variant: Vælg variant...
+        select_variant_to_add_to_cart: "Vælg en variant og klik på \"%button%\" for at kunne lægge produktet i kurven"
         toggle_wishlist: Slå ønskeliste til/fra
         wishlist: Ønskeliste
         wishlist_subheader: Her kan du redigere mængden af produkterne i din ønskeliste. Du kan også vælge de varianter, du ønsker, og fjerne produkter fra din ønskeliste. Endelig kan du dele din ønskeliste med andre ved at kopiere URL'en nedenfor.

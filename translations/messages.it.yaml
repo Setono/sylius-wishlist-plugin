@@ -6,6 +6,7 @@ setono_sylius_wishlist:
         note: Nota
         remove_from_wishlist: Rimuovi
         select_variant: Seleziona variante...
+        select_variant_to_add_to_cart: "Seleziona una variante e fai clic su \"%button%\" per poter aggiungere questo prodotto al carrello"
         toggle_wishlist: Attiva/disattiva lista dei desideri
         wishlist: Lista dei desideri
         wishlist_subheader: "Qui puoi modificare la quantità dei prodotti nella tua lista dei desideri. Puoi anche selezionare le varianti che desideri e rimuovere prodotti dalla tua lista dei desideri. Infine puoi condividere la tua lista dei desideri con altri copiando l'URL qui sotto."

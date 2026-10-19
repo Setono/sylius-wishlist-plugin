@@ -1,3 +1,6 @@
 setono_sylius_wishlist:
     no_wishlists: Nu ați adăugat încă nimic în lista dvs. de dorințe
+    products_unavailable_not_added_to_cart: "Aceste produse nu sunt disponibile și nu au fost adăugate în coș: %products%"
+    products_without_variant_not_added_to_cart: "Aceste produse nu au fost adăugate în coș deoarece nu a fost selectată nicio variantă: %products%"
+    wishlist_added_to_cart: "Produsele din lista de dorințe au fost adăugate în coșul dvs."
     wishlist_updated: Lista dvs. de dorințe a fost actualizată

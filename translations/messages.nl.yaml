@@ -6,6 +6,7 @@ setono_sylius_wishlist:
         note: Notitie
         remove_from_wishlist: Verwijderen
         select_variant: Selecteer variant...
+        select_variant_to_add_to_cart: "Selecteer een variant en klik op \"%button%\" om dit product aan je winkelwagen te kunnen toevoegen"
         toggle_wishlist: Verlanglijst in-/uitschakelen
         wishlist: Verlanglijst
         wishlist_subheader: Hier kun je het aantal producten in je verlanglijst bewerken. Je kunt ook de gewenste varianten selecteren en producten uit je verlanglijst verwijderen. Tot slot kun je je verlanglijst met anderen delen door de onderstaande URL te kopiëren.
