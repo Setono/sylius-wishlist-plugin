@@ -14,14 +14,10 @@ final class GuestWishlistRepositoryTest extends KernelTestCase
     protected function setUp(): void
     {
         self::bootKernel();
-
-        $this->connection()->executeStatement('DELETE FROM setono_sylius_wishlist__wishlist');
     }
 
     protected function tearDown(): void
     {
-        $this->connection()->executeStatement('DELETE FROM setono_sylius_wishlist__wishlist');
-
         parent::tearDown();
 
         restore_exception_handler();

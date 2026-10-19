@@ -6,8 +6,8 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Factory;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Setono\SyliusWishlistPlugin\Factory\WishlistItemFactory;
 use Setono\SyliusWishlistPlugin\Model\WishlistItem;
 use Setono\SyliusWishlistPlugin\Model\WishlistItemInterface;
@@ -17,6 +17,8 @@ use Sylius\Resource\Factory\FactoryInterface;
 
 final class WishlistItemFactoryTest extends TestCase
 {
+    use ProphecyTrait;
+
     #[Test]
     public function it_creates_a_new_wishlist_item_via_the_decorated_factory(): void
     {
@@ -28,12 +30,12 @@ final class WishlistItemFactoryTest extends TestCase
     #[Test]
     public function it_creates_an_item_for_a_configurable_product(): void
     {
-        $product = $this->createMock(ProductInterface::class);
-        $product->method('isSimple')->willReturn(false);
+        $product = $this->prophesize(ProductInterface::class);
+        $product->isSimple()->willReturn(false);
 
-        $item = $this->factory(new WishlistItem())->createWithProduct($product, 3);
+        $item = $this->factory(new WishlistItem())->createWithProduct($product->reveal(), 3);
 
-        self::assertSame($product, $item->getProduct());
+        self::assertSame($product->reveal(), $item->getProduct());
         self::assertNull($item->getVariant());
         self::assertSame(3, $item->getQuantity());
     }
@@ -41,38 +43,38 @@ final class WishlistItemFactoryTest extends TestCase
     #[Test]
     public function it_creates_an_item_for_a_simple_product_using_its_first_variant(): void
     {
-        $product = $this->createMock(ProductInterface::class);
-        $variant = $this->createMock(ProductVariantInterface::class);
-        $variant->method('getProduct')->willReturn($product);
-        $product->method('isSimple')->willReturn(true);
-        $product->method('getVariants')->willReturn(new ArrayCollection([$variant]));
+        $product = $this->prophesize(ProductInterface::class);
+        $variant = $this->prophesize(ProductVariantInterface::class);
+        $variant->getProduct()->willReturn($product->reveal());
+        $product->isSimple()->willReturn(true);
+        $product->getVariants()->willReturn(new ArrayCollection([$variant->reveal()]));
 
-        $item = $this->factory(new WishlistItem())->createWithProduct($product);
+        $item = $this->factory(new WishlistItem())->createWithProduct($product->reveal());
 
-        self::assertSame($variant, $item->getVariant());
+        self::assertSame($variant->reveal(), $item->getVariant());
         self::assertSame(1, $item->getQuantity());
     }
 
     #[Test]
     public function it_creates_an_item_for_a_product_variant(): void
     {
-        $product = $this->createMock(ProductInterface::class);
-        $variant = $this->createMock(ProductVariantInterface::class);
-        $variant->method('getProduct')->willReturn($product);
+        $product = $this->prophesize(ProductInterface::class);
+        $variant = $this->prophesize(ProductVariantInterface::class);
+        $variant->getProduct()->willReturn($product->reveal());
 
-        $item = $this->factory(new WishlistItem())->createWithProductVariant($variant, 4);
+        $item = $this->factory(new WishlistItem())->createWithProductVariant($variant->reveal(), 4);
 
-        self::assertSame($variant, $item->getVariant());
+        self::assertSame($variant->reveal(), $item->getVariant());
         self::assertSame(4, $item->getQuantity());
     }
 
     #[Test]
     public function it_defaults_the_quantity_to_one_for_a_product_variant(): void
     {
-        $variant = $this->createMock(ProductVariantInterface::class);
-        $variant->method('getProduct')->willReturn($this->createMock(ProductInterface::class));
+        $variant = $this->prophesize(ProductVariantInterface::class);
+        $variant->getProduct()->willReturn($this->prophesize(ProductInterface::class)->reveal());
 
-        $item = $this->factory(new WishlistItem())->createWithProductVariant($variant);
+        $item = $this->factory(new WishlistItem())->createWithProductVariant($variant->reveal());
 
         self::assertSame(1, $item->getQuantity());
     }
@@ -80,21 +82,20 @@ final class WishlistItemFactoryTest extends TestCase
     #[Test]
     public function it_rejects_a_simple_product_without_variants(): void
     {
-        $product = $this->createMock(ProductInterface::class);
-        $product->method('isSimple')->willReturn(true);
-        $product->method('getVariants')->willReturn(new ArrayCollection());
+        $product = $this->prophesize(ProductInterface::class);
+        $product->isSimple()->willReturn(true);
+        $product->getVariants()->willReturn(new ArrayCollection());
 
         $this->expectException(\InvalidArgumentException::class);
 
-        $this->factory(new WishlistItem())->createWithProduct($product);
+        $this->factory(new WishlistItem())->createWithProduct($product->reveal());
     }
 
     private function factory(WishlistItemInterface $item): WishlistItemFactory
     {
-        /** @var MockObject&FactoryInterface<WishlistItemInterface> $decorated */
-        $decorated = $this->createMock(FactoryInterface::class);
-        $decorated->method('createNew')->willReturn($item);
+        $decorated = $this->prophesize(FactoryInterface::class);
+        $decorated->createNew()->willReturn($item);
 
-        return new WishlistItemFactory($decorated);
+        return new WishlistItemFactory($decorated->reveal());
     }
 }

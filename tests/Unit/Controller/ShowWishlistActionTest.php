@@ -6,8 +6,10 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Controller;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
+use Prophecy\Prophecy\ObjectProphecy;
 use Setono\SyliusWishlistPlugin\Controller\ShowWishlistAction;
 use Setono\SyliusWishlistPlugin\Form\Type\WishlistType;
 use Setono\SyliusWishlistPlugin\Model\GuestWishlist;
@@ -29,12 +31,14 @@ use Twig\Environment;
 
 final class ShowWishlistActionTest extends TestCase
 {
+    use ProphecyTrait;
+
     #[Test]
     public function it_throws_not_found_when_the_wishlist_does_not_exist(): void
     {
         $action = new ShowWishlistAction(
-            $this->repository(null),
-            $this->formFactory($this->form(false)),
+            $this->repository(null)->reveal(),
+            $this->formFactory($this->form(false)->reveal()),
             $this->authorizationChecker(true),
             $this->twig(),
             $this->urlGenerator(),
@@ -54,30 +58,28 @@ final class ShowWishlistActionTest extends TestCase
         $guestWishlist->setMergedInto($userWishlist);
 
         $form = $this->form(true);
-        $form->expects(self::never())->method('handleRequest');
+        $form->handleRequest(Argument::cetera())->shouldNotBeCalled();
 
-        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
+        $authorizationChecker = $this->prophesize(AuthorizationCheckerInterface::class);
         $authorizationChecker
-            ->expects(self::once())
-            ->method('isGranted')
-            ->with(WishlistVoter::EDIT, $userWishlist)
+            ->isGranted(WishlistVoter::EDIT, $userWishlist)
+            ->shouldBeCalledOnce()
             ->willReturn(true)
         ;
 
-        $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
         $urlGenerator
-            ->expects(self::once())
-            ->method('generate')
-            ->with('setono_sylius_wishlist_shop_wishlist_show', ['uuid' => $userWishlist->getUuid()])
+            ->generate('setono_sylius_wishlist_shop_wishlist_show', ['uuid' => $userWishlist->getUuid()])
+            ->shouldBeCalledOnce()
             ->willReturn('/wishlists/user-wishlist')
         ;
 
         $action = new ShowWishlistAction(
-            $this->repository($guestWishlist),
-            $this->formFactory($form),
-            $authorizationChecker,
+            $this->repository($guestWishlist)->reveal(),
+            $this->formFactory($form->reveal()),
+            $authorizationChecker->reveal(),
             $this->twig(),
-            $urlGenerator,
+            $urlGenerator->reveal(),
         );
 
         $response = $action(Request::create('/wishlists/uuid', $method), 'uuid');
@@ -95,18 +97,17 @@ final class ShowWishlistActionTest extends TestCase
         $guestWishlist = new GuestWishlist();
         $guestWishlist->setMergedInto($userWishlist);
 
-        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
+        $authorizationChecker = $this->prophesize(AuthorizationCheckerInterface::class);
         $authorizationChecker
-            ->expects(self::once())
-            ->method('isGranted')
-            ->with(WishlistVoter::EDIT, $userWishlist)
+            ->isGranted(WishlistVoter::EDIT, $userWishlist)
+            ->shouldBeCalledOnce()
             ->willReturn(false)
         ;
 
         $action = new ShowWishlistAction(
-            $this->repository($guestWishlist),
-            $this->formFactory($this->form(false)),
-            $authorizationChecker,
+            $this->repository($guestWishlist)->reveal(),
+            $this->formFactory($this->form(false)->reveal()),
+            $authorizationChecker->reveal(),
             $this->twig(),
             $this->urlGenerator(),
         );
@@ -130,21 +131,20 @@ final class ShowWishlistActionTest extends TestCase
     {
         $guestWishlist = new GuestWishlist();
 
-        $twig = $this->createMock(Environment::class);
+        $twig = $this->prophesize(Environment::class);
         $twig
-            ->expects(self::once())
-            ->method('render')
-            ->with('@SetonoSyliusWishlistPlugin/shop/wishlist/show.html.twig', self::callback(
+            ->render('@SetonoSyliusWishlistPlugin/shop/wishlist/show.html.twig', Argument::that(
                 static fn (array $context): bool => $context['wishlist'] === $guestWishlist,
             ))
+            ->shouldBeCalledOnce()
             ->willReturn('rendered')
         ;
 
         $action = new ShowWishlistAction(
-            $this->repository($guestWishlist),
-            $this->formFactory($this->form(false)),
+            $this->repository($guestWishlist)->reveal(),
+            $this->formFactory($this->form(false)->reveal()),
             $this->authorizationChecker(false),
-            $twig,
+            $twig->reveal(),
             $this->urlGenerator(),
         );
 
@@ -154,25 +154,24 @@ final class ShowWishlistActionTest extends TestCase
     #[Test]
     public function it_saves_the_wishlist_and_redirects_with_a_flash_when_the_owner_submits_a_valid_form(): void
     {
-        $wishlist = $this->createMock(WishlistInterface::class);
+        $wishlist = $this->prophesize(WishlistInterface::class)->reveal();
 
         $repository = $this->repository($wishlist);
-        $repository->expects(self::once())->method('add')->with($wishlist);
+        $repository->add($wishlist)->shouldBeCalledOnce();
 
-        $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
         $urlGenerator
-            ->expects(self::once())
-            ->method('generate')
-            ->with('setono_sylius_wishlist_shop_wishlist_show', ['uuid' => 'uuid'])
+            ->generate('setono_sylius_wishlist_shop_wishlist_show', ['uuid' => 'uuid'])
+            ->shouldBeCalledOnce()
             ->willReturn('/wishlists/uuid')
         ;
 
         $action = new ShowWishlistAction(
-            $repository,
-            $this->formFactory($this->form(true)),
+            $repository->reveal(),
+            $this->formFactory($this->form(true)->reveal()),
             $this->authorizationChecker(true),
             $this->twig(),
-            $urlGenerator,
+            $urlGenerator->reveal(),
         );
 
         $session = new Session(new MockArraySessionStorage());
@@ -190,26 +189,25 @@ final class ShowWishlistActionTest extends TestCase
     #[DataProvider('provideUnsafeMethods')]
     public function it_refuses_a_non_owner_submission_before_the_form_touches_the_wishlist(string $method): void
     {
-        $wishlist = $this->createMock(WishlistInterface::class);
+        $wishlist = $this->prophesize(WishlistInterface::class)->reveal();
 
         $repository = $this->repository($wishlist);
-        $repository->expects(self::never())->method('add');
+        $repository->add(Argument::cetera())->shouldNotBeCalled();
 
         $form = $this->form(true);
-        $form->expects(self::never())->method('handleRequest');
+        $form->handleRequest(Argument::cetera())->shouldNotBeCalled();
 
-        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
+        $authorizationChecker = $this->prophesize(AuthorizationCheckerInterface::class);
         $authorizationChecker
-            ->expects(self::once())
-            ->method('isGranted')
-            ->with(WishlistVoter::EDIT, $wishlist)
+            ->isGranted(WishlistVoter::EDIT, $wishlist)
+            ->shouldBeCalledOnce()
             ->willReturn(false)
         ;
 
         $action = new ShowWishlistAction(
-            $repository,
-            $this->formFactory($form),
-            $authorizationChecker,
+            $repository->reveal(),
+            $this->formFactory($form->reveal()),
+            $authorizationChecker->reveal(),
             $this->twig(),
             $this->urlGenerator(),
         );
@@ -231,19 +229,18 @@ final class ShowWishlistActionTest extends TestCase
     #[Test]
     public function it_builds_the_form_for_the_wishlist_with_the_patch_method(): void
     {
-        $wishlist = $this->createMock(WishlistInterface::class);
+        $wishlist = $this->prophesize(WishlistInterface::class)->reveal();
 
-        $formFactory = $this->createMock(FormFactoryInterface::class);
+        $formFactory = $this->prophesize(FormFactoryInterface::class);
         $formFactory
-            ->expects(self::once())
-            ->method('create')
-            ->with(WishlistType::class, $wishlist, ['method' => 'PATCH'])
-            ->willReturn($this->form(false))
+            ->create(WishlistType::class, $wishlist, ['method' => 'PATCH'])
+            ->shouldBeCalledOnce()
+            ->willReturn($this->form(false)->reveal())
         ;
 
         $action = new ShowWishlistAction(
-            $this->repository($wishlist),
-            $formFactory,
+            $this->repository($wishlist)->reveal(),
+            $formFactory->reveal(),
             $this->authorizationChecker(true),
             $this->twig(),
             $this->urlGenerator(),
@@ -255,31 +252,30 @@ final class ShowWishlistActionTest extends TestCase
     #[Test]
     public function it_handles_the_request_and_renders_the_wishlist_with_its_form(): void
     {
-        $wishlist = $this->createMock(WishlistInterface::class);
+        $wishlist = $this->prophesize(WishlistInterface::class)->reveal();
         $request = new Request();
         $formView = new FormView();
 
-        $form = $this->createMock(FormInterface::class);
-        $form->expects(self::once())->method('handleRequest')->with($request);
-        $form->method('isSubmitted')->willReturn(false);
-        $form->method('createView')->willReturn($formView);
+        $form = $this->prophesize(FormInterface::class);
+        $form->handleRequest($request)->shouldBeCalledOnce()->willReturn($form);
+        $form->isSubmitted()->willReturn(false);
+        $form->createView()->willReturn($formView);
 
-        $twig = $this->createMock(Environment::class);
+        $twig = $this->prophesize(Environment::class);
         $twig
-            ->expects(self::once())
-            ->method('render')
-            ->with('@SetonoSyliusWishlistPlugin/shop/wishlist/show.html.twig', [
+            ->render('@SetonoSyliusWishlistPlugin/shop/wishlist/show.html.twig', [
                 'wishlist' => $wishlist,
                 'form' => $formView,
             ])
+            ->shouldBeCalledOnce()
             ->willReturn('rendered')
         ;
 
         $action = new ShowWishlistAction(
-            $this->repository($wishlist),
-            $this->formFactory($form),
+            $this->repository($wishlist)->reveal(),
+            $this->formFactory($form->reveal()),
             $this->authorizationChecker(true),
-            $twig,
+            $twig->reveal(),
             $this->urlGenerator(),
         );
 
@@ -289,16 +285,16 @@ final class ShowWishlistActionTest extends TestCase
     #[Test]
     public function it_neither_authorizes_nor_saves_on_a_safe_request(): void
     {
-        $repository = $this->repository($this->createMock(WishlistInterface::class));
-        $repository->expects(self::never())->method('add');
+        $repository = $this->repository($this->prophesize(WishlistInterface::class)->reveal());
+        $repository->add(Argument::cetera())->shouldNotBeCalled();
 
-        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
-        $authorizationChecker->expects(self::never())->method('isGranted');
+        $authorizationChecker = $this->prophesize(AuthorizationCheckerInterface::class);
+        $authorizationChecker->isGranted(Argument::cetera())->shouldNotBeCalled();
 
         $action = new ShowWishlistAction(
-            $repository,
-            $this->formFactory($this->form(false)),
-            $authorizationChecker,
+            $repository->reveal(),
+            $this->formFactory($this->form(false)->reveal()),
+            $authorizationChecker->reveal(),
             $this->twig(),
             $this->urlGenerator(),
         );
@@ -307,26 +303,28 @@ final class ShowWishlistActionTest extends TestCase
     }
 
     /**
-     * @return MockObject&WishlistRepositoryInterface<WishlistInterface>
+     * @return ObjectProphecy<WishlistRepositoryInterface<WishlistInterface>>
      */
-    private function repository(?WishlistInterface $wishlist): WishlistRepositoryInterface
+    private function repository(?WishlistInterface $wishlist): ObjectProphecy
     {
-        /** @var MockObject&WishlistRepositoryInterface<WishlistInterface> $repository */
-        $repository = $this->createMock(WishlistRepositoryInterface::class);
-        $repository->method('findOneByUuid')->willReturn($wishlist);
+        /** @var ObjectProphecy<WishlistRepositoryInterface<WishlistInterface>> $repository */
+        $repository = $this->prophesize(WishlistRepositoryInterface::class);
+        $repository->findOneByUuid(Argument::any())->willReturn($wishlist);
 
         return $repository;
     }
 
     /**
-     * @return FormInterface<mixed>&MockObject
+     * @return ObjectProphecy<FormInterface<mixed>>
      */
-    private function form(bool $submitted): FormInterface
+    private function form(bool $submitted): ObjectProphecy
     {
-        $form = $this->createMock(FormInterface::class);
-        $form->method('isSubmitted')->willReturn($submitted);
-        $form->method('isValid')->willReturn(true);
-        $form->method('createView')->willReturn(new FormView());
+        /** @var ObjectProphecy<FormInterface<mixed>> $form */
+        $form = $this->prophesize(FormInterface::class);
+        $form->handleRequest(Argument::any())->willReturn($form);
+        $form->isSubmitted()->willReturn($submitted);
+        $form->isValid()->willReturn(true);
+        $form->createView()->willReturn(new FormView());
 
         return $form;
     }
@@ -336,33 +334,33 @@ final class ShowWishlistActionTest extends TestCase
      */
     private function formFactory(FormInterface $form): FormFactoryInterface
     {
-        $formFactory = $this->createMock(FormFactoryInterface::class);
-        $formFactory->method('create')->willReturn($form);
+        $formFactory = $this->prophesize(FormFactoryInterface::class);
+        $formFactory->create(Argument::cetera())->willReturn($form);
 
-        return $formFactory;
+        return $formFactory->reveal();
     }
 
     private function authorizationChecker(bool $granted): AuthorizationCheckerInterface
     {
-        $authorizationChecker = $this->createMock(AuthorizationCheckerInterface::class);
-        $authorizationChecker->method('isGranted')->willReturn($granted);
+        $authorizationChecker = $this->prophesize(AuthorizationCheckerInterface::class);
+        $authorizationChecker->isGranted(Argument::cetera())->willReturn($granted);
 
-        return $authorizationChecker;
+        return $authorizationChecker->reveal();
     }
 
     private function twig(): Environment
     {
-        $twig = $this->createMock(Environment::class);
-        $twig->method('render')->willReturn('');
+        $twig = $this->prophesize(Environment::class);
+        $twig->render(Argument::cetera())->willReturn('');
 
-        return $twig;
+        return $twig->reveal();
     }
 
     private function urlGenerator(): UrlGeneratorInterface
     {
-        $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
-        $urlGenerator->method('generate')->willReturn('/wishlists/uuid');
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::cetera())->willReturn('/wishlists/uuid');
 
-        return $urlGenerator;
+        return $urlGenerator->reveal();
     }
 }

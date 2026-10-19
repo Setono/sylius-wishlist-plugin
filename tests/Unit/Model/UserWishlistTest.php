@@ -6,11 +6,14 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Model;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Setono\SyliusWishlistPlugin\Model\UserWishlist;
 use Sylius\Component\User\Model\UserInterface;
 
 final class UserWishlistTest extends TestCase
 {
+    use ProphecyTrait;
+
     #[Test]
     public function it_has_no_user_by_default(): void
     {
@@ -21,7 +24,7 @@ final class UserWishlistTest extends TestCase
     public function it_sets_and_gets_the_user(): void
     {
         $wishlist = new UserWishlist();
-        $user = $this->createMock(UserInterface::class);
+        $user = $this->prophesize(UserInterface::class)->reveal();
 
         $wishlist->setUser($user);
         self::assertSame($user, $wishlist->getUser());

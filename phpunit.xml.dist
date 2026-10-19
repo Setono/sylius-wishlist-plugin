@@ -10,6 +10,10 @@
             <directory>tests/Functional</directory>
         </testsuite>
     </testsuites>
+    <extensions>
+        <!-- Runs each test in a database transaction that is rolled back afterwards -->
+        <bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension"/>
+    </extensions>
     <php>
         <env name="APP_ENV" value="test"/>
         <env name="SHELL_VERBOSITY" value="-1"/>

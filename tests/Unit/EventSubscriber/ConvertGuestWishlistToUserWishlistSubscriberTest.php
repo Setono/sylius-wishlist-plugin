@@ -8,8 +8,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestWith;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Setono\SyliusWishlistPlugin\EventSubscriber\ConvertGuestWishlistToUserWishlistSubscriber;
 use Setono\SyliusWishlistPlugin\Factory\WishlistFactoryInterface;
 use Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface;
@@ -29,6 +30,8 @@ use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 
 final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
 {
+    use ProphecyTrait;
+
     #[Test]
     public function it_subscribes_to_the_login_success_event(): void
     {
@@ -46,17 +49,21 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
     #[TestWith([AdminUserInterface::class])]
     public function it_does_nothing_when_the_user_is_not_a_shop_user(string $userClass): void
     {
-        $provider = $this->createMock(WishlistProviderInterface::class);
-        $provider->expects(self::never())->method('getWishlists');
+        $provider = $this->prophesize(WishlistProviderInterface::class);
+        $provider->getWishlists(Argument::cetera())->shouldNotBeCalled();
 
-        $subscriber = $this->subscriber($provider, $this->createMock(UserWishlistRepositoryInterface::class), $this->createMock(ManagerRegistry::class));
-        $subscriber->onLoginSuccess($this->event($this->createMock($userClass)));
+        $subscriber = $this->subscriber(
+            $provider->reveal(),
+            $this->prophesize(UserWishlistRepositoryInterface::class)->reveal(),
+            $this->prophesize(ManagerRegistry::class)->reveal(),
+        );
+        $subscriber->onLoginSuccess($this->event($this->prophesize($userClass)->reveal()));
     }
 
     #[Test]
     public function it_moves_the_guest_items_onto_the_existing_user_wishlist_and_keeps_the_guest_wishlist_as_a_placeholder(): void
     {
-        $user = $this->createMock(ShopUserInterface::class);
+        $user = $this->prophesize(ShopUserInterface::class)->reveal();
 
         $product = $this->product(1);
         $variant = $this->variant(10, $this->product(2));
@@ -71,19 +78,19 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
 
         $userWishlist = new UserWishlist();
 
-        $manager = $this->createMock(EntityManagerInterface::class);
-        $manager->expects(self::never())->method('persist');
-        $manager->expects(self::never())->method('remove');
-        $manager->expects(self::once())->method('flush');
+        $manager = $this->prophesize(EntityManagerInterface::class);
+        $manager->persist(Argument::cetera())->shouldNotBeCalled();
+        $manager->remove(Argument::cetera())->shouldNotBeCalled();
+        $manager->flush()->shouldBeCalledOnce();
 
-        $wishlistFactory = $this->createMock(WishlistFactoryInterface::class);
-        $wishlistFactory->expects(self::never())->method('createForUser');
+        $wishlistFactory = $this->prophesize(WishlistFactoryInterface::class);
+        $wishlistFactory->createForUser(Argument::cetera())->shouldNotBeCalled();
 
         $subscriber = $this->subscriber(
             $this->provider([$guestWishlist]),
             $this->repository($user, [$userWishlist]),
-            $this->managerRegistry($manager),
-            $wishlistFactory,
+            $this->managerRegistry($manager->reveal()),
+            $wishlistFactory->reveal(),
         );
         $subscriber->onLoginSuccess($this->event($user));
 
@@ -116,7 +123,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
     #[Test]
     public function it_creates_a_user_wishlist_when_the_user_has_none(): void
     {
-        $user = $this->createMock(ShopUserInterface::class);
+        $user = $this->prophesize(ShopUserInterface::class)->reveal();
         $product = $this->product(1);
 
         $guestWishlist = new GuestWishlist();
@@ -124,19 +131,19 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
 
         $userWishlist = new UserWishlist();
 
-        $wishlistFactory = $this->createMock(WishlistFactoryInterface::class);
-        $wishlistFactory->expects(self::once())->method('createForUser')->with($user)->willReturn($userWishlist);
+        $wishlistFactory = $this->prophesize(WishlistFactoryInterface::class);
+        $wishlistFactory->createForUser($user)->shouldBeCalledOnce()->willReturn($userWishlist);
 
-        $manager = $this->createMock(EntityManagerInterface::class);
-        $manager->expects(self::once())->method('persist')->with($userWishlist);
-        $manager->expects(self::never())->method('remove');
-        $manager->expects(self::once())->method('flush');
+        $manager = $this->prophesize(EntityManagerInterface::class);
+        $manager->persist($userWishlist)->shouldBeCalledOnce();
+        $manager->remove(Argument::cetera())->shouldNotBeCalled();
+        $manager->flush()->shouldBeCalledOnce();
 
         $subscriber = $this->subscriber(
             $this->provider([$guestWishlist]),
             $this->repository($user, []),
-            $this->managerRegistry($manager),
-            $wishlistFactory,
+            $this->managerRegistry($manager->reveal()),
+            $wishlistFactory->reveal(),
         );
         $subscriber->onLoginSuccess($this->event($user));
 
@@ -147,7 +154,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
     #[Test]
     public function it_copies_the_guest_items_onto_the_first_user_wishlist(): void
     {
-        $user = $this->createMock(ShopUserInterface::class);
+        $user = $this->prophesize(ShopUserInterface::class)->reveal();
         $product = $this->product(1);
 
         $guestWishlist = new GuestWishlist();
@@ -159,7 +166,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
         $subscriber = $this->subscriber(
             $this->provider([$guestWishlist]),
             $this->repository($user, [$first, $second]),
-            $this->managerRegistry($this->createMock(EntityManagerInterface::class)),
+            $this->managerRegistry($this->prophesize(EntityManagerInterface::class)->reveal()),
         );
         $subscriber->onLoginSuccess($this->event($user));
 
@@ -170,7 +177,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
     #[Test]
     public function it_keeps_the_existing_item_when_the_product_or_variant_is_already_on_the_user_wishlist(): void
     {
-        $user = $this->createMock(ShopUserInterface::class);
+        $user = $this->prophesize(ShopUserInterface::class)->reveal();
 
         $product = $this->product(1);
         $variant = $this->variant(10, $this->product(2));
@@ -189,7 +196,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
         $subscriber = $this->subscriber(
             $this->provider([$guestWishlist]),
             $this->repository($user, [$userWishlist]),
-            $this->managerRegistry($this->createMock(EntityManagerInterface::class)),
+            $this->managerRegistry($this->prophesize(EntityManagerInterface::class)->reveal()),
         );
         $subscriber->onLoginSuccess($this->event($user));
 
@@ -203,21 +210,21 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
     #[Test]
     public function it_skips_items_without_a_product(): void
     {
-        $user = $this->createMock(ShopUserInterface::class);
+        $user = $this->prophesize(ShopUserInterface::class)->reveal();
 
         $guestWishlist = new GuestWishlist();
         $guestWishlist->addItem(new WishlistItem());
 
         $userWishlist = new UserWishlist();
 
-        $wishlistItemFactory = $this->createMock(WishlistItemFactoryInterface::class);
-        $wishlistItemFactory->expects(self::never())->method('createNew');
+        $wishlistItemFactory = $this->prophesize(WishlistItemFactoryInterface::class);
+        $wishlistItemFactory->createNew(Argument::cetera())->shouldNotBeCalled();
 
         $subscriber = $this->subscriber(
             $this->provider([$guestWishlist]),
             $this->repository($user, [$userWishlist]),
-            $this->managerRegistry($this->createMock(EntityManagerInterface::class)),
-            wishlistItemFactory: $wishlistItemFactory,
+            $this->managerRegistry($this->prophesize(EntityManagerInterface::class)->reveal()),
+            wishlistItemFactory: $wishlistItemFactory->reveal(),
         );
         $subscriber->onLoginSuccess($this->event($user));
 
@@ -227,28 +234,33 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
     #[Test]
     public function it_removes_an_empty_guest_wishlist_without_touching_the_user_wishlists(): void
     {
-        $user = $this->createMock(ShopUserInterface::class);
+        $user = $this->prophesize(ShopUserInterface::class)->reveal();
         $guestWishlist = new GuestWishlist();
 
-        $repository = $this->createMock(UserWishlistRepositoryInterface::class);
-        $repository->expects(self::never())->method('findByUser');
+        $repository = $this->prophesize(UserWishlistRepositoryInterface::class);
+        $repository->findByUser(Argument::cetera())->shouldNotBeCalled();
 
-        $wishlistFactory = $this->createMock(WishlistFactoryInterface::class);
-        $wishlistFactory->expects(self::never())->method('createForUser');
+        $wishlistFactory = $this->prophesize(WishlistFactoryInterface::class);
+        $wishlistFactory->createForUser(Argument::cetera())->shouldNotBeCalled();
 
-        $manager = $this->createMock(EntityManagerInterface::class);
-        $manager->expects(self::never())->method('persist');
-        $manager->expects(self::once())->method('remove')->with($guestWishlist);
-        $manager->expects(self::once())->method('flush');
+        $manager = $this->prophesize(EntityManagerInterface::class);
+        $manager->persist(Argument::cetera())->shouldNotBeCalled();
+        $manager->remove($guestWishlist)->shouldBeCalledOnce();
+        $manager->flush()->shouldBeCalledOnce();
 
-        $subscriber = $this->subscriber($this->provider([$guestWishlist]), $repository, $this->managerRegistry($manager), $wishlistFactory);
+        $subscriber = $this->subscriber(
+            $this->provider([$guestWishlist]),
+            $repository->reveal(),
+            $this->managerRegistry($manager->reveal()),
+            $wishlistFactory->reveal(),
+        );
         $subscriber->onLoginSuccess($this->event($user));
     }
 
     #[Test]
     public function it_looks_up_the_user_wishlist_once_for_several_guest_wishlists(): void
     {
-        $user = $this->createMock(ShopUserInterface::class);
+        $user = $this->prophesize(ShopUserInterface::class)->reveal();
 
         $first = new GuestWishlist();
         $first->addItem($this->item($this->product(1)));
@@ -258,14 +270,14 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
 
         $userWishlist = new UserWishlist();
 
-        $repository = $this->createMock(UserWishlistRepositoryInterface::class);
-        $repository->expects(self::once())->method('findByUser')->with($user)->willReturn([$userWishlist]);
+        $repository = $this->prophesize(UserWishlistRepositoryInterface::class);
+        $repository->findByUser($user)->shouldBeCalledOnce()->willReturn([$userWishlist]);
 
-        $manager = $this->createMock(EntityManagerInterface::class);
-        $manager->expects(self::never())->method('remove');
-        $manager->expects(self::once())->method('flush');
+        $manager = $this->prophesize(EntityManagerInterface::class);
+        $manager->remove(Argument::cetera())->shouldNotBeCalled();
+        $manager->flush()->shouldBeCalledOnce();
 
-        $subscriber = $this->subscriber($this->provider([$first, $second]), $repository, $this->managerRegistry($manager));
+        $subscriber = $this->subscriber($this->provider([$first, $second]), $repository->reveal(), $this->managerRegistry($manager->reveal()));
         $subscriber->onLoginSuccess($this->event($user));
 
         self::assertCount(2, $userWishlist->getItems());
@@ -276,7 +288,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
     #[Test]
     public function it_keeps_going_after_removing_an_empty_guest_wishlist(): void
     {
-        $user = $this->createMock(ShopUserInterface::class);
+        $user = $this->prophesize(ShopUserInterface::class)->reveal();
 
         $empty = new GuestWishlist();
 
@@ -285,14 +297,14 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
 
         $userWishlist = new UserWishlist();
 
-        $manager = $this->createMock(EntityManagerInterface::class);
-        $manager->expects(self::once())->method('remove')->with($empty);
-        $manager->expects(self::once())->method('flush');
+        $manager = $this->prophesize(EntityManagerInterface::class);
+        $manager->remove($empty)->shouldBeCalledOnce();
+        $manager->flush()->shouldBeCalledOnce();
 
         $subscriber = $this->subscriber(
             $this->provider([$empty, $withItems]),
             $this->repository($user, [$userWishlist]),
-            $this->managerRegistry($manager),
+            $this->managerRegistry($manager->reveal()),
         );
         $subscriber->onLoginSuccess($this->event($user));
 
@@ -304,7 +316,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
     #[Test]
     public function it_ignores_wishlists_that_are_not_guest_wishlists(): void
     {
-        $user = $this->createMock(ShopUserInterface::class);
+        $user = $this->prophesize(ShopUserInterface::class)->reveal();
 
         $otherUsersWishlist = new UserWishlist();
         $otherUsersWishlist->addItem($this->item($this->product(1)));
@@ -314,14 +326,14 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
 
         $userWishlist = new UserWishlist();
 
-        $manager = $this->createMock(EntityManagerInterface::class);
-        $manager->expects(self::never())->method('remove');
-        $manager->expects(self::once())->method('flush');
+        $manager = $this->prophesize(EntityManagerInterface::class);
+        $manager->remove(Argument::cetera())->shouldNotBeCalled();
+        $manager->flush()->shouldBeCalledOnce();
 
         $subscriber = $this->subscriber(
             $this->provider([$otherUsersWishlist, $guestWishlist]),
             $this->repository($user, [$userWishlist]),
-            $this->managerRegistry($manager),
+            $this->managerRegistry($manager->reveal()),
         );
         $subscriber->onLoginSuccess($this->event($user));
 
@@ -333,11 +345,15 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
     #[Test]
     public function it_does_nothing_when_the_visitor_has_no_guest_wishlist(): void
     {
-        $managerRegistry = $this->createMock(ManagerRegistry::class);
-        $managerRegistry->expects(self::never())->method('getManagerForClass');
+        $managerRegistry = $this->prophesize(ManagerRegistry::class);
+        $managerRegistry->getManagerForClass(Argument::cetera())->shouldNotBeCalled();
 
-        $subscriber = $this->subscriber($this->provider([]), $this->createMock(UserWishlistRepositoryInterface::class), $managerRegistry);
-        $subscriber->onLoginSuccess($this->event($this->createMock(ShopUserInterface::class)));
+        $subscriber = $this->subscriber(
+            $this->provider([]),
+            $this->prophesize(UserWishlistRepositoryInterface::class)->reveal(),
+            $managerRegistry->reveal(),
+        );
+        $subscriber->onLoginSuccess($this->event($this->prophesize(ShopUserInterface::class)->reveal()));
     }
 
     private function subscriber(
@@ -348,14 +364,15 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
         ?WishlistItemFactoryInterface $wishlistItemFactory = null,
     ): ConvertGuestWishlistToUserWishlistSubscriber {
         if (null === $wishlistItemFactory) {
-            $wishlistItemFactory = $this->createMock(WishlistItemFactoryInterface::class);
-            $wishlistItemFactory->method('createNew')->willReturnCallback(static fn (): WishlistItemInterface => new WishlistItem());
+            $defaultWishlistItemFactory = $this->prophesize(WishlistItemFactoryInterface::class);
+            $defaultWishlistItemFactory->createNew()->will(static fn (): WishlistItemInterface => new WishlistItem());
+            $wishlistItemFactory = $defaultWishlistItemFactory->reveal();
         }
 
         return new ConvertGuestWishlistToUserWishlistSubscriber(
             $provider,
             $repository,
-            $wishlistFactory ?? $this->createMock(WishlistFactoryInterface::class),
+            $wishlistFactory ?? $this->prophesize(WishlistFactoryInterface::class)->reveal(),
             $wishlistItemFactory,
             $managerRegistry,
         );
@@ -366,10 +383,10 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
      */
     private function provider(array $wishlists): WishlistProviderInterface
     {
-        $provider = $this->createMock(WishlistProviderInterface::class);
-        $provider->method('getWishlists')->willReturn($wishlists);
+        $provider = $this->prophesize(WishlistProviderInterface::class);
+        $provider->getWishlists()->willReturn($wishlists);
 
-        return $provider;
+        return $provider->reveal();
     }
 
     /**
@@ -377,26 +394,26 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
      */
     private function repository(ShopUserInterface $user, array $userWishlists): UserWishlistRepositoryInterface
     {
-        $repository = $this->createMock(UserWishlistRepositoryInterface::class);
-        $repository->method('findByUser')->with($user)->willReturn($userWishlists);
+        $repository = $this->prophesize(UserWishlistRepositoryInterface::class);
+        $repository->findByUser($user)->willReturn($userWishlists);
 
-        return $repository;
+        return $repository->reveal();
     }
 
     private function managerRegistry(EntityManagerInterface $manager): ManagerRegistry
     {
-        $managerRegistry = $this->createMock(ManagerRegistry::class);
-        $managerRegistry->method('getManagerForClass')->willReturn($manager);
+        $managerRegistry = $this->prophesize(ManagerRegistry::class);
+        $managerRegistry->getManagerForClass(Argument::any())->willReturn($manager);
 
-        return $managerRegistry;
+        return $managerRegistry->reveal();
     }
 
     private function event(SymfonyUserInterface $user): LoginSuccessEvent
     {
-        $event = $this->createMock(LoginSuccessEvent::class);
-        $event->method('getUser')->willReturn($user);
+        $event = $this->prophesize(LoginSuccessEvent::class);
+        $event->getUser()->willReturn($user);
 
-        return $event;
+        return $event->reveal();
     }
 
     private function item(ProductInterface $product, int $quantity = 1, ?string $note = null): WishlistItem
@@ -419,20 +436,20 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
         return $item;
     }
 
-    private function product(int $id): ProductInterface&MockObject
+    private function product(int $id): ProductInterface
     {
-        $product = $this->createMock(ProductInterface::class);
-        $product->method('getId')->willReturn($id);
+        $product = $this->prophesize(ProductInterface::class);
+        $product->getId()->willReturn($id);
 
-        return $product;
+        return $product->reveal();
     }
 
-    private function variant(int $id, ProductInterface $product): ProductVariantInterface&MockObject
+    private function variant(int $id, ProductInterface $product): ProductVariantInterface
     {
-        $variant = $this->createMock(ProductVariantInterface::class);
-        $variant->method('getId')->willReturn($id);
-        $variant->method('getProduct')->willReturn($product);
+        $variant = $this->prophesize(ProductVariantInterface::class);
+        $variant->getId()->willReturn($id);
+        $variant->getProduct()->willReturn($product);
 
-        return $variant;
+        return $variant->reveal();
     }
 }

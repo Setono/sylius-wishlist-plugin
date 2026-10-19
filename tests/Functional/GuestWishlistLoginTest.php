@@ -24,8 +24,6 @@ final class GuestWishlistLoginTest extends WebTestCase
     {
         $this->client = self::createClient();
 
-        $this->deleteWishlists();
-
         // The fixtures don't verify the customer, and Sylius doesn't let unverified customers log in
         $this->connection()->executeStatement(
             'UPDATE sylius_shop_user SET verified_at = COALESCE(verified_at, NOW()) WHERE username = ?',
@@ -35,8 +33,6 @@ final class GuestWishlistLoginTest extends WebTestCase
 
     protected function tearDown(): void
     {
-        $this->deleteWishlists();
-
         parent::tearDown();
 
         restore_exception_handler();
@@ -246,12 +242,6 @@ final class GuestWishlistLoginTest extends WebTestCase
             'kind' => $row['kind'],
             'product_id' => (int) $row['product_id'],
         ], $rows);
-    }
-
-    private function deleteWishlists(): void
-    {
-        // Items are removed by the ON DELETE CASCADE foreign key
-        $this->connection()->executeStatement('DELETE FROM setono_sylius_wishlist__wishlist');
     }
 
     private function connection(): Connection

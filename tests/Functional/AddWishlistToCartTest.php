@@ -18,24 +18,13 @@ final class AddWishlistToCartTest extends WebTestCase
 
     private KernelBrowser $client;
 
-    /** @var list<array{string, list<int|null>}> the statements that restore the fixture data a test changed */
-    private array $restoreStatements = [];
-
     protected function setUp(): void
     {
         $this->client = self::createClient();
-
-        $this->deleteWishlists();
     }
 
     protected function tearDown(): void
     {
-        $this->deleteWishlists();
-
-        foreach ($this->restoreStatements as [$sql, $params]) {
-            $this->connection()->executeStatement($sql, $params);
-        }
-
         parent::tearDown();
 
         restore_exception_handler();
@@ -76,12 +65,8 @@ final class AddWishlistToCartTest extends WebTestCase
         $this->client->request('GET', sprintf('/en_US/wishlist/add-product/%d', $available['id']));
         $this->client->request('GET', sprintf('/en_US/wishlist/add-product/%d', $unpriced['id']));
 
-        // Sylius can't price a variant without a price in the channel, which used to fail the whole wishlist
-        foreach ($this->connection()->fetchAllKeyValue('SELECT id, price FROM sylius_channel_pricing WHERE product_variant_id = ?', [$unpriced['variant_id']]) as $id => $price) {
-            self::assertIsNumeric($id);
-            self::assertTrue(null === $price || is_numeric($price));
-            $this->restoreStatements[] = ['UPDATE sylius_channel_pricing SET price = ? WHERE id = ?', [null === $price ? null : (int) $price, (int) $id]];
-        }
+        // Sylius can't price a variant without a price in the channel, which used to fail the whole wishlist.
+        // Like every change a test makes to the database, this is rolled back afterwards
         $this->connection()->executeStatement('UPDATE sylius_channel_pricing SET price = NULL WHERE product_variant_id = ?', [$unpriced['variant_id']]);
 
         $uuid = $this->connection()->fetchOne("SELECT uuid FROM setono_sylius_wishlist__wishlist WHERE kind = 'guest'");
@@ -106,15 +91,6 @@ final class AddWishlistToCartTest extends WebTestCase
         $this->client->request('GET', sprintf('/en_US/wishlist/add-product/%d', $outOfStock['id']));
 
         // The fixtures don't track stock, so we make one variant tracked and sold out
-        $original = $this->connection()->fetchAssociative('SELECT tracked, on_hand, on_hold FROM sylius_product_variant WHERE id = ?', [$outOfStock['variant_id']]);
-        self::assertIsArray($original);
-        self::assertIsNumeric($original['tracked']);
-        self::assertIsNumeric($original['on_hand']);
-        self::assertIsNumeric($original['on_hold']);
-        $this->restoreStatements[] = [
-            'UPDATE sylius_product_variant SET tracked = ?, on_hand = ?, on_hold = ? WHERE id = ?',
-            [(int) $original['tracked'], (int) $original['on_hand'], (int) $original['on_hold'], $outOfStock['variant_id']],
-        ];
         $this->connection()->executeStatement('UPDATE sylius_product_variant SET tracked = 1, on_hand = 0, on_hold = 0 WHERE id = ?', [$outOfStock['variant_id']]);
 
         $uuid = $this->connection()->fetchOne("SELECT uuid FROM setono_sylius_wishlist__wishlist WHERE kind = 'guest'");
@@ -138,7 +114,6 @@ final class AddWishlistToCartTest extends WebTestCase
         $this->client->request('GET', sprintf('/en_US/wishlist/add-product/%d', $enabled['id']));
         $this->client->request('GET', sprintf('/en_US/wishlist/add-product/%d', $disabled['id']));
 
-        $this->restoreStatements[] = ['UPDATE sylius_product SET enabled = 1 WHERE id = ?', [$disabled['id']]];
         $this->connection()->executeStatement('UPDATE sylius_product SET enabled = 0 WHERE id = ?', [$disabled['id']]);
 
         $uuid = $this->connection()->fetchOne("SELECT uuid FROM setono_sylius_wishlist__wishlist WHERE kind = 'guest'");
@@ -217,12 +192,6 @@ final class AddWishlistToCartTest extends WebTestCase
         self::assertIsNumeric($row['variant_id']);
 
         return ['id' => (int) $row['id'], 'name' => $row['name'], 'slug' => $row['slug'], 'variant_id' => (int) $row['variant_id']];
-    }
-
-    private function deleteWishlists(): void
-    {
-        // Items are removed by the ON DELETE CASCADE foreign key
-        $this->connection()->executeStatement('DELETE FROM setono_sylius_wishlist__wishlist');
     }
 
     private function connection(): Connection

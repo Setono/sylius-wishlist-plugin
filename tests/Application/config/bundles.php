@@ -59,4 +59,5 @@ return [
     Sylius\Abstraction\StateMachine\SyliusStateMachineAbstractionBundle::class => ['all' => true],
     Setono\ClientBundle\SetonoClientBundle::class => ['all' => true],
     Setono\SyliusWishlistPlugin\SetonoSyliusWishlistPlugin::class => ['all' => true],
+    DAMA\DoctrineTestBundle\DAMADoctrineTestBundle::class => ['test' => true],
 ];

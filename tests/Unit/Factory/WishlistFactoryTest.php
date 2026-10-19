@@ -6,6 +6,8 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Factory;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Setono\Client\Client;
 use Setono\ClientBundle\Context\ClientContextInterface;
 use Setono\SyliusWishlistPlugin\Factory\WishlistFactory;
@@ -19,6 +21,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class WishlistFactoryTest extends TestCase
 {
+    use ProphecyTrait;
+
     #[Test]
     public function it_creates_a_guest_wishlist(): void
     {
@@ -31,7 +35,7 @@ final class WishlistFactoryTest extends TestCase
     #[Test]
     public function it_creates_a_user_wishlist(): void
     {
-        $user = $this->createMock(UserInterface::class);
+        $user = $this->prophesize(UserInterface::class)->reveal();
 
         $wishlist = $this->factory()->createForUser($user);
 
@@ -42,7 +46,7 @@ final class WishlistFactoryTest extends TestCase
     #[Test]
     public function it_creates_a_user_wishlist_when_a_user_is_logged_in(): void
     {
-        $user = $this->createMock(UserInterface::class);
+        $user = $this->prophesize(UserInterface::class)->reveal();
 
         $wishlist = $this->factory($user)->createNew();
 
@@ -61,15 +65,15 @@ final class WishlistFactoryTest extends TestCase
 
     private function factory(?UserInterface $user = null, string $clientId = 'client-1'): WishlistFactory
     {
-        $security = $this->createMock(Security::class);
-        $security->method('getUser')->willReturn($user);
+        $security = $this->prophesize(Security::class);
+        $security->getUser()->willReturn($user);
 
-        $clientContext = $this->createMock(ClientContextInterface::class);
-        $clientContext->method('getClient')->willReturn(new Client($clientId));
+        $clientContext = $this->prophesize(ClientContextInterface::class);
+        $clientContext->getClient()->willReturn(new Client($clientId));
 
-        $translator = $this->createMock(TranslatorInterface::class);
-        $translator->method('trans')->willReturn('My wishlist');
+        $translator = $this->prophesize(TranslatorInterface::class);
+        $translator->trans(Argument::cetera())->willReturn('My wishlist');
 
-        return new WishlistFactory($security, $clientContext, $translator, GuestWishlist::class, UserWishlist::class);
+        return new WishlistFactory($security->reveal(), $clientContext->reveal(), $translator->reveal(), GuestWishlist::class, UserWishlist::class);
     }
 }

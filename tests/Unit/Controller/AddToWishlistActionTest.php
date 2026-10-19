@@ -7,8 +7,9 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Setono\SyliusWishlistPlugin\Controller\AddToWishlistAction;
 use Setono\SyliusWishlistPlugin\Factory\WishlistFactoryInterface;
 use Setono\SyliusWishlistPlugin\Factory\WishlistItemFactoryInterface;
@@ -25,6 +26,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class AddToWishlistActionTest extends TestCase
 {
+    use ProphecyTrait;
+
     #[Test]
     public function it_throws_not_found_when_the_product_does_not_exist(): void
     {
@@ -41,19 +44,19 @@ final class AddToWishlistActionTest extends TestCase
         $product = $this->product(1);
         $wishlist = $this->wishlist();
 
-        $manager = $this->manager($product);
-        $manager->expects(self::once())->method('persist')->with($wishlist);
-        $manager->expects(self::once())->method('flush');
+        $manager = $this->prophesize(EntityManagerInterface::class);
+        $manager->find(Argument::cetera())->willReturn($product);
+        $manager->persist($wishlist)->shouldBeCalledOnce();
+        $manager->flush()->shouldBeCalledOnce();
 
-        $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
         $urlGenerator
-            ->expects(self::once())
-            ->method('generate')
-            ->with('setono_sylius_wishlist_shop_wishlist_remove_product', ['id' => 1])
+            ->generate('setono_sylius_wishlist_shop_wishlist_remove_product', ['id' => 1])
+            ->shouldBeCalledOnce()
             ->willReturn('/remove')
         ;
 
-        $response = $this->action(Product::class, $manager, [$wishlist], urlGenerator: $urlGenerator)(1);
+        $response = $this->action(Product::class, $manager->reveal(), [$wishlist], urlGenerator: $urlGenerator->reveal())(1);
 
         self::assertTrue($wishlist->hasProduct($product));
         self::assertSame(
@@ -68,15 +71,14 @@ final class AddToWishlistActionTest extends TestCase
         $variant = $this->variant(10, $this->product(1));
         $wishlist = $this->wishlist();
 
-        $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
         $urlGenerator
-            ->expects(self::once())
-            ->method('generate')
-            ->with('setono_sylius_wishlist_shop_wishlist_remove_product_variant', ['id' => 10])
+            ->generate('setono_sylius_wishlist_shop_wishlist_remove_product_variant', ['id' => 10])
+            ->shouldBeCalledOnce()
             ->willReturn('/remove')
         ;
 
-        $this->action(ProductVariant::class, $this->manager($variant), [$wishlist], urlGenerator: $urlGenerator)(10);
+        $this->action(ProductVariant::class, $this->manager($variant), [$wishlist], urlGenerator: $urlGenerator->reveal())(10);
 
         self::assertTrue($wishlist->hasProductVariant($variant));
     }
@@ -135,10 +137,10 @@ final class AddToWishlistActionTest extends TestCase
         $product = $this->product(1);
         $wishlist = $this->wishlist();
 
-        $wishlistFactory = $this->createMock(WishlistFactoryInterface::class);
-        $wishlistFactory->expects(self::once())->method('createNew')->willReturn($wishlist);
+        $wishlistFactory = $this->prophesize(WishlistFactoryInterface::class);
+        $wishlistFactory->createNew()->shouldBeCalledOnce()->willReturn($wishlist);
 
-        $this->action(Product::class, $this->manager($product), [], $wishlistFactory)(1);
+        $this->action(Product::class, $this->manager($product), [], $wishlistFactory->reveal())(1);
 
         self::assertTrue($wishlist->hasProduct($product));
     }
@@ -154,42 +156,56 @@ final class AddToWishlistActionTest extends TestCase
         ?WishlistFactoryInterface $wishlistFactory = null,
         ?UrlGeneratorInterface $urlGenerator = null,
     ): AddToWishlistAction {
-        $managerRegistry = $this->createMock(ManagerRegistry::class);
-        $managerRegistry->method('getManagerForClass')->willReturn($manager);
+        $managerRegistry = $this->prophesize(ManagerRegistry::class);
+        $managerRegistry->getManagerForClass(Argument::any())->willReturn($manager);
 
-        $wishlistProvider = $this->createMock(WishlistProviderInterface::class);
-        $wishlistProvider->method('getPreSelectedWishlists')->willReturn($preSelectedWishlists);
+        $wishlistProvider = $this->prophesize(WishlistProviderInterface::class);
+        $wishlistProvider->getPreSelectedWishlists()->willReturn($preSelectedWishlists);
 
-        $wishlistItemFactory = $this->createMock(WishlistItemFactoryInterface::class);
-        $wishlistItemFactory->method('createWithProduct')->willReturnCallback($this->item(...));
-        $wishlistItemFactory->method('createWithProductVariant')->willReturnCallback(static function (ProductVariantInterface $variant): WishlistItem {
+        // Prophecy binds non-static closures to the double, so the item helper is captured instead of called on $this
+        $item = $this->item(...);
+
+        $wishlistItemFactory = $this->prophesize(WishlistItemFactoryInterface::class);
+        $wishlistItemFactory->createWithProduct(Argument::cetera())->will(static function (array $args) use ($item): WishlistItem {
+            self::assertInstanceOf(ProductInterface::class, $args[0]);
+
+            return $item($args[0]);
+        });
+        $wishlistItemFactory->createWithProductVariant(Argument::cetera())->will(static function (array $args): WishlistItem {
+            self::assertInstanceOf(ProductVariantInterface::class, $args[0]);
+
             $item = new WishlistItem();
-            $item->setVariant($variant);
+            $item->setVariant($args[0]);
 
             return $item;
         });
 
         if (null === $urlGenerator) {
-            $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
-            $urlGenerator->method('generate')->willReturn('/remove');
+            $defaultUrlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+            $defaultUrlGenerator->generate(Argument::cetera())->willReturn('/remove');
+            $urlGenerator = $defaultUrlGenerator->reveal();
         }
 
         return new AddToWishlistAction(
-            $wishlistProvider,
-            $wishlistItemFactory,
-            $managerRegistry,
-            $wishlistFactory ?? $this->createMock(WishlistFactoryInterface::class),
+            $wishlistProvider->reveal(),
+            $wishlistItemFactory->reveal(),
+            $managerRegistry->reveal(),
+            $wishlistFactory ?? $this->prophesize(WishlistFactoryInterface::class)->reveal(),
             $urlGenerator,
             $className,
         );
     }
 
-    private function manager(?object $entity): EntityManagerInterface&MockObject
+    private function manager(?object $entity): EntityManagerInterface
     {
-        $manager = $this->createMock(EntityManagerInterface::class);
-        $manager->method('find')->willReturn($entity);
+        $manager = $this->prophesize(EntityManagerInterface::class);
+        $manager->find(Argument::cetera())->willReturn($entity);
 
-        return $manager;
+        // Once a double has a stubbed method, Prophecy rejects calls to any method it wasn't told about, so allow the writes
+        $manager->persist(Argument::any())->will(static function (): void {});
+        $manager->flush()->will(static function (): void {});
+
+        return $manager->reveal();
     }
 
     private function wishlist(): UserWishlist
@@ -205,20 +221,20 @@ final class AddToWishlistActionTest extends TestCase
         return $item;
     }
 
-    private function product(int $id): ProductInterface&MockObject
+    private function product(int $id): ProductInterface
     {
-        $product = $this->createMock(ProductInterface::class);
-        $product->method('getId')->willReturn($id);
+        $product = $this->prophesize(ProductInterface::class);
+        $product->getId()->willReturn($id);
 
-        return $product;
+        return $product->reveal();
     }
 
-    private function variant(int $id, ProductInterface $product): ProductVariantInterface&MockObject
+    private function variant(int $id, ProductInterface $product): ProductVariantInterface
     {
-        $variant = $this->createMock(ProductVariantInterface::class);
-        $variant->method('getId')->willReturn($id);
-        $variant->method('getProduct')->willReturn($product);
+        $variant = $this->prophesize(ProductVariantInterface::class);
+        $variant->getId()->willReturn($id);
+        $variant->getProduct()->willReturn($product);
 
-        return $variant;
+        return $variant->reveal();
     }
 }

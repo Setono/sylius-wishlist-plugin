@@ -6,6 +6,8 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Checker;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Setono\SyliusWishlistPlugin\Checker\WishlistChecker;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
@@ -14,43 +16,45 @@ use Sylius\Component\Core\Model\ProductVariantInterface;
 
 final class WishlistCheckerTest extends TestCase
 {
+    use ProphecyTrait;
+
     #[Test]
     public function it_reports_a_product_on_a_wishlist(): void
     {
-        $product = $this->createMock(ProductInterface::class);
+        $product = $this->prophesize(ProductInterface::class)->reveal();
 
-        $wishlist = $this->createMock(WishlistInterface::class);
-        $wishlist->method('hasProduct')->with($product)->willReturn(true);
+        $wishlist = $this->prophesize(WishlistInterface::class);
+        $wishlist->hasProduct($product)->willReturn(true);
 
-        self::assertTrue($this->checker([$wishlist])->onWishlist($product));
+        self::assertTrue($this->checker([$wishlist->reveal()])->onWishlist($product));
     }
 
     #[Test]
     public function it_reports_a_product_not_on_any_wishlist(): void
     {
-        $product = $this->createMock(ProductInterface::class);
+        $product = $this->prophesize(ProductInterface::class)->reveal();
 
-        $wishlist = $this->createMock(WishlistInterface::class);
-        $wishlist->method('hasProduct')->willReturn(false);
+        $wishlist = $this->prophesize(WishlistInterface::class);
+        $wishlist->hasProduct(Argument::any())->willReturn(false);
 
-        self::assertFalse($this->checker([$wishlist])->onWishlist($product));
+        self::assertFalse($this->checker([$wishlist->reveal()])->onWishlist($product));
     }
 
     #[Test]
     public function it_reports_a_product_variant_on_a_wishlist(): void
     {
-        $variant = $this->createMock(ProductVariantInterface::class);
+        $variant = $this->prophesize(ProductVariantInterface::class)->reveal();
 
-        $wishlist = $this->createMock(WishlistInterface::class);
-        $wishlist->method('hasProductVariant')->with($variant)->willReturn(true);
+        $wishlist = $this->prophesize(WishlistInterface::class);
+        $wishlist->hasProductVariant($variant)->willReturn(true);
 
-        self::assertTrue($this->checker([$wishlist])->onWishlist($variant));
+        self::assertTrue($this->checker([$wishlist->reveal()])->onWishlist($variant));
     }
 
     #[Test]
     public function it_reports_false_when_there_are_no_wishlists(): void
     {
-        self::assertFalse($this->checker([])->onWishlist($this->createMock(ProductInterface::class)));
+        self::assertFalse($this->checker([])->onWishlist($this->prophesize(ProductInterface::class)->reveal()));
     }
 
     /**
@@ -58,9 +62,9 @@ final class WishlistCheckerTest extends TestCase
      */
     private function checker(array $wishlists): WishlistChecker
     {
-        $provider = $this->createMock(WishlistProviderInterface::class);
-        $provider->method('getWishlists')->willReturn($wishlists);
+        $provider = $this->prophesize(WishlistProviderInterface::class);
+        $provider->getWishlists()->willReturn($wishlists);
 
-        return new WishlistChecker($provider);
+        return new WishlistChecker($provider->reveal());
     }
 }

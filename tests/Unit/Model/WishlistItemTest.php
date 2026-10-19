@@ -6,6 +6,7 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Model;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Setono\SyliusWishlistPlugin\Model\UserWishlist;
 use Setono\SyliusWishlistPlugin\Model\WishlistItem;
 use Sylius\Component\Core\Model\ProductInterface;
@@ -13,6 +14,8 @@ use Sylius\Component\Core\Model\ProductVariantInterface;
 
 final class WishlistItemTest extends TestCase
 {
+    use ProphecyTrait;
+
     #[Test]
     public function it_has_no_id_by_default(): void
     {
@@ -54,7 +57,7 @@ final class WishlistItemTest extends TestCase
         $item = new WishlistItem();
         self::assertNull($item->getProduct());
 
-        $product = $this->createMock(ProductInterface::class);
+        $product = $this->prophesize(ProductInterface::class)->reveal();
         $item->setProduct($product);
 
         self::assertSame($product, $item->getProduct());
@@ -63,32 +66,32 @@ final class WishlistItemTest extends TestCase
     #[Test]
     public function it_derives_the_product_from_the_variant(): void
     {
-        $product = $this->createMock(ProductInterface::class);
-        $variant = $this->createMock(ProductVariantInterface::class);
-        $variant->method('getProduct')->willReturn($product);
+        $product = $this->prophesize(ProductInterface::class)->reveal();
+        $variant = $this->prophesize(ProductVariantInterface::class);
+        $variant->getProduct()->willReturn($product);
 
         $item = new WishlistItem();
-        $item->setVariant($variant);
+        $item->setVariant($variant->reveal());
 
-        self::assertSame($variant, $item->getVariant());
+        self::assertSame($variant->reveal(), $item->getVariant());
         self::assertSame($product, $item->getProduct());
     }
 
     #[Test]
     public function it_rejects_a_variant_without_a_product(): void
     {
-        $variant = $this->createMock(ProductVariantInterface::class);
-        $variant->method('getProduct')->willReturn(null);
+        $variant = $this->prophesize(ProductVariantInterface::class);
+        $variant->getProduct()->willReturn(null);
 
         $this->expectException(\InvalidArgumentException::class);
 
-        (new WishlistItem())->setVariant($variant);
+        (new WishlistItem())->setVariant($variant->reveal());
     }
 
     #[Test]
     public function it_keeps_the_product_when_the_variant_is_unset(): void
     {
-        $product = $this->createMock(ProductInterface::class);
+        $product = $this->prophesize(ProductInterface::class)->reveal();
 
         $item = new WishlistItem();
         $item->setProduct($product);
