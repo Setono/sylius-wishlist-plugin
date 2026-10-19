@@ -54,7 +54,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
     }
 
     #[Test]
-    public function it_copies_the_guest_items_onto_the_existing_user_wishlist_and_removes_the_guest_wishlist(): void
+    public function it_moves_the_guest_items_onto_the_existing_user_wishlist_and_keeps_the_guest_wishlist_as_a_placeholder(): void
     {
         $user = $this->createMock(ShopUserInterface::class);
 
@@ -65,6 +65,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
         $variantItem = $this->variantItem($variant, quantity: 3, note: 'In red');
 
         $guestWishlist = new GuestWishlist();
+        $guestWishlist->setClientId('client-1');
         $guestWishlist->addItem($productItem);
         $guestWishlist->addItem($variantItem);
 
@@ -72,7 +73,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
 
         $manager = $this->createMock(EntityManagerInterface::class);
         $manager->expects(self::never())->method('persist');
-        $manager->expects(self::once())->method('remove')->with($guestWishlist);
+        $manager->expects(self::never())->method('remove');
         $manager->expects(self::once())->method('flush');
 
         $wishlistFactory = $this->createMock(WishlistFactoryInterface::class);
@@ -104,6 +105,12 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
         self::assertSame($variant->getProduct(), $copiedVariantItem->getProduct());
         self::assertSame(3, $copiedVariantItem->getQuantity());
         self::assertSame('In red', $copiedVariantItem->getNote());
+
+        self::assertFalse($guestWishlist->hasItems());
+        self::assertNull($productItem->getWishlist());
+        self::assertNull($variantItem->getWishlist());
+        self::assertNull($guestWishlist->getClientId());
+        self::assertSame($userWishlist, $guestWishlist->getMergedInto());
     }
 
     #[Test]
@@ -122,7 +129,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
 
         $manager = $this->createMock(EntityManagerInterface::class);
         $manager->expects(self::once())->method('persist')->with($userWishlist);
-        $manager->expects(self::once())->method('remove')->with($guestWishlist);
+        $manager->expects(self::never())->method('remove');
         $manager->expects(self::once())->method('flush');
 
         $subscriber = $this->subscriber(
@@ -134,6 +141,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
         $subscriber->onLoginSuccess($this->event($user));
 
         self::assertTrue($userWishlist->hasProduct($product));
+        self::assertSame($userWishlist, $guestWishlist->getMergedInto());
     }
 
     #[Test]
@@ -254,13 +262,43 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
         $repository->expects(self::once())->method('findByUser')->with($user)->willReturn([$userWishlist]);
 
         $manager = $this->createMock(EntityManagerInterface::class);
-        $manager->expects(self::exactly(2))->method('remove');
+        $manager->expects(self::never())->method('remove');
         $manager->expects(self::once())->method('flush');
 
         $subscriber = $this->subscriber($this->provider([$first, $second]), $repository, $this->managerRegistry($manager));
         $subscriber->onLoginSuccess($this->event($user));
 
         self::assertCount(2, $userWishlist->getItems());
+        self::assertSame($userWishlist, $first->getMergedInto());
+        self::assertSame($userWishlist, $second->getMergedInto());
+    }
+
+    #[Test]
+    public function it_keeps_going_after_removing_an_empty_guest_wishlist(): void
+    {
+        $user = $this->createMock(ShopUserInterface::class);
+
+        $empty = new GuestWishlist();
+
+        $withItems = new GuestWishlist();
+        $withItems->addItem($this->item($this->product(1)));
+
+        $userWishlist = new UserWishlist();
+
+        $manager = $this->createMock(EntityManagerInterface::class);
+        $manager->expects(self::once())->method('remove')->with($empty);
+        $manager->expects(self::once())->method('flush');
+
+        $subscriber = $this->subscriber(
+            $this->provider([$empty, $withItems]),
+            $this->repository($user, [$userWishlist]),
+            $this->managerRegistry($manager),
+        );
+        $subscriber->onLoginSuccess($this->event($user));
+
+        self::assertNull($empty->getMergedInto());
+        self::assertSame($userWishlist, $withItems->getMergedInto());
+        self::assertCount(1, $userWishlist->getItems());
     }
 
     #[Test]
@@ -277,7 +315,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
         $userWishlist = new UserWishlist();
 
         $manager = $this->createMock(EntityManagerInterface::class);
-        $manager->expects(self::once())->method('remove')->with($guestWishlist);
+        $manager->expects(self::never())->method('remove');
         $manager->expects(self::once())->method('flush');
 
         $subscriber = $this->subscriber(
@@ -289,6 +327,7 @@ final class ConvertGuestWishlistToUserWishlistSubscriberTest extends TestCase
 
         self::assertCount(1, $otherUsersWishlist->getItems());
         self::assertCount(1, $userWishlist->getItems());
+        self::assertSame($userWishlist, $guestWishlist->getMergedInto());
     }
 
     #[Test]

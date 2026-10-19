@@ -8,6 +8,8 @@ class GuestWishlist extends Wishlist implements GuestWishlistInterface
 {
     protected ?string $clientId = null;
 
+    protected ?UserWishlistInterface $mergedInto = null;
+
     public function getClientId(): ?string
     {
         return $this->clientId;
@@ -16,5 +18,15 @@ class GuestWishlist extends Wishlist implements GuestWishlistInterface
     public function setClientId(?string $clientId): void
     {
         $this->clientId = $clientId;
+    }
+
+    public function getMergedInto(): ?UserWishlistInterface
+    {
+        return $this->mergedInto;
+    }
+
+    public function setMergedInto(?UserWishlistInterface $mergedInto): void
+    {
+        $this->mergedInto = $mergedInto;
     }
 }

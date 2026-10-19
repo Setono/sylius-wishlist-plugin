@@ -62,8 +62,11 @@ shared/team wishlist), implement `WishlistProviderInterface` and tag it – you 
 Anonymous visitors are identified through [`setono/client-bundle`][link-client-bundle], which assigns a stable
 client id stored in a cookie. That id keys the guest wishlist. When the visitor logs in as a customer, a login
 subscriber (`ConvertGuestWishlistToUserWishlistSubscriber`) copies the guest wishlist's items onto the customer's
-first wishlist (creating one if they have none; products already on it are left untouched) and deletes the guest
-wishlist. The next anonymous visitor on the same browser therefore starts with an empty wishlist.
+first wishlist (creating one if they have none; products already on it are left untouched). The guest wishlist is
+emptied and detached from the browser, so the next anonymous visitor on the same browser starts with an empty
+wishlist. It is kept as a placeholder that points to the customer's wishlist: when the customer opens the old guest
+wishlist URL (e.g. an open tab or a bookmark), they are redirected to the wishlist their items went to. Anyone else
+gets a 404, because that wishlist may hold more than the guest wishlist they were shown (see [#13][link-issue-13]).
 
 ### Templates & the toggle flow
 
@@ -263,3 +266,4 @@ This plugin is released under the [MIT License](LICENSE).
 [link-code-coverage]: https://codecov.io/gh/Setono/sylius-wishlist-plugin
 [link-infection]: https://dashboard.stryker-mutator.io/reports/github.com/Setono/sylius-wishlist-plugin/2.x
 [link-client-bundle]: https://packagist.org/packages/setono/client-bundle
+[link-issue-13]: https://github.com/Setono/sylius-wishlist-plugin/issues/13
