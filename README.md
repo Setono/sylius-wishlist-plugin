@@ -60,8 +60,10 @@ shared/team wishlist), implement `WishlistProviderInterface` and tag it – you 
 ### Guest identity
 
 Anonymous visitors are identified through [`setono/client-bundle`][link-client-bundle], which assigns a stable
-client id stored in a cookie. That id keys the guest wishlist. When the visitor authenticates, a login subscriber
-(`ConvertGuestWishlistToUserWishlistSubscriber`) converts the guest wishlist into a user wishlist.
+client id stored in a cookie. That id keys the guest wishlist. When the visitor logs in as a customer, a login
+subscriber (`ConvertGuestWishlistToUserWishlistSubscriber`) copies the guest wishlist's items onto the customer's
+first wishlist (creating one if they have none; products already on it are left untouched) and deletes the guest
+wishlist. The next anonymous visitor on the same browser therefore starts with an empty wishlist.
 
 ### Templates & the toggle flow
 

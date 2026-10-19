@@ -3,6 +3,8 @@
     "source": {
         "directories": ["src"]
     },
+    // The functional tests need the database, which only the functional-tests CI job sets up
+    "testFrameworkOptions": "--testsuite=unit",
     "logs": {
         "text": "php://stderr",
         "github": true,
