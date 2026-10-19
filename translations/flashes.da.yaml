@@ -1,3 +1,7 @@
 setono_sylius_wishlist:
     no_wishlists: Du har ikke tilføjet noget til din ønskeliste endnu
+    products_out_of_stock_not_added_to_cart: "Der er ikke nok på lager af disse produkter, så de blev ikke lagt i kurven: %products%"
+    products_unavailable_not_added_to_cart: "Disse produkter er ikke tilgængelige og blev ikke lagt i kurven: %products%"
+    products_without_variant_not_added_to_cart: "Disse produkter blev ikke lagt i kurven, fordi der ikke er valgt en variant: %products%"
+    wishlist_added_to_cart: "Produkter fra ønskelisten er lagt i din kurv"
     wishlist_updated: Din ønskeliste er blevet opdateret

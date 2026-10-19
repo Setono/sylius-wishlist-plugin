@@ -3,9 +3,11 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Legg ønskeliste til handlekurv
         copy: Kopier
         inventory_insufficient: Lageret er utilstrekkelig for mengden du ønsker å legge til ønskelisten
+        item_unavailable: "Denne varen er ikke tilgjengelig for øyeblikket og kan derfor ikke legges i handlekurven"
         note: Notat
         remove_from_wishlist: Fjern
         select_variant: Velg variant...
+        select_variant_to_add_to_cart: "Velg en variant og klikk på «%button%» for å kunne legge produktet i handlekurven"
         toggle_wishlist: Slå ønskeliste på/av
         wishlist: Ønskeliste
         wishlist_subheader: Her kan du redigere mengden av produktene i ønskelisten din. Du kan også velge variantene du ønsker og fjerne produkter fra ønskelisten din. Til slutt kan du dele ønskelisten din med andre ved å kopiere URL-en nedenfor.

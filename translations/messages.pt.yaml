@@ -3,9 +3,11 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Adicionar lista de desejos ao carrinho
         copy: Copiar
         inventory_insufficient: O stock é insuficiente para a quantidade que pretende adicionar à lista de desejos
+        item_unavailable: "Este artigo não está disponível de momento, por isso não pode ser adicionado ao carrinho"
         note: Nota
         remove_from_wishlist: Remover
         select_variant: Selecionar variante...
+        select_variant_to_add_to_cart: "Selecione uma variante e clique em «%button%» para poder adicionar este produto ao carrinho"
         toggle_wishlist: Alternar lista de desejos
         wishlist: Lista de desejos
         wishlist_subheader: Aqui pode editar a quantidade dos produtos na sua lista de desejos. Também pode selecionar as variantes que pretende e remover produtos da sua lista de desejos. Por fim, pode partilhar a sua lista de desejos com outras pessoas copiando o URL abaixo.

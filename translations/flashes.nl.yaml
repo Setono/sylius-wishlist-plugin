@@ -1,3 +1,7 @@
 setono_sylius_wishlist:
     no_wishlists: Je hebt nog niets aan je verlanglijst toegevoegd
+    products_out_of_stock_not_added_to_cart: "Er is niet genoeg voorraad van deze producten, dus ze zijn niet aan je winkelwagen toegevoegd: %products%"
+    products_unavailable_not_added_to_cart: "Deze producten zijn niet beschikbaar en zijn niet aan je winkelwagen toegevoegd: %products%"
+    products_without_variant_not_added_to_cart: "Deze producten zijn niet aan je winkelwagen toegevoegd, omdat er geen variant is geselecteerd: %products%"
+    wishlist_added_to_cart: "Producten van de verlanglijst zijn aan je winkelwagen toegevoegd"
     wishlist_updated: Je verlanglijst is bijgewerkt

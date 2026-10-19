@@ -6,11 +6,16 @@ namespace Setono\SyliusWishlistPlugin\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Setono\Doctrine\ORMTrait;
+use Setono\SyliusWishlistPlugin\Checker\WishlistItemAvailabilityCheckerInterface;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
 use Sylius\Component\Core\Factory\CartItemFactoryInterface;
+use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
+use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Core\Model\ProductVariantInterface;
+use Sylius\Component\Inventory\Checker\AvailabilityCheckerInterface;
 use Sylius\Component\Order\Context\CartContextInterface;
 use Sylius\Component\Order\Modifier\OrderItemQuantityModifierInterface;
 use Sylius\Component\Order\Modifier\OrderModifierInterface;
@@ -39,6 +44,8 @@ final class AddWishlistToCartAction
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly CartItemFactoryInterface $cartItemFactory,
         ManagerRegistry $managerRegistry,
+        private readonly AvailabilityCheckerInterface $availabilityChecker,
+        private readonly WishlistItemAvailabilityCheckerInterface $wishlistItemAvailabilityChecker,
     ) {
         $this->managerRegistry = $managerRegistry;
     }
@@ -50,38 +57,120 @@ final class AddWishlistToCartAction
             throw new NotFoundHttpException(sprintf('Wishlist with id %s not found', $uuid));
         }
 
-        try {
-            $cart = $this->cartContext->getCart();
-            Assert::isInstanceOf($cart, OrderInterface::class);
+        $cart = $this->cartContext->getCart();
+        Assert::isInstanceOf($cart, OrderInterface::class);
 
-            foreach ($wishlist->getItems() as $item) {
-                if ($item->getVariant() === null) {
-                    throw new \RuntimeException(sprintf(
-                        'You have not selected a variant for the product "%s"',
-                        (string) $item->getProduct()?->getName(),
-                    ));
-                }
+        $channel = $cart->getChannel();
+        Assert::isInstanceOf($channel, ChannelInterface::class);
 
-                /** @var OrderItemInterface $cartItem */
-                $cartItem = $this->cartItemFactory->createNew();
-                $cartItem->setVariant($item->getVariant());
+        $added = false;
+        $productsWithoutVariant = [];
+        $unavailableProducts = [];
+        $productsOutOfStock = [];
 
-                $this->orderItemQuantityModifier->modify($cartItem, $item->getQuantity());
-
-                $this->orderModifier->addToOrder($cart, $cartItem);
+        // Instead of failing the whole wishlist on an item that can't go into the cart, we add everything else
+        // and tell the visitor which products weren't added and why
+        foreach ($wishlist->getItems() as $item) {
+            $product = $item->getProduct();
+            if (null === $product) {
+                continue;
             }
 
-            $this->getManager($cart)->persist($cart);
-            $this->getManager($cart)->flush();
-        } catch (\Throwable $e) {
-            $session = $request->getSession();
-            if ($session instanceof FlashBagAwareSessionInterface) {
-                $session->getFlashBag()->add('error', $e->getMessage());
+            // Checked before the variant: choosing a variant doesn't help if the product isn't sold anymore
+            if (!$this->wishlistItemAvailabilityChecker->isAvailable($item, $channel)) {
+                $unavailableProducts[] = self::getName($product);
+
+                continue;
             }
+
+            // A configurable product can be put on the wishlist before a variant is chosen
+            $variant = $item->getVariant();
+            if (null === $variant) {
+                $productsWithoutVariant[] = self::getName($product);
+
+                continue;
+            }
+
+            // Like Sylius' own add to cart, the quantity already in the cart counts too
+            if (!$this->availabilityChecker->isStockSufficient($variant, $item->getQuantity() + self::getQuantityInCart($cart, $variant))) {
+                $productsOutOfStock[] = self::getName($product);
+
+                continue;
+            }
+
+            /** @var OrderItemInterface $cartItem */
+            $cartItem = $this->cartItemFactory->createNew();
+            $cartItem->setVariant($variant);
+
+            $this->orderItemQuantityModifier->modify($cartItem, $item->getQuantity());
+
+            $this->orderModifier->addToOrder($cart, $cartItem);
+
+            $added = true;
         }
+
+        if ($added) {
+            $manager = $this->getManager($cart);
+            $manager->persist($cart);
+            $manager->flush();
+
+            $this->addFlash($request, 'success', 'setono_sylius_wishlist.wishlist_added_to_cart');
+        }
+
+        $this->addProductsFlash($request, 'setono_sylius_wishlist.products_without_variant_not_added_to_cart', $productsWithoutVariant);
+        $this->addProductsFlash($request, 'setono_sylius_wishlist.products_unavailable_not_added_to_cart', $unavailableProducts);
+        $this->addProductsFlash($request, 'setono_sylius_wishlist.products_out_of_stock_not_added_to_cart', $productsOutOfStock);
 
         return new RedirectResponse($this->urlGenerator->generate('setono_sylius_wishlist_shop_wishlist_show', [
             'uuid' => $uuid,
         ]));
+    }
+
+    /**
+     * Adding a variant that is already in the cart increases the quantity of its cart item, so there is at most one
+     */
+    private static function getQuantityInCart(OrderInterface $cart, ProductVariantInterface $variant): int
+    {
+        foreach ($cart->getItems() as $cartItem) {
+            if ($cartItem->getVariant() === $variant) {
+                return $cartItem->getQuantity();
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * The name is missing if the product isn't translated into the current locale
+     */
+    private static function getName(ProductInterface $product): ?string
+    {
+        return $product->getName() ?? $product->getCode();
+    }
+
+    /**
+     * @param list<string|null> $products
+     */
+    private function addProductsFlash(Request $request, string $message, array $products): void
+    {
+        if ([] === $products) {
+            return;
+        }
+
+        $this->addFlash($request, 'warning', [
+            'message' => $message,
+            'parameters' => ['%products%' => implode(', ', array_unique($products))],
+        ]);
+    }
+
+    /**
+     * @param string|array{message: string, parameters: array<string, string>} $message
+     */
+    private function addFlash(Request $request, string $type, string|array $message): void
+    {
+        $session = $request->getSession();
+        if ($session instanceof FlashBagAwareSessionInterface) {
+            $session->getFlashBag()->add($type, $message);
+        }
     }
 }

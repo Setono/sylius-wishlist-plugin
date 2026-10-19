@@ -7,6 +7,8 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 use Setono\SyliusWishlistPlugin\Checker\CachedWishlistChecker;
 use Setono\SyliusWishlistPlugin\Checker\WishlistChecker;
 use Setono\SyliusWishlistPlugin\Checker\WishlistCheckerInterface;
+use Setono\SyliusWishlistPlugin\Checker\WishlistItemAvailabilityChecker;
+use Setono\SyliusWishlistPlugin\Checker\WishlistItemAvailabilityCheckerInterface;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 
 return static function (ContainerConfigurator $container): void {
@@ -27,4 +29,8 @@ return static function (ContainerConfigurator $container): void {
         ])
         ->tag('kernel.reset', ['method' => 'reset'])
     ;
+
+    $services->alias(WishlistItemAvailabilityCheckerInterface::class, WishlistItemAvailabilityChecker::class);
+
+    $services->set(WishlistItemAvailabilityChecker::class);
 };

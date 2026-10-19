@@ -3,9 +3,11 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Wunschliste in den Warenkorb legen
         copy: Kopieren
         inventory_insufficient: Der Lagerbestand reicht für die Menge, die Sie zur Wunschliste hinzufügen möchten, nicht aus
+        item_unavailable: "Dieser Artikel ist derzeit nicht verfügbar und kann daher nicht in den Warenkorb gelegt werden"
         note: Notiz
         remove_from_wishlist: Entfernen
         select_variant: Variante auswählen...
+        select_variant_to_add_to_cart: "Wählen Sie eine Variante und klicken Sie auf „%button%“, um dieses Produkt in den Warenkorb legen zu können"
         toggle_wishlist: Wunschliste umschalten
         wishlist: Wunschliste
         wishlist_subheader: Hier können Sie die Menge der Produkte in Ihrer Wunschliste bearbeiten. Sie können auch die gewünschten Varianten auswählen und Produkte aus Ihrer Wunschliste entfernen. Schließlich können Sie Ihre Wunschliste mit anderen teilen, indem Sie die untenstehende URL kopieren.

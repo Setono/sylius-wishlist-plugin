@@ -3,9 +3,11 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Adaugă lista de dorințe în coș
         copy: Copiază
         inventory_insufficient: Stocul este insuficient pentru cantitatea pe care doriți să o adăugați în lista de dorințe
+        item_unavailable: "Acest articol nu este disponibil momentan, așa că nu poate fi adăugat în coș"
         note: Notă
         remove_from_wishlist: Elimină
         select_variant: Selectați varianta...
+        select_variant_to_add_to_cart: "Selectați o variantă și faceți clic pe „%button%” pentru a putea adăuga acest produs în coș"
         toggle_wishlist: Comută lista de dorințe
         wishlist: Listă de dorințe
         wishlist_subheader: Aici puteți edita cantitatea produselor din lista dvs. de dorințe. De asemenea, puteți selecta variantele dorite și puteți elimina produse din lista de dorințe. În final, puteți partaja lista de dorințe cu alții copiind adresa URL de mai jos.

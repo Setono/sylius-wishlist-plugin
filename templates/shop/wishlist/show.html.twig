@@ -56,6 +56,7 @@
                     </thead>
                     <tbody>
                         {% for key, item in wishlist.items %}
+                            {% set available = setono_sylius_wishlist_is_available(item) %}
                             <tr>
                                 <td style="width: 80px">
                                     {{ component('sylius_shop:main_image', {
@@ -68,25 +69,38 @@
                                     {% for error in form.items[key].quantity.vars.errors %}
                                         <div class="invalid-feedback d-block">{{ error.message }}</div>
                                     {% endfor %}
-                                    {% if item.variant and not sylius_inventory_is_sufficient(item.variant, item.quantity) %}
+                                    {% if available and item.variant and not sylius_inventory_is_sufficient(item.variant, item.quantity) %}
                                         <div class="text-danger small mt-1">
                                             {{ 'setono_sylius_wishlist.ui.inventory_insufficient'|trans }}
                                         </div>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {# A product without a translation in the current (or fallback) locale has no slug to link to #}
-                                    {% if item.product.slug %}
+                                    {# A product without a translation in the current (or fallback) locale has no slug to link to,
+                                       and Sylius has no page for a product that is disabled or not sold in this channel #}
+                                    {% if item.product.slug and item.product.enabled and item.product.hasChannel(sylius.channel) %}
                                         <a href="{{ path('sylius_shop_product_show', { 'slug': item.product.slug }) }}" class="text-decoration-none">
                                             {{ item.product.name }}
                                         </a>
                                     {% else %}
                                         {{ item.product.name }}
                                     {% endif %}
+                                    {% if not available %}
+                                        <div class="text-danger small mt-1">
+                                            {{ 'setono_sylius_wishlist.ui.item_unavailable'|trans }}
+                                        </div>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     {% if form.items[key].variant is defined %}
-                                        {{ form_widget(form.items[key].variant, { 'attr': { 'class': 'form-select form-select-sm' } }) }}
+                                        {# Only the owner can save a variant, so only the owner is asked to pick one #}
+                                        {% set missingVariant = canEdit and available and item.variant is null %}
+                                        {{ form_widget(form.items[key].variant, { 'attr': { 'class': 'form-select form-select-sm' ~ (missingVariant ? ' is-invalid') } }) }}
+                                        {% if missingVariant %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ 'setono_sylius_wishlist.ui.select_variant_to_add_to_cart'|trans({ '%button%': 'sylius.ui.update'|trans }) }}
+                                            </div>
+                                        {% endif %}
                                     {% endif %}
                                 </td>
                                 <td>

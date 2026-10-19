@@ -1,3 +1,7 @@
 setono_sylius_wishlist:
     no_wishlists: Még nem adott semmit a kívánságlistájához
+    products_out_of_stock_not_added_to_cart: "Ezekből a termékekből nincs elég készleten, ezért nem kerültek a kosárba: %products%"
+    products_unavailable_not_added_to_cart: "Ezek a termékek nem elérhetők, ezért nem kerültek a kosárba: %products%"
+    products_without_variant_not_added_to_cart: "Ezek a termékek nem kerültek a kosárba, mert nincs kiválasztva változat: %products%"
+    wishlist_added_to_cart: "A kívánságlista termékei bekerültek a kosarába"
     wishlist_updated: A kívánságlistája frissült

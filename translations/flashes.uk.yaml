@@ -1,3 +1,7 @@
 setono_sylius_wishlist:
     no_wishlists: Ви ще нічого не додали до свого списку бажань
+    products_out_of_stock_not_added_to_cart: "Цих товарів недостатньо на складі, тому їх не додано до кошика: %products%"
+    products_unavailable_not_added_to_cart: "Ці товари недоступні, тому їх не додано до кошика: %products%"
+    products_without_variant_not_added_to_cart: "Ці товари не додано до кошика, оскільки не вибрано варіант: %products%"
+    wishlist_added_to_cart: "Товари зі списку бажань додано до вашого кошика"
     wishlist_updated: Ваш список бажань оновлено

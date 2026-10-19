@@ -18,7 +18,9 @@ can move everything to the cart in one click.
   customer wishlist, so nothing is lost.
 - ❤️ **Drop-in toggle button** – a ready-made "heart" button that adds/removes a product (or a specific variant)
   over AJAX, plus a JS event you can hook into.
-- 🛒 **Add the whole wishlist to the cart** in a single request.
+- 🛒 **Add the whole wishlist to the cart** in a single request. Items that can't go into the cart (no variant
+  chosen yet, no longer for sale in the channel, or not enough stock) are skipped, and the shopper is told which ones.
+  The wishlist page flags those items too, through the `setono_sylius_wishlist_is_available(item)` Twig function.
 - 📝 **Per-item notes** – shoppers can add a free-text note to each wishlist item (e.g. a size or colour
   preference), editable by the owner and visible to anyone they share the wishlist with.
 - 🔗 **Shareable wishlists** – every wishlist has a UUID, so it can be viewed via a stable, shareable URL.
@@ -70,7 +72,7 @@ gets a 404, because that wishlist may hold more than the guest wishlist they wer
 
 ### Templates & the toggle flow
 
-The plugin exposes two Twig functions so your templates can react to wishlist state:
+The plugin exposes three Twig functions so your templates can react to wishlist state:
 
 ```twig
 {# is this product (or variant) on the current visitor's wishlist? #}
@@ -78,6 +80,9 @@ The plugin exposes two Twig functions so your templates can react to wishlist st
 
 {# does the current visitor have any non-empty wishlist? #}
 {{ setono_sylius_wishlist_has_wishlist() }}          {# returns a bool #}
+
+{# can this wishlist item still be bought in the current channel (enabled, sold here and priced)? #}
+{{ setono_sylius_wishlist_is_available(item) }}      {# returns a bool #}
 ```
 
 Adding/removing happens against small JSON endpoints. The bundled `wishlist-action-handler.js` listens for clicks

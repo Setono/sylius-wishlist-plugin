@@ -1,3 +1,7 @@
 setono_sylius_wishlist:
     no_wishlists: Zatím jste do svého seznamu přání nic nepřidali
+    products_out_of_stock_not_added_to_cart: "Těchto produktů není dostatek skladem, a proto nebyly přidány do košíku: %products%"
+    products_unavailable_not_added_to_cart: "Tyto produkty nejsou dostupné, a proto nebyly přidány do košíku: %products%"
+    products_without_variant_not_added_to_cart: "Tyto produkty nebyly přidány do košíku, protože nebyla vybrána varianta: %products%"
+    wishlist_added_to_cart: "Produkty ze seznamu přání byly přidány do vašeho košíku"
     wishlist_updated: Váš seznam přání byl aktualizován

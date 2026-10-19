@@ -1,0 +1,554 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Setono\SyliusWishlistPlugin\Tests\Unit\Controller;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Setono\SyliusWishlistPlugin\Checker\WishlistItemAvailabilityCheckerInterface;
+use Setono\SyliusWishlistPlugin\Controller\AddWishlistToCartAction;
+use Setono\SyliusWishlistPlugin\Model\UserWishlist;
+use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
+use Setono\SyliusWishlistPlugin\Model\WishlistItem;
+use Setono\SyliusWishlistPlugin\Model\WishlistItemInterface;
+use Setono\SyliusWishlistPlugin\Repository\WishlistRepositoryInterface;
+use Sylius\Component\Core\Factory\CartItemFactoryInterface;
+use Sylius\Component\Core\Model\ChannelInterface;
+use Sylius\Component\Core\Model\OrderInterface;
+use Sylius\Component\Core\Model\OrderItemInterface;
+use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Core\Model\ProductVariantInterface;
+use Sylius\Component\Inventory\Checker\AvailabilityCheckerInterface;
+use Sylius\Component\Order\Context\CartContextInterface;
+use Sylius\Component\Order\Model\OrderInterface as BaseOrderInterface;
+use Sylius\Component\Order\Modifier\OrderItemQuantityModifierInterface;
+use Sylius\Component\Order\Modifier\OrderModifierInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
+final class AddWishlistToCartActionTest extends TestCase
+{
+    private ChannelInterface $channel;
+
+    protected function setUp(): void
+    {
+        $this->channel = $this->createMock(ChannelInterface::class);
+    }
+
+    #[Test]
+    public function it_throws_not_found_when_the_wishlist_does_not_exist(): void
+    {
+        $cartContext = $this->createMock(CartContextInterface::class);
+        $cartContext->expects(self::never())->method('getCart');
+
+        $action = $this->action(null, cartContext: $cartContext);
+
+        $this->expectException(NotFoundHttpException::class);
+
+        $action($this->request(), 'missing');
+    }
+
+    #[Test]
+    public function it_adds_every_item_to_the_cart_and_redirects_back_to_the_wishlist(): void
+    {
+        $cart = $this->cart();
+
+        $first = $this->variant($this->product('T-shirt'));
+        $second = $this->variant($this->product('Cap'));
+
+        $wishlist = new UserWishlist();
+        $wishlist->addItem($this->item($first, 2));
+        $wishlist->addItem($this->item($second, 1));
+
+        $firstCartItem = $this->createMock(OrderItemInterface::class);
+        $firstCartItem->expects(self::once())->method('setVariant')->with($first);
+        $secondCartItem = $this->createMock(OrderItemInterface::class);
+        $secondCartItem->expects(self::once())->method('setVariant')->with($second);
+
+        $cartItemFactory = $this->createMock(CartItemFactoryInterface::class);
+        $cartItemFactory->method('createNew')->willReturnOnConsecutiveCalls($firstCartItem, $secondCartItem);
+
+        $quantityModifier = $this->createMock(OrderItemQuantityModifierInterface::class);
+        $quantityModifier
+            ->expects(self::exactly(2))
+            ->method('modify')
+            ->willReturnCallback(static function (OrderItemInterface $cartItem, int $quantity) use ($firstCartItem, $secondCartItem): void {
+                self::assertSame($cartItem === $firstCartItem ? 2 : 1, $quantity);
+                self::assertContains($cartItem, [$firstCartItem, $secondCartItem]);
+            })
+        ;
+
+        $added = [];
+        $orderModifier = $this->createMock(OrderModifierInterface::class);
+        $orderModifier
+            ->expects(self::exactly(2))
+            ->method('addToOrder')
+            ->willReturnCallback(static function (OrderInterface $order, OrderItemInterface $cartItem) use ($cart, &$added): void {
+                self::assertSame($cart, $order);
+                $added[] = $cartItem;
+            })
+        ;
+
+        $manager = $this->createMock(EntityManagerInterface::class);
+        $manager->expects(self::once())->method('persist')->with($cart);
+        $manager->expects(self::once())->method('flush');
+
+        $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
+        $urlGenerator
+            ->expects(self::once())
+            ->method('generate')
+            ->with('setono_sylius_wishlist_shop_wishlist_show', ['uuid' => 'uuid'])
+            ->willReturn('/wishlists/uuid')
+        ;
+
+        $request = $this->request();
+
+        $response = $this->action(
+            $wishlist,
+            cart: $cart,
+            cartItemFactory: $cartItemFactory,
+            quantityModifier: $quantityModifier,
+            orderModifier: $orderModifier,
+            manager: $manager,
+            urlGenerator: $urlGenerator,
+        )($request, 'uuid');
+
+        self::assertSame('/wishlists/uuid', $response->getTargetUrl());
+        self::assertSame([$firstCartItem, $secondCartItem], $added);
+        self::assertSame(['success' => ['setono_sylius_wishlist.wishlist_added_to_cart']], $this->flashes($request));
+    }
+
+    #[Test]
+    public function it_adds_the_items_with_a_variant_and_names_the_products_without_one(): void
+    {
+        $withVariant = $this->variant($this->product('Cap'));
+
+        $wishlist = new UserWishlist();
+        $wishlist->addItem($this->productItem($this->product('T-shirt', 'TSHIRT')));
+        $wishlist->addItem($this->item($withVariant, 1));
+        // Products without a name in the current locale are named by their code
+        $wishlist->addItem($this->productItem($this->product(null, 'JEANS')));
+
+        $cartItem = $this->createMock(OrderItemInterface::class);
+        $cartItem->expects(self::once())->method('setVariant')->with($withVariant);
+
+        $cartItemFactory = $this->createMock(CartItemFactoryInterface::class);
+        $cartItemFactory->expects(self::once())->method('createNew')->willReturn($cartItem);
+
+        $orderModifier = $this->createMock(OrderModifierInterface::class);
+        $orderModifier->expects(self::once())->method('addToOrder');
+
+        $manager = $this->createMock(EntityManagerInterface::class);
+        $manager->expects(self::once())->method('flush');
+
+        $request = $this->request();
+
+        $this->action($wishlist, cartItemFactory: $cartItemFactory, orderModifier: $orderModifier, manager: $manager)($request, 'uuid');
+
+        self::assertSame([
+            'success' => ['setono_sylius_wishlist.wishlist_added_to_cart'],
+            'warning' => [[
+                'message' => 'setono_sylius_wishlist.products_without_variant_not_added_to_cart',
+                'parameters' => ['%products%' => 'T-shirt, JEANS'],
+            ]],
+        ], $this->flashes($request));
+    }
+
+    #[Test]
+    public function it_names_each_product_without_a_variant_once(): void
+    {
+        $product = $this->product('T-shirt');
+
+        $wishlist = new UserWishlist();
+        $wishlist->addItem($this->productItem($product));
+        $wishlist->addItem($this->productItem($product));
+
+        $request = $this->request();
+
+        $this->action($wishlist)($request, 'uuid');
+
+        self::assertSame([
+            'warning' => [[
+                'message' => 'setono_sylius_wishlist.products_without_variant_not_added_to_cart',
+                'parameters' => ['%products%' => 'T-shirt'],
+            ]],
+        ], $this->flashes($request));
+    }
+
+    #[Test]
+    public function it_ignores_items_without_a_product(): void
+    {
+        $wishlist = new UserWishlist();
+        $wishlist->addItem(new WishlistItem());
+        $wishlist->addItem($this->item($this->variant($this->product('Cap')), 1));
+
+        $orderModifier = $this->createMock(OrderModifierInterface::class);
+        $orderModifier->expects(self::once())->method('addToOrder');
+
+        $request = $this->request();
+
+        $this->action($wishlist, orderModifier: $orderModifier)($request, 'uuid');
+
+        self::assertSame(['success' => ['setono_sylius_wishlist.wishlist_added_to_cart']], $this->flashes($request));
+    }
+
+    #[Test]
+    public function it_names_the_unavailable_products_instead_of_adding_them(): void
+    {
+        $unavailableItem = $this->item($this->variant($this->product('T-shirt')), 1);
+        $available = $this->variant($this->product('Cap'));
+
+        $wishlist = new UserWishlist();
+        $wishlist->addItem($unavailableItem);
+        $wishlist->addItem($this->item($available, 1));
+
+        $cartItem = $this->createMock(OrderItemInterface::class);
+        $cartItem->expects(self::once())->method('setVariant')->with($available);
+
+        $cartItemFactory = $this->createMock(CartItemFactoryInterface::class);
+        $cartItemFactory->expects(self::once())->method('createNew')->willReturn($cartItem);
+
+        $request = $this->request();
+
+        $this->action(
+            $wishlist,
+            cartItemFactory: $cartItemFactory,
+            itemAvailabilityChecker: $this->itemAvailabilityChecker($unavailableItem),
+        )($request, 'uuid');
+
+        self::assertSame([
+            'success' => ['setono_sylius_wishlist.wishlist_added_to_cart'],
+            'warning' => [[
+                'message' => 'setono_sylius_wishlist.products_unavailable_not_added_to_cart',
+                'parameters' => ['%products%' => 'T-shirt'],
+            ]],
+        ], $this->flashes($request));
+    }
+
+    #[Test]
+    public function it_names_an_unavailable_product_as_unavailable_even_if_no_variant_is_chosen(): void
+    {
+        // Choosing a variant doesn't help if the product isn't sold anymore
+        $item = $this->productItem($this->product('T-shirt'));
+
+        $wishlist = new UserWishlist();
+        $wishlist->addItem($item);
+
+        $request = $this->request();
+
+        $this->action($wishlist, itemAvailabilityChecker: $this->itemAvailabilityChecker($item))($request, 'uuid');
+
+        self::assertSame([
+            'warning' => [[
+                'message' => 'setono_sylius_wishlist.products_unavailable_not_added_to_cart',
+                'parameters' => ['%products%' => 'T-shirt'],
+            ]],
+        ], $this->flashes($request));
+    }
+
+    #[Test]
+    public function it_reports_products_without_a_variant_and_unavailable_products_separately(): void
+    {
+        $unavailableItem = $this->item($this->variant($this->product('Cap')), 1);
+
+        $wishlist = new UserWishlist();
+        $wishlist->addItem($this->productItem($this->product('T-shirt')));
+        $wishlist->addItem($unavailableItem);
+
+        $request = $this->request();
+
+        $this->action($wishlist, itemAvailabilityChecker: $this->itemAvailabilityChecker($unavailableItem))($request, 'uuid');
+
+        self::assertSame([
+            'warning' => [
+                [
+                    'message' => 'setono_sylius_wishlist.products_without_variant_not_added_to_cart',
+                    'parameters' => ['%products%' => 'T-shirt'],
+                ],
+                [
+                    'message' => 'setono_sylius_wishlist.products_unavailable_not_added_to_cart',
+                    'parameters' => ['%products%' => 'Cap'],
+                ],
+            ],
+        ], $this->flashes($request));
+    }
+
+    #[Test]
+    public function it_names_the_products_without_enough_stock_instead_of_adding_them(): void
+    {
+        $outOfStock = $this->variant($this->product('T-shirt'));
+        $inStock = $this->variant($this->product('Cap'));
+
+        $wishlist = new UserWishlist();
+        $wishlist->addItem($this->item($outOfStock, 2));
+        $wishlist->addItem($this->item($inStock, 1));
+
+        $availabilityChecker = $this->createMock(AvailabilityCheckerInterface::class);
+        $availabilityChecker->method('isStockSufficient')->willReturnCallback(
+            static fn (ProductVariantInterface $variant): bool => $variant === $inStock,
+        );
+
+        $cartItem = $this->createMock(OrderItemInterface::class);
+        $cartItem->expects(self::once())->method('setVariant')->with($inStock);
+
+        $cartItemFactory = $this->createMock(CartItemFactoryInterface::class);
+        $cartItemFactory->expects(self::once())->method('createNew')->willReturn($cartItem);
+
+        $request = $this->request();
+
+        $this->action($wishlist, cartItemFactory: $cartItemFactory, availabilityChecker: $availabilityChecker)($request, 'uuid');
+
+        self::assertSame([
+            'success' => ['setono_sylius_wishlist.wishlist_added_to_cart'],
+            'warning' => [[
+                'message' => 'setono_sylius_wishlist.products_out_of_stock_not_added_to_cart',
+                'parameters' => ['%products%' => 'T-shirt'],
+            ]],
+        ], $this->flashes($request));
+    }
+
+    #[Test]
+    public function it_counts_the_quantity_already_in_the_cart_when_checking_the_stock(): void
+    {
+        $variant = $this->variant($this->product('T-shirt'));
+
+        $wishlist = new UserWishlist();
+        $wishlist->addItem($this->item($variant, 2));
+
+        $sameVariant = $this->createMock(OrderItemInterface::class);
+        $sameVariant->method('getVariant')->willReturn($variant);
+        $sameVariant->method('getQuantity')->willReturn(3);
+
+        $otherVariant = $this->createMock(OrderItemInterface::class);
+        $otherVariant->method('getVariant')->willReturn($this->variant($this->product('Cap')));
+        $otherVariant->method('getQuantity')->willReturn(7);
+
+        $availabilityChecker = $this->createMock(AvailabilityCheckerInterface::class);
+        $availabilityChecker->expects(self::once())->method('isStockSufficient')->with($variant, 5)->willReturn(true);
+
+        $this->action($wishlist, cart: $this->cart([$otherVariant, $sameVariant]), availabilityChecker: $availabilityChecker)($this->request(), 'uuid');
+    }
+
+    #[Test]
+    public function it_checks_the_stock_for_the_wishlist_quantity_when_the_variant_is_not_in_the_cart(): void
+    {
+        $variant = $this->variant($this->product('T-shirt'));
+
+        $wishlist = new UserWishlist();
+        $wishlist->addItem($this->item($variant, 2));
+
+        $otherVariant = $this->createMock(OrderItemInterface::class);
+        $otherVariant->method('getVariant')->willReturn($this->variant($this->product('Cap')));
+        $otherVariant->method('getQuantity')->willReturn(7);
+
+        $availabilityChecker = $this->createMock(AvailabilityCheckerInterface::class);
+        $availabilityChecker->expects(self::once())->method('isStockSufficient')->with($variant, 2)->willReturn(true);
+
+        $this->action($wishlist, cart: $this->cart([$otherVariant]), availabilityChecker: $availabilityChecker)($this->request(), 'uuid');
+    }
+
+    #[Test]
+    public function it_requires_the_cart_to_have_a_channel(): void
+    {
+        $cart = $this->createMock(OrderInterface::class);
+        $cart->method('getChannel')->willReturn(null);
+
+        $action = $this->action(new UserWishlist(), cart: $cart);
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $action($this->request(), 'uuid');
+    }
+
+    #[Test]
+    public function it_requires_the_cart_to_be_a_core_order(): void
+    {
+        $cartContext = $this->createMock(CartContextInterface::class);
+        $cartContext->method('getCart')->willReturn($this->createMock(BaseOrderInterface::class));
+
+        $action = $this->action(new UserWishlist(), cartContext: $cartContext);
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $action($this->request(), 'uuid');
+    }
+
+    #[Test]
+    public function it_neither_saves_the_cart_nor_reports_success_when_no_item_has_a_variant(): void
+    {
+        $wishlist = new UserWishlist();
+        $wishlist->addItem($this->productItem($this->product('T-shirt')));
+
+        $orderModifier = $this->createMock(OrderModifierInterface::class);
+        $orderModifier->expects(self::never())->method('addToOrder');
+
+        $managerRegistry = $this->createMock(ManagerRegistry::class);
+        $managerRegistry->expects(self::never())->method('getManagerForClass');
+
+        $request = $this->request();
+
+        $this->action($wishlist, orderModifier: $orderModifier, managerRegistry: $managerRegistry)($request, 'uuid');
+
+        self::assertSame(['warning'], array_keys($this->flashes($request)));
+    }
+
+    #[Test]
+    public function it_does_nothing_for_an_empty_wishlist(): void
+    {
+        $managerRegistry = $this->createMock(ManagerRegistry::class);
+        $managerRegistry->expects(self::never())->method('getManagerForClass');
+
+        $request = $this->request();
+
+        $this->action(new UserWishlist(), managerRegistry: $managerRegistry)($request, 'uuid');
+
+        self::assertSame([], $this->flashes($request));
+    }
+
+    /**
+     * @param CartItemFactoryInterface<OrderItemInterface>|null $cartItemFactory
+     */
+    private function action(
+        ?WishlistInterface $wishlist,
+        ?OrderInterface $cart = null,
+        ?CartContextInterface $cartContext = null,
+        ?CartItemFactoryInterface $cartItemFactory = null,
+        ?OrderItemQuantityModifierInterface $quantityModifier = null,
+        ?OrderModifierInterface $orderModifier = null,
+        ?EntityManagerInterface $manager = null,
+        ?ManagerRegistry $managerRegistry = null,
+        ?UrlGeneratorInterface $urlGenerator = null,
+        ?AvailabilityCheckerInterface $availabilityChecker = null,
+        ?WishlistItemAvailabilityCheckerInterface $itemAvailabilityChecker = null,
+    ): AddWishlistToCartAction {
+        /** @var MockObject&WishlistRepositoryInterface<WishlistInterface> $repository */
+        $repository = $this->createMock(WishlistRepositoryInterface::class);
+        $repository->method('findOneByUuid')->willReturn($wishlist);
+
+        if (null === $cartContext) {
+            $cartContext = $this->createMock(CartContextInterface::class);
+            $cartContext->method('getCart')->willReturn($cart ?? $this->cart());
+        }
+
+        if (null === $cartItemFactory) {
+            $cartItemFactory = $this->createMock(CartItemFactoryInterface::class);
+            $cartItemFactory->method('createNew')->willReturnCallback(fn (): OrderItemInterface => $this->createMock(OrderItemInterface::class));
+        }
+
+        if (null === $managerRegistry) {
+            $managerRegistry = $this->createMock(ManagerRegistry::class);
+            $managerRegistry->method('getManagerForClass')->willReturn($manager ?? $this->createMock(EntityManagerInterface::class));
+        }
+
+        if (null === $urlGenerator) {
+            $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
+            $urlGenerator->method('generate')->willReturn('/wishlists/uuid');
+        }
+
+        if (null === $availabilityChecker) {
+            $availabilityChecker = $this->createMock(AvailabilityCheckerInterface::class);
+            $availabilityChecker->method('isStockSufficient')->willReturn(true);
+        }
+
+        return new AddWishlistToCartAction(
+            $repository,
+            $quantityModifier ?? $this->createMock(OrderItemQuantityModifierInterface::class),
+            $orderModifier ?? $this->createMock(OrderModifierInterface::class),
+            $cartContext,
+            $urlGenerator,
+            $cartItemFactory,
+            $managerRegistry,
+            $availabilityChecker,
+            $itemAvailabilityChecker ?? $this->itemAvailabilityChecker(),
+        );
+    }
+
+    /**
+     * Every item is available in the cart's channel, except the given ones
+     */
+    private function itemAvailabilityChecker(WishlistItemInterface ...$unavailableItems): WishlistItemAvailabilityCheckerInterface
+    {
+        $checker = $this->createMock(WishlistItemAvailabilityCheckerInterface::class);
+        $checker->method('isAvailable')->willReturnCallback(
+            fn (WishlistItemInterface $item, ChannelInterface $channel): bool => $channel === $this->channel && !in_array($item, $unavailableItems, true),
+        );
+
+        return $checker;
+    }
+
+    private function request(): Request
+    {
+        $request = new Request();
+        $request->setSession(new Session(new MockArraySessionStorage()));
+
+        return $request;
+    }
+
+    /**
+     * @return array<string, list<mixed>>
+     */
+    private function flashes(Request $request): array
+    {
+        $session = $request->getSession();
+        self::assertInstanceOf(Session::class, $session);
+
+        /** @var array<string, list<mixed>> $flashes */
+        $flashes = $session->getFlashBag()->peekAll();
+
+        return $flashes;
+    }
+
+    private function item(ProductVariantInterface $variant, int $quantity): WishlistItem
+    {
+        $item = new WishlistItem();
+        $item->setVariant($variant);
+        $item->setQuantity($quantity);
+
+        return $item;
+    }
+
+    private function productItem(ProductInterface $product): WishlistItem
+    {
+        $item = new WishlistItem();
+        $item->setProduct($product);
+
+        return $item;
+    }
+
+    /**
+     * @param list<OrderItemInterface> $items
+     */
+    private function cart(array $items = []): OrderInterface&MockObject
+    {
+        $cart = $this->createMock(OrderInterface::class);
+        $cart->method('getChannel')->willReturn($this->channel);
+        $cart->method('getItems')->willReturn(new ArrayCollection($items));
+
+        return $cart;
+    }
+
+    private function product(?string $name, ?string $code = null): ProductInterface&MockObject
+    {
+        $product = $this->createMock(ProductInterface::class);
+        $product->method('getName')->willReturn($name);
+        $product->method('getCode')->willReturn($code);
+
+        return $product;
+    }
+
+    private function variant(ProductInterface $product): ProductVariantInterface&MockObject
+    {
+        $variant = $this->createMock(ProductVariantInterface::class);
+        $variant->method('getProduct')->willReturn($product);
+
+        return $variant;
+    }
+}

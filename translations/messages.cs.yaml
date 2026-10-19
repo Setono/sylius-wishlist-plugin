@@ -3,9 +3,11 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Přidat seznam přání do košíku
         copy: Kopírovat
         inventory_insufficient: Skladová zásoba nestačí pro množství, které chcete přidat do seznamu přání
+        item_unavailable: "Tato položka není momentálně dostupná, a proto ji nelze přidat do košíku"
         note: Poznámka
         remove_from_wishlist: Odebrat
         select_variant: Vyberte variantu...
+        select_variant_to_add_to_cart: "Vyberte variantu a klikněte na „%button%“, abyste mohli tento produkt přidat do košíku"
         toggle_wishlist: Přepnout seznam přání
         wishlist: Seznam přání
         wishlist_subheader: Zde můžete upravit množství produktů ve svém seznamu přání. Můžete také vybrat požadované varianty a odebrat produkty ze svého seznamu přání. Nakonec můžete svůj seznam přání sdílet s ostatními zkopírováním níže uvedené adresy URL.

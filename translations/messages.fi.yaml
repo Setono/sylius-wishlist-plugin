@@ -3,9 +3,11 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Lisää toivelista ostoskoriin
         copy: Kopioi
         inventory_insufficient: Varastosaldo ei riitä toivelistalle lisättävälle määrälle
+        item_unavailable: "Tämä tuote ei ole tällä hetkellä saatavilla, joten sitä ei voi lisätä ostoskoriin"
         note: Huomautus
         remove_from_wishlist: Poista
         select_variant: Valitse vaihtoehto...
+        select_variant_to_add_to_cart: "Valitse vaihtoehto ja napsauta \"%button%\", jotta voit lisätä tämän tuotteen ostoskoriin"
         toggle_wishlist: Vaihda toivelistan tila
         wishlist: Toivelista
         wishlist_subheader: Täällä voit muokata toivelistasi tuotteiden määrää. Voit myös valita haluamasi vaihtoehdot ja poistaa tuotteita toivelistaltasi. Lopuksi voit jakaa toivelistasi muiden kanssa kopioimalla alla olevan URL-osoitteen.

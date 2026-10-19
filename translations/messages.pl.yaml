@@ -3,9 +3,11 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Dodaj listę życzeń do koszyka
         copy: Kopiuj
         inventory_insufficient: Stan magazynowy jest niewystarczający dla ilości, którą chcesz dodać do listy życzeń
+        item_unavailable: "Ta pozycja jest obecnie niedostępna, więc nie można jej dodać do koszyka"
         note: Notatka
         remove_from_wishlist: Usuń
         select_variant: Wybierz wariant...
+        select_variant_to_add_to_cart: "Wybierz wariant i kliknij „%button%”, aby móc dodać ten produkt do koszyka"
         toggle_wishlist: Przełącz listę życzeń
         wishlist: Lista życzeń
         wishlist_subheader: Tutaj możesz edytować ilość produktów na swojej liście życzeń. Możesz również wybrać żądane warianty i usunąć produkty ze swojej listy życzeń. Na koniec możesz udostępnić swoją listę życzeń innym, kopiując poniższy adres URL.

@@ -3,9 +3,11 @@ setono_sylius_wishlist:
         add_wishlist_to_cart: Kívánságlista kosárba helyezése
         copy: Másolás
         inventory_insufficient: A készlet nem elegendő a kívánságlistához hozzáadni kívánt mennyiséghez
+        item_unavailable: "Ez a tétel jelenleg nem elérhető, ezért nem tehető a kosárba"
         note: Megjegyzés
         remove_from_wishlist: Eltávolítás
         select_variant: Válasszon változatot...
+        select_variant_to_add_to_cart: "Válasszon változatot, és kattintson a(z) „%button%” gombra, hogy a terméket a kosárba tehesse"
         toggle_wishlist: Kívánságlista ki-/bekapcsolása
         wishlist: Kívánságlista
         wishlist_subheader: Itt szerkesztheti a kívánságlistáján szereplő termékek mennyiségét. Kiválaszthatja a kívánt változatokat is, és eltávolíthat termékeket a kívánságlistájáról. Végül megoszthatja kívánságlistáját másokkal az alábbi URL másolásával.

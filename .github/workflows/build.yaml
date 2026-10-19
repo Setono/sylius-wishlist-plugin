@@ -100,4 +100,4 @@ jobs:
             -   uses: "setono/sylius-plugin/code-coverage@v2"
                 with:
                     codecov-token: "${{ secrets.CODECOV_TOKEN }}"
-                    testsuite: "unit" # The functional tests need the database, which only the functional-tests job sets up
+                    node-version: "22" # Webpack Encore 6 (Sylius 2.3) requires Node ^22.13 || >=24
