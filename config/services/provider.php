@@ -38,5 +38,6 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             service('.inner'),
         ])
+        ->tag('kernel.reset', ['method' => 'reset'])
     ;
 };

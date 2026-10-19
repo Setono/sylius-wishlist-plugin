@@ -6,11 +6,13 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\DependencyInjection;
 
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Setono\SyliusWishlistPlugin\Checker\CachedWishlistChecker;
 use Setono\SyliusWishlistPlugin\DependencyInjection\SetonoSyliusWishlistExtension;
 use Setono\SyliusWishlistPlugin\Model\GuestWishlist;
 use Setono\SyliusWishlistPlugin\Model\UserWishlist;
 use Setono\SyliusWishlistPlugin\Model\Wishlist;
 use Setono\SyliusWishlistPlugin\Model\WishlistItem;
+use Setono\SyliusWishlistPlugin\Provider\CachedWishlistProvider;
 use Setono\SyliusWishlistPlugin\Provider\CompositeWishlistProvider;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Setono\SyliusWishlistPlugin\Security\Voter\WishlistVoter;
@@ -42,6 +44,15 @@ final class SetonoSyliusWishlistExtensionTest extends AbstractExtensionTestCase
 
         $this->assertContainerBuilderHasService(WishlistVoter::class);
         $this->assertContainerBuilderHasAlias(WishlistProviderInterface::class, CompositeWishlistProvider::class);
+    }
+
+    #[Test]
+    public function it_resets_the_request_caches_between_requests(): void
+    {
+        $this->load();
+
+        $this->assertContainerBuilderHasServiceDefinitionWithTag(CachedWishlistProvider::class, 'kernel.reset', ['method' => 'reset']);
+        $this->assertContainerBuilderHasServiceDefinitionWithTag(CachedWishlistChecker::class, 'kernel.reset', ['method' => 'reset']);
     }
 
     #[Test]

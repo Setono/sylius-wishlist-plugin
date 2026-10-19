@@ -44,4 +44,21 @@ final class CachedWishlistProviderTest extends TestCase
         $provider->getPreSelectedWishlists();
         $provider->getPreSelectedWishlists();
     }
+
+    #[Test]
+    public function it_asks_the_decorated_provider_again_after_a_reset(): void
+    {
+        $decorated = $this->createMock(WishlistProviderInterface::class);
+        $decorated->expects(self::exactly(2))->method('getWishlists')->willReturn([]);
+        $decorated->expects(self::exactly(2))->method('getPreSelectedWishlists')->willReturn([]);
+
+        $provider = new CachedWishlistProvider($decorated);
+        $provider->getWishlists();
+        $provider->getPreSelectedWishlists();
+
+        $provider->reset();
+
+        $provider->getWishlists();
+        $provider->getPreSelectedWishlists();
+    }
 }

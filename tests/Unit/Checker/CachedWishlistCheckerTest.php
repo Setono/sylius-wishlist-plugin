@@ -46,4 +46,20 @@ final class CachedWishlistCheckerTest extends TestCase
         $checker->onWishlist($this->createMock(ProductInterface::class));
         $checker->onWishlist($this->createMock(ProductInterface::class));
     }
+
+    #[Test]
+    public function it_asks_the_decorated_checker_again_after_a_reset(): void
+    {
+        $product = $this->createMock(ProductInterface::class);
+
+        $decorated = $this->createMock(WishlistCheckerInterface::class);
+        $decorated->expects(self::exactly(2))->method('onWishlist')->with($product)->willReturn(true);
+
+        $checker = new CachedWishlistChecker($decorated);
+        $checker->onWishlist($product);
+
+        $checker->reset();
+
+        $checker->onWishlist($product);
+    }
 }
