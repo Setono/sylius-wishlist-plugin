@@ -6,6 +6,7 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Provider;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Setono\Client\Client;
 use Setono\ClientBundle\Context\ClientContextInterface;
 use Setono\SyliusWishlistPlugin\Model\GuestWishlistInterface;
@@ -14,13 +15,15 @@ use Setono\SyliusWishlistPlugin\Repository\GuestWishlistRepositoryInterface;
 
 final class GuestWishlistProviderTest extends TestCase
 {
+    use ProphecyTrait;
+
     #[Test]
     public function it_returns_no_wishlists_when_the_client_has_none(): void
     {
-        $repository = $this->createMock(GuestWishlistRepositoryInterface::class);
-        $repository->method('findOneByClientId')->with('client-1')->willReturn(null);
+        $repository = $this->prophesize(GuestWishlistRepositoryInterface::class);
+        $repository->findOneByClientId('client-1')->willReturn(null);
 
-        $provider = new GuestWishlistProvider($this->clientContext('client-1'), $repository);
+        $provider = new GuestWishlistProvider($this->clientContext('client-1'), $repository->reveal());
 
         self::assertSame([], $provider->getWishlists());
     }
@@ -28,12 +31,12 @@ final class GuestWishlistProviderTest extends TestCase
     #[Test]
     public function it_returns_the_clients_wishlist(): void
     {
-        $wishlist = $this->createMock(GuestWishlistInterface::class);
+        $wishlist = $this->prophesize(GuestWishlistInterface::class)->reveal();
 
-        $repository = $this->createMock(GuestWishlistRepositoryInterface::class);
-        $repository->method('findOneByClientId')->with('client-1')->willReturn($wishlist);
+        $repository = $this->prophesize(GuestWishlistRepositoryInterface::class);
+        $repository->findOneByClientId('client-1')->willReturn($wishlist);
 
-        $provider = new GuestWishlistProvider($this->clientContext('client-1'), $repository);
+        $provider = new GuestWishlistProvider($this->clientContext('client-1'), $repository->reveal());
 
         self::assertSame([$wishlist], $provider->getWishlists());
         self::assertSame([$wishlist], $provider->getPreSelectedWishlists());
@@ -41,9 +44,9 @@ final class GuestWishlistProviderTest extends TestCase
 
     private function clientContext(string $clientId): ClientContextInterface
     {
-        $clientContext = $this->createMock(ClientContextInterface::class);
-        $clientContext->method('getClient')->willReturn(new Client($clientId));
+        $clientContext = $this->prophesize(ClientContextInterface::class);
+        $clientContext->getClient()->willReturn(new Client($clientId));
 
-        return $clientContext;
+        return $clientContext->reveal();
     }
 }

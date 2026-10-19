@@ -7,6 +7,8 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Checker;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Setono\SyliusWishlistPlugin\Checker\WishlistItemAvailabilityChecker;
 use Setono\SyliusWishlistPlugin\Model\WishlistItem;
 use Sylius\Component\Core\Model\ChannelInterface;
@@ -16,11 +18,13 @@ use Sylius\Component\Core\Model\ProductVariantInterface;
 
 final class WishlistItemAvailabilityCheckerTest extends TestCase
 {
+    use ProphecyTrait;
+
     private ChannelInterface $channel;
 
     protected function setUp(): void
     {
-        $this->channel = $this->createMock(ChannelInterface::class);
+        $this->channel = $this->prophesize(ChannelInterface::class)->reveal();
     }
 
     #[Test]
@@ -79,28 +83,33 @@ final class WishlistItemAvailabilityCheckerTest extends TestCase
 
     private function variantItem(?ProductInterface $product = null, bool $enabled = true, bool $priced = true, ?int $price = 100): WishlistItem
     {
-        $channelPricing = $this->createMock(ChannelPricingInterface::class);
-        $channelPricing->method('getPrice')->willReturn($price);
+        $channelPricing = $this->prophesize(ChannelPricingInterface::class);
+        $channelPricing->getPrice()->willReturn($price);
 
-        $variant = $this->createMock(ProductVariantInterface::class);
-        $variant->method('getProduct')->willReturn($product ?? $this->product());
-        $variant->method('isEnabled')->willReturn($enabled);
-        $variant->method('getChannelPricingForChannel')->willReturnCallback(
-            fn (ChannelInterface $channel): ?ChannelPricingInterface => $priced && $channel === $this->channel ? $channelPricing : null,
+        // Prophecy binds non-static closures to the prophecy, so $this->channel wouldn't resolve inside the callback
+        $channel = $this->channel;
+
+        $variant = $this->prophesize(ProductVariantInterface::class);
+        $variant->getProduct()->willReturn($product ?? $this->product());
+        $variant->isEnabled()->willReturn($enabled);
+        $variant->getChannelPricingForChannel(Argument::any())->will(
+            static fn (array $args): ?ChannelPricingInterface => $priced && $args[0] === $channel ? $channelPricing->reveal() : null,
         );
 
         $item = new WishlistItem();
-        $item->setVariant($variant);
+        $item->setVariant($variant->reveal());
 
         return $item;
     }
 
     private function product(bool $enabled = true, bool $inChannel = true): ProductInterface
     {
-        $product = $this->createMock(ProductInterface::class);
-        $product->method('isEnabled')->willReturn($enabled);
-        $product->method('hasChannel')->willReturnCallback(fn (ChannelInterface $channel): bool => $inChannel && $channel === $this->channel);
+        $channel = $this->channel;
 
-        return $product;
+        $product = $this->prophesize(ProductInterface::class);
+        $product->isEnabled()->willReturn($enabled);
+        $product->hasChannel(Argument::any())->will(static fn (array $args): bool => $inChannel && $args[0] === $channel);
+
+        return $product->reveal();
     }
 }

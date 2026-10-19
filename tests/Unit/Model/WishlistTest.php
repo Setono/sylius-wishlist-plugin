@@ -6,6 +6,7 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Model;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Setono\SyliusWishlistPlugin\Model\UserWishlist;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Model\WishlistItem;
@@ -16,6 +17,8 @@ use Symfony\Component\Uid\UuidV7;
 
 final class WishlistTest extends TestCase
 {
+    use ProphecyTrait;
+
     #[Test]
     public function it_generates_a_v7_uuid_on_construction(): void
     {
@@ -239,18 +242,18 @@ final class WishlistTest extends TestCase
 
     private function createProduct(int $id): ProductInterface
     {
-        $product = $this->createMock(ProductInterface::class);
-        $product->method('getId')->willReturn($id);
+        $product = $this->prophesize(ProductInterface::class);
+        $product->getId()->willReturn($id);
 
-        return $product;
+        return $product->reveal();
     }
 
     private function createVariant(int $variantId, int $productId): ProductVariantInterface
     {
-        $variant = $this->createMock(ProductVariantInterface::class);
-        $variant->method('getId')->willReturn($variantId);
-        $variant->method('getProduct')->willReturn($this->createProduct($productId));
+        $variant = $this->prophesize(ProductVariantInterface::class);
+        $variant->getId()->willReturn($variantId);
+        $variant->getProduct()->willReturn($this->createProduct($productId));
 
-        return $variant;
+        return $variant->reveal();
     }
 }

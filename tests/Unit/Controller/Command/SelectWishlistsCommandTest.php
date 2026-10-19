@@ -6,11 +6,14 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Controller\Command;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Setono\SyliusWishlistPlugin\Controller\Command\SelectWishlistsCommand;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 
 final class SelectWishlistsCommandTest extends TestCase
 {
+    use ProphecyTrait;
+
     #[Test]
     public function it_defaults_to_no_wishlists(): void
     {
@@ -20,7 +23,7 @@ final class SelectWishlistsCommandTest extends TestCase
     #[Test]
     public function it_holds_the_given_wishlists(): void
     {
-        $wishlist = $this->createMock(WishlistInterface::class);
+        $wishlist = $this->prophesize(WishlistInterface::class)->reveal();
 
         self::assertSame([$wishlist], (new SelectWishlistsCommand([$wishlist]))->wishlists);
     }

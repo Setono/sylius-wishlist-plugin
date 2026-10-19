@@ -6,12 +6,15 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Provider;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Provider\CompositeWishlistProvider;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 
 final class CompositeWishlistProviderTest extends TestCase
 {
+    use ProphecyTrait;
+
     #[Test]
     public function it_returns_no_wishlists_when_it_has_no_providers(): void
     {
@@ -22,8 +25,8 @@ final class CompositeWishlistProviderTest extends TestCase
     #[Test]
     public function it_returns_the_first_non_empty_result(): void
     {
-        $first = $this->createMock(WishlistInterface::class);
-        $second = $this->createMock(WishlistInterface::class);
+        $first = $this->prophesize(WishlistInterface::class)->reveal();
+        $second = $this->prophesize(WishlistInterface::class)->reveal();
 
         $composite = new CompositeWishlistProvider();
         $composite->add($this->provider([], []));
@@ -36,11 +39,11 @@ final class CompositeWishlistProviderTest extends TestCase
     #[Test]
     public function it_does_not_consult_later_providers_once_a_result_is_found(): void
     {
-        $first = $this->createMock(WishlistInterface::class);
+        $first = $this->prophesize(WishlistInterface::class)->reveal();
 
         $composite = new CompositeWishlistProvider();
         $composite->add($this->provider([$first], [$first]));
-        $composite->add($this->provider([$this->createMock(WishlistInterface::class)], []));
+        $composite->add($this->provider([$this->prophesize(WishlistInterface::class)->reveal()], []));
 
         self::assertSame([$first], $composite->getWishlists());
     }
@@ -51,10 +54,10 @@ final class CompositeWishlistProviderTest extends TestCase
      */
     private function provider(array $wishlists, array $preSelectedWishlists): WishlistProviderInterface
     {
-        $provider = $this->createMock(WishlistProviderInterface::class);
-        $provider->method('getWishlists')->willReturn($wishlists);
-        $provider->method('getPreSelectedWishlists')->willReturn($preSelectedWishlists);
+        $provider = $this->prophesize(WishlistProviderInterface::class);
+        $provider->getWishlists()->willReturn($wishlists);
+        $provider->getPreSelectedWishlists()->willReturn($preSelectedWishlists);
 
-        return $provider;
+        return $provider->reveal();
     }
 }

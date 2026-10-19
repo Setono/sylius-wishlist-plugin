@@ -6,6 +6,7 @@ namespace Setono\SyliusWishlistPlugin\Tests\Unit\Security\Voter;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Setono\SyliusWishlistPlugin\Model\WishlistInterface;
 use Setono\SyliusWishlistPlugin\Provider\WishlistProviderInterface;
 use Setono\SyliusWishlistPlugin\Security\Voter\WishlistVoter;
@@ -14,10 +15,12 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 
 final class WishlistVoterTest extends TestCase
 {
+    use ProphecyTrait;
+
     #[Test]
     public function it_grants_editing_a_wishlist_owned_by_the_current_visitor(): void
     {
-        $wishlist = $this->createMock(WishlistInterface::class);
+        $wishlist = $this->prophesize(WishlistInterface::class)->reveal();
 
         self::assertSame(
             VoterInterface::ACCESS_GRANTED,
@@ -30,14 +33,14 @@ final class WishlistVoterTest extends TestCase
     {
         self::assertSame(
             VoterInterface::ACCESS_DENIED,
-            $this->voter([])->vote($this->token(), $this->createMock(WishlistInterface::class), [WishlistVoter::EDIT]),
+            $this->voter([])->vote($this->token(), $this->prophesize(WishlistInterface::class)->reveal(), [WishlistVoter::EDIT]),
         );
     }
 
     #[Test]
     public function it_abstains_from_unsupported_attributes(): void
     {
-        $wishlist = $this->createMock(WishlistInterface::class);
+        $wishlist = $this->prophesize(WishlistInterface::class)->reveal();
 
         self::assertSame(
             VoterInterface::ACCESS_ABSTAIN,
@@ -59,14 +62,14 @@ final class WishlistVoterTest extends TestCase
      */
     private function voter(array $wishlists): WishlistVoter
     {
-        $provider = $this->createMock(WishlistProviderInterface::class);
-        $provider->method('getWishlists')->willReturn($wishlists);
+        $provider = $this->prophesize(WishlistProviderInterface::class);
+        $provider->getWishlists()->willReturn($wishlists);
 
-        return new WishlistVoter($provider);
+        return new WishlistVoter($provider->reveal());
     }
 
     private function token(): TokenInterface
     {
-        return $this->createMock(TokenInterface::class);
+        return $this->prophesize(TokenInterface::class)->reveal();
     }
 }
