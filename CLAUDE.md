@@ -54,7 +54,7 @@ Four configurable Sylius resources are registered in `DependencyInjection/Setono
 - `GuestWishlist` — keyed by a `clientId` (anonymous visitor), can `convertToUserWishlist()`.
 - `UserWishlist` — bound to a Sylius `UserInterface`.
 
-The bundle still extends `AbstractResourceBundle` (overriding `getPath()` → repo root and `getConfigFilesPath()` → `config/doctrine/model`, since resources moved out of `src/Resources/`). Doctrine mapping is **XML** in `config/doctrine/model/*.orm.xml` (ORM 3 compatible; not annotations/attributes).
+The bundle still extends `AbstractResourceBundle` (overriding `getPath()` → repo root and `getConfigFilesPath()` → `config/doctrine/model`, since resources moved out of `src/Resources/`). Doctrine mapping is **XML** in `config/doctrine/model/*.orm.xml` (ORM 3 compatible; not annotations/attributes). Validation constraints are XML too, in `config/validation/*.xml` (group `setono_sylius_wishlist`, picked up by FrameworkBundle from the bundle path).
 
 ### Provider chain — "whose wishlists are these?"
 
@@ -62,7 +62,7 @@ The bundle still extends `AbstractResourceBundle` (overriding `getPath()` → re
 
 1. `CompositeWishlistProvider` is the public service (aliased to the interface). It is assembled by `Setono\CompositeCompilerPass` from all services tagged `setono_sylius_wishlist.wishlist_provider`, and returns the **first non-empty** result by tag priority.
 2. Tagged providers, highest priority first: `UserWishlistProvider` (-40, logged-in user via `Security`) then `GuestWishlistProvider` (-50, anonymous via `setono/client-bundle` `ClientContext`).
-3. `CachedWishlistProvider` **decorates** the interface (decoration-priority 64) to memoize results within a request.
+3. `CachedWishlistProvider` **decorates** the interface (decoration-priority 64) to memoize results within a request. It is tagged `kernel.reset` (like `CachedWishlistChecker`) so long-running workers don't leak one visitor's wishlists to the next; any new memoizing service needs the same.
 
 To add a new wishlist source, implement `WishlistProviderInterface` and tag it — do not edit the composite.
 
